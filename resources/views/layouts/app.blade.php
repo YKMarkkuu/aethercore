@@ -67,8 +67,8 @@
             } else if (path === '/friends') {
                 currentView = 'friends';
             } else if (path === '/profile' || path.startsWith('/profile/')) {
-                // If we're on a profile page, keep the current view
-                // Don't change the tab highlight
+                return;
+            } else if (path === '/conversations' || path.startsWith('/conversations/')) {
                 return;
             } else {
                 currentView = 'feed';
@@ -122,10 +122,11 @@
                 document.getElementById('sidebar-music').classList.add('hidden');
                 
                 const path = window.location.pathname;
-                const validSocialPages = ['/feed', '/spaces', '/friends', '/profile'];
+                const validSocialPages = ['/feed', '/spaces', '/friends', '/profile', '/conversations'];
                 const isProfilePage = path.startsWith('/profile/');
+                const isConversationPage = path.startsWith('/conversations/');
                 
-                if (!validSocialPages.includes(path) && !isProfilePage) {
+                if (!validSocialPages.includes(path) && !isProfilePage && !isConversationPage) {
                     window.location.href = '/feed';
                 } else {
                     setViewFromUrl();
@@ -238,5 +239,6 @@
             setViewFromUrl();
         });
     </script>
+        @stack('scripts')
 </body>
 </html>

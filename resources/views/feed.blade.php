@@ -9,7 +9,7 @@
         <div class="post-avatar">{{ Auth::user()->name[0] ?? '?' }}</div>
         <form action="{{ route('posts.store') }}" method="POST" style="flex: 1;">
             @csrf
-            <textarea name="content" class="settings-input" rows="2" placeholder="What's on your mind, {{ Auth::user()->name }}?" style="resize: none;"></textarea>
+            <textarea name="content" class="settings-input" rows="2" placeholder="What's on your mind, {{ Auth::user()->display_name }}?" style="resize: none;"></textarea>
             <div style="display: flex; justify-content: flex-end; margin-top: 0.3rem;">
                 <button type="submit" class="settings-btn">Post</button>
             </div>
@@ -28,7 +28,7 @@
         <div class="post-item">
             <div class="post-header">
                 <div class="post-avatar">{{ $post->user->name[0] }}</div>
-                <span class="post-user">{{ $post->user->name }}</span>
+                <span class="post-user">{{ $post->user->display_name }}</span>
                 <span class="post-time">{{ $post->created_at->diffForHumans() }}</span>
             </div>
             <div class="post-content">{{ $post->content }}</div>

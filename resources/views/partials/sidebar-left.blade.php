@@ -11,22 +11,22 @@
         <!-- Feed View -->
         <div id="view-feed" class="sidebar-view">
             <div class="status-group">
-                <div class="status-group-label">📰 Recent Activity</div>
+                <div class="status-group-label">Recent Activity</div>
                 @forelse($feedPosts ?? [] as $post)
-                    <div style="padding: 0.4rem 0; border-bottom: 1px solid #0e0e1a;">
+                    <div style="padding: 0.4rem 0; border-bottom: 1px solid #d0c8c0;">
                         <div style="display: flex; align-items: center; gap: 0.5rem;">
                             <div class="friend-avatar">{{ $post->user->name[0] }}</div>
                             <div style="flex: 1; min-width: 0;">
-                                <div style="font-size: 0.7rem; color: #8888aa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                    <span style="color: #e0e0e0; font-weight: 500;">{{ $post->user->name }}</span>
-                                    {{ Str::limit($post->content, 20) }}
+                                <div style="font-size: 0.7rem; color: #1a1a1a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                    <span style="color: #1a4a9e; font-weight: 600;">{{ $post->user->display_name }}</span>
+                                    <span style="color: #2a2a2a;">{{ Str::limit($post->content, 20) }}</span>
                                 </div>
-                                <div style="font-size: 0.6rem; color: #555;">{{ $post->created_at->diffForHumans() }}</div>
+                                <div style="font-size: 0.6rem; color: #5a5a5a;">{{ $post->created_at->diffForHumans() }}</div>
                             </div>
                         </div>
                     </div>
                 @empty
-                    <p style="color: #555; font-size: 0.75rem; padding: 0.5rem;">No activity yet.</p>
+                    <p style="color: #3a3a3a; font-size: 0.75rem; padding: 0.5rem;">No activity yet.</p>
                 @endforelse
             </div>
         </div>
@@ -46,19 +46,20 @@
         <div id="view-friends" class="sidebar-view hidden">
             <div class="status-group">
                 <div class="status-group-label">Direct Messages</div>
-                @forelse(Auth::user()->friends as $friend)
-                    <a href="{{ route('profile.show', $friend) }}" class="friend-item">
+                @forelse(Auth::user()->getFriends() as $friend)
+                    <a href="{{ route('conversations.start', $friend->id) }}" class="friend-item">
                         <div class="friend-avatar">{{ $friend->name[0] }}</div>
                         <div class="friend-info">
-                            <div class="friend-name">{{ $friend->name }}</div>
+                            <div class="friend-name">{{ $friend->display_name }}</div>
                             <div class="friend-status">Online</div>
                         </div>
                     </a>
                 @empty
-                    <p style="color: #555; font-size: 0.75rem; padding: 0.5rem;">No friends yet. Add some!</p>
+                    <p style="color: #3a3a3a; font-size: 0.75rem; padding: 0.5rem;">No friends yet. Add some!</p>
                 @endforelse
             </div>
         </div>
+
     </div>
 
     <!-- ===== AETHERTUNES SIDEBAR CONTENT ===== -->
@@ -144,7 +145,7 @@
     <div class="mini-profile" onclick="toggleProfilePopup()">
         <div class="mini-profile-avatar">{{ Auth::user()->name[0] ?? '?' }}</div>
         <div class="mini-profile-info">
-            <div class="mini-profile-name">{{ Auth::user()->name ?? 'Guest' }}</div>
+            <div class="mini-profile-name">{{ Auth::user()->display_name }}</div>
             <div class="mini-profile-status">Online</div>
         </div>
         <div class="mini-profile-badge">▶</div>

@@ -6,7 +6,23 @@
 @section('content')
     <form method="POST" action="{{ route('register') }}">
         @csrf
+        <div style="margin-bottom: 1rem;">
+            <label class="auth-label" for="username">Username</label>
+            <input class="auth-input" id="username" type="text" name="username" value="{{ old('username') }}" required autofocus>
+            <span style="font-size: 0.65rem; color: #6a6a6a;">Letters, numbers, and underscores only. No spaces.</span>
+            @error('username')
+                <div class="auth-error">{{ $message }}</div>
+            @enderror
+        </div>
 
+        <div style="margin-bottom: 1rem;">
+            <label class="auth-label" for="name">Display Name</label>
+            <input class="auth-input" id="name" type="text" name="name" value="{{ old('name') }}" required>
+            @error('name')
+                <div class="auth-error">{{ $message }}</div>
+            @enderror
+        </div>
+        
         <div style="margin-bottom: 1rem;">
             <label class="auth-label" for="name">Name</label>
             <input class="auth-input" id="name" type="text" name="name" value="{{ old('name') }}" required autofocus>

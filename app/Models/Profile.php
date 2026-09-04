@@ -9,9 +9,18 @@ class Profile extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'user_id', 'display_name', 'bio', 'avatar', 'banner',
-        'top_artists', 'top_songs', 'top_albums', 'top_friends', 'is_public'
+        protected $fillable = [
+        'user_id',
+        'display_name',
+        'avatar',
+        'banner',
+        'bio',
+        'location',
+        'top_artists',
+        'top_songs',
+        'top_albums',
+        'top_friends',
+        'is_public',
     ];
 
     protected $casts = [

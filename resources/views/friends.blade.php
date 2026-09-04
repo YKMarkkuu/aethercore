@@ -25,16 +25,16 @@
             <div class="xp-friend-item">
                 <a href="{{ route('profile.show', $friend) }}" class="xp-friend-link">
                     <span class="xp-friend-avatar">{{ $friend->name[0] }}</span>
-                    <span class="xp-friend-name">{{ $friend->name }}</span>
+                    <span class="xp-friend-name">{{ $friend->display_name }}</span>
                 </a>
-                <form action="{{ route('friends.reject', $friend) }}" method="POST" style="display: inline;">
+                <form action="{{ route('friends.reject', $friend->id) }}" method="POST" style="display: inline;">
                     @csrf
                     <button type="submit" class="xp-action-btn xp-action-btn-danger">Unfriend</button>
                 </form>
             </div>
         @empty
             <p style="font-size: 0.75rem; color: #6a6a6a; text-align: center; padding: 0.5rem 0;">
-                You haven't made any friends yet. Search for people above!
+                You haven't made any friends yet.
             </p>
         @endforelse
     </div>
@@ -48,14 +48,14 @@
             <div class="xp-friend-item">
                 <a href="{{ route('profile.show', $request) }}" class="xp-friend-link">
                     <span class="xp-friend-avatar">{{ $request->name[0] }}</span>
-                    <span class="xp-friend-name">{{ $request->name }}</span>
+                    <span class="xp-friend-name">{{ $request->display_name }}</span>
                 </a>
                 <div style="display: flex; gap: 0.3rem;">
-                    <form action="{{ route('friends.accept', $request) }}" method="POST" style="display: inline;">
+                    <form action="{{ route('friends.accept', $request->id) }}" method="POST">
                         @csrf
                         <button type="submit" class="xp-action-btn xp-action-btn-success">Accept</button>
                     </form>
-                    <form action="{{ route('friends.reject', $request) }}" method="POST" style="display: inline;">
+                   <form action="{{ route('friends.reject', $request->id) }}" method="POST">
                         @csrf
                         <button type="submit" class="xp-action-btn xp-action-btn-danger">Decline</button>
                     </form>
@@ -69,7 +69,7 @@
     </div>
 </div>
 
-<!-- ===== SEARCH RESULTS (if searching) ===== -->
+<!-- ===== SEARCH RESULTS ===== -->
 @if(request('search'))
     <div class="xp-panel">
         <div class="xp-panel-header">Search Results for "{{ request('search') }}"</div>
@@ -78,16 +78,16 @@
                 <div class="xp-friend-item">
                     <a href="{{ route('profile.show', $user) }}" class="xp-friend-link">
                         <span class="xp-friend-avatar">{{ $user->name[0] }}</span>
-                        <span class="xp-friend-name">{{ $user->name }}</span>
+                        <span class="xp-friend-name">{{ $user->display_name }}</span>
                     </a>
-                    <form action="{{ route('friends.request', $user) }}" method="POST" style="display: inline;">
+                    <form action="{{ route('friends.request', $user->id) }}" method="POST" style="display: inline;">
                         @csrf
                         <button type="submit" class="xp-action-btn xp-action-btn-primary">Add Friend</button>
                     </form>
                 </div>
             @empty
                 <p style="font-size: 0.75rem; color: #6a6a6a; text-align: center; padding: 0.5rem 0;">
-                    No users found matching "{{ request('search') }}"
+                    No users found.
                 </p>
             @endforelse
         </div>

@@ -7,8 +7,8 @@
         <div class="popup-header">
             <div class="popup-avatar">{{ Auth::user()->name[0] ?? '?' }}</div>
             <div class="popup-user-info">
-                <div class="popup-name">{{ Auth::user()->name ?? 'Guest' }}</div>
-                <div class="popup-username">@ {{ Auth::user()->name ?? 'guest' }}</div>
+                <div class="popup-name">{{ Auth::user()->display_name }}</div>
+                <div class="popup-username">@ {{ Auth::user()->username ?? Auth::user()->name }}</div>
                 <div class="popup-status">🟢 Online</div>
                 <div class="popup-pronouns">He/Him</div>
                 <div class="popup-bio">✨ AetherCore Developer</div>

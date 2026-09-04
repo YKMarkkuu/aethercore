@@ -16,7 +16,7 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #d4d0c8; /* Windows XP default background */
+    background: #d4d0c8;
     color: #1e1e1e;
     height: 100vh;
     overflow: hidden;
@@ -29,7 +29,7 @@ body {
 }
 
 /* ============================================
-   TOP BAR (Windows XP Taskbar Style)
+   TOP BAR
    ============================================ */
 .topbar {
     display: flex;
@@ -41,12 +41,6 @@ body {
     height: 48px;
     flex-shrink: 0;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
-}
-
-/* AetherTunes Top Bar (Green) */
-.mode-btn.active + .mode-toggle .mode-btn#modeMusic.active ~ .topbar {
-    background: linear-gradient(180deg, #3a8a3a 0%, #5cb85c 50%, #2d6b2d 100%);
-    border-bottom: 2px solid #1a4a1a;
 }
 
 .topbar-left {
@@ -121,7 +115,6 @@ body {
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
 
-/* AetherTunes mode button active (green) */
 .mode-btn#modeMusic.active {
     background: #ffffff;
     color: #2d6b2d;
@@ -151,7 +144,7 @@ body {
 }
 
 /* ============================================
-   MAIN BODY (Windows XP Silver/Blue Gradient)
+   MAIN BODY
    ============================================ */
 .main-body {
     display: flex;
@@ -161,7 +154,7 @@ body {
 }
 
 /* ============================================
-   LEFT SIDEBAR (Windows XP Explorer Style)
+   LEFT SIDEBAR
    ============================================ */
 .sidebar {
     width: 240px;
@@ -251,7 +244,7 @@ body {
 .status-group-label {
     font-size: 0.55rem;
     text-transform: uppercase;
-    color: #6a6a6a;
+    color: #4a4a4a;
     letter-spacing: 0.3px;
     padding: 0.3rem 0.4rem 0.1rem;
     font-weight: 700;
@@ -298,7 +291,7 @@ body {
 
 .friend-name {
     font-size: 0.75rem;
-    font-weight: 500;
+    font-weight: 600;
     color: #1e1e1e;
 }
 
@@ -366,7 +359,7 @@ body {
 }
 
 /* ============================================
-   NOW PLAYING (Windows XP Status Bar Style)
+   NOW PLAYING
    ============================================ */
 .now-playing {
     padding: 0.3rem 0.6rem;
@@ -396,7 +389,7 @@ body {
 }
 
 /* ============================================
-   MINI PROFILE (Windows XP User Panel)
+   MINI PROFILE
    ============================================ */
 .mini-profile {
     display: flex;
@@ -453,7 +446,7 @@ body {
 }
 
 /* ============================================
-   MAIN CONTENT (Windows XP White Area)
+   MAIN CONTENT
    ============================================ */
 .main-content {
     flex: 1;
@@ -479,7 +472,7 @@ body {
 }
 
 /* ============================================
-   RIGHT SIDEBAR (Windows XP Info Panel)
+   RIGHT SIDEBAR
    ============================================ */
 .right-sidebar {
     width: 220px;
@@ -552,7 +545,7 @@ body {
 }
 
 /* ============================================
-   CARDS (Windows XP Window Style)
+   CARDS
    ============================================ */
 .card {
     background: #f0edd8;
@@ -571,7 +564,7 @@ body {
 }
 
 /* ============================================
-   BUTTONS & INPUTS (Windows XP Style)
+   BUTTONS & INPUTS
    ============================================ */
 .settings-input {
     width: 100%;
@@ -618,15 +611,12 @@ body {
     background: #c89090;
 }
 
-/* ============================================
-   HIDDEN UTILITY
-   ============================================ */
 .hidden {
     display: none !important;
 }
 
 /* ============================================
-   MINI PROFILE POPUP (Windows XP Dialog Style)
+   MINI PROFILE POPUP
    ============================================ */
 .profile-popup {
     position: fixed;
@@ -762,7 +752,7 @@ body {
 }
 
 /* ============================================
-   SETTINGS MODAL (Windows XP Dialog Style)
+   SETTINGS MODAL
    ============================================ */
 .settings-modal {
     position: fixed;
@@ -925,7 +915,7 @@ body {
 }
 
 /* ============================================
-   XP STYLE POSTS (Clean, no emojis, no colored borders)
+   XP STYLE POSTS
    ============================================ */
 .post-item {
     padding: 0.6rem 0.8rem;
@@ -1009,7 +999,7 @@ body {
 }
 
 /* ============================================
-   XP STYLE STATS BOXES (No emojis)
+   XP STYLE STATS BOXES
    ============================================ */
 .xp-stats {
     display: flex;
@@ -1061,7 +1051,7 @@ body {
 }
 
 /* ============================================
-   XP STYLE RIGHT STATS (Clean, no emojis)
+   XP STYLE RIGHT STATS
    ============================================ */
 .xp-right-stats {
     text-align: center;
@@ -1187,13 +1177,11 @@ body {
 /* ============================================
    XP PROFILE PAGE
    ============================================ */
-
 .xp-profile {
     max-width: 1000px;
     margin: 0 auto;
 }
 
-/* ----- PROFILE HEADER ----- */
 .xp-profile-header {
     background: #f0edd8;
     border: 2px solid #b0a8a0;
@@ -1251,7 +1239,6 @@ body {
     margin-top: 0.2rem;
 }
 
-/* ----- PROFILE STATS ----- */
 .xp-profile-stats {
     display: flex;
     gap: 1rem;
@@ -1283,7 +1270,6 @@ body {
     letter-spacing: 0.3px;
 }
 
-/* ----- PROFILE BODY (Two-Column) ----- */
 .xp-profile-body {
     display: flex;
     gap: 1rem;
@@ -1297,7 +1283,6 @@ body {
     flex: 1;
 }
 
-/* ----- PANELS ----- */
 .xp-panel {
     background: #f0edd8;
     border: 2px solid #b0a8a0;
@@ -1320,7 +1305,6 @@ body {
     padding: 0.6rem 0.8rem;
 }
 
-/* ----- INFO ROWS ----- */
 .xp-info-row {
     display: flex;
     justify-content: space-between;
@@ -1338,7 +1322,6 @@ body {
     font-weight: 500;
 }
 
-/* ----- FRIEND BADGES ----- */
 .xp-friend-badge {
     display: inline-block;
     background: #e0dcd0;
@@ -1356,7 +1339,6 @@ body {
     border-color: #a09890;
 }
 
-/* ----- POSTS ----- */
 .xp-post {
     background: #f8f5ec;
     border: 1px solid #d0c8c0;
@@ -1373,18 +1355,19 @@ body {
 }
 
 .xp-post-user {
-    font-weight: 600;
-    color: #1a4a9e;
-}
-
-.xp-post-time {
-    color: #6a6a6a;
+    font-weight: 700;
+    color: #1a4a9e; 
 }
 
 .xp-post-content {
     font-size: 0.8rem;
-    color: #1e1e1e;
+    color: #1a1a1a;
     padding: 0.2rem 0;
+}
+
+.xp-post-time {
+    color: #6a6a6a;
+    font-size: 0.65rem;
 }
 
 .xp-post-actions {
@@ -1416,14 +1399,12 @@ body {
     text-decoration: underline;
 }
 
-/* ----- DIVIDER ----- */
 .xp-divider {
     border: none;
     border-top: 1px solid #d0c8c0;
     margin: 0.5rem 0;
 }
 
-/* ----- RESPONSIVE ----- */
 @media (max-width: 768px) {
     .xp-profile-body {
         flex-direction: column;
@@ -1449,9 +1430,6 @@ body {
     }
 }
 
-/* ============================================
-   PROFILE ACTION BUTTONS
-   ============================================ */
 .xp-profile-actions {
     display: flex;
     gap: 0.5rem;
@@ -1507,9 +1485,6 @@ body {
     border-color: #b08080;
 }
 
-/* ============================================
-   FRIENDS ITEMS (XP Style)
-   ============================================ */
 .xp-friend-item {
     display: flex;
     justify-content: space-between;
@@ -1554,4 +1529,441 @@ body {
     font-size: 0.75rem;
     font-weight: 500;
     color: #1e1e1e;
+}
+
+.xp-profile-username {
+    font-size: 0.8rem;
+    color: #6a6a6a;
+    font-weight: 500;
+    margin-top: -0.1rem;
+}
+
+.xp-edit-btn {
+    background: linear-gradient(180deg, #f0edd8 0%, #d4d0c8 100%);
+    border: 2px solid #b0a8a0;
+    border-radius: 4px;
+    padding: 0.15rem 0.8rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #1e1e1e;
+    cursor: pointer;
+    transition: 0.2s;
+    font-family: inherit;
+}
+
+.xp-edit-btn:hover {
+    background: #e0dcd0;
+    border-color: #a09890;
+}
+
+/* ============================================
+   CONVERSATIONS (Discord-style XP)
+   ============================================ */
+.conversation-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #1e1e1e;
+    transition: 0.2s;
+    border-bottom: 1px solid #e0dcd0;
+}
+
+.conversation-item:hover {
+    background: #e0dcd0;
+}
+
+.conversation-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3a7bd5, #1a4a9e);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    color: #ffffff;
+    flex-shrink: 0;
+}
+
+.conversation-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.conversation-name {
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.conversation-preview {
+    font-size: 0.7rem;
+    color: #6a6a6a;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.conversation-time {
+    font-size: 0.6rem;
+    color: #6a6a6a;
+    flex-shrink: 0;
+}
+
+/* ============================================
+   CHAT (Discord-style XP - All Messages Left)
+   ============================================ */
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 200px);
+    background: #f0edd8;
+    border: 2px solid #b0a8a0;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.chat-header-xp {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(180deg, #ece9d8 0%, #d4d0c8 100%);
+    border-bottom: 2px solid #b0a8a0;
+}
+
+.chat-header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.chat-avatar-xp {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3a7bd5, #1a4a9e);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #ffffff;
+    border: 2px solid rgba(255,255,255,0.3);
+    flex-shrink: 0;
+}
+
+.chat-name-xp {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #1e1e1e;
+}
+
+.chat-status-xp {
+    font-size: 0.65rem;
+    color: #3a8a3a;
+}
+
+.chat-header-right {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.chat-icon-btn {
+    background: none;
+    border: none;
+    color: #6a6a6a;
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    transition: 0.2s;
+    text-decoration: none;
+}
+
+.chat-icon-btn:hover {
+    background: rgba(0,0,0,0.05);
+    color: #1e1e1e;
+}
+
+.chat-messages-xp {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.75rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    background: #f8f5ec;
+}
+
+.chat-messages-xp::-webkit-scrollbar {
+    width: 10px;
+}
+
+.chat-messages-xp::-webkit-scrollbar-track {
+    background: #e8e4dc;
+    border-left: 1px solid #d0c8c0;
+}
+
+.chat-messages-xp::-webkit-scrollbar-thumb {
+    background: #c8c0b8;
+    border: 1px solid #b0a8a0;
+    border-radius: 4px;
+}
+
+.chat-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    color: #6a6a6a;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 0.5rem 0;
+    gap: 0.5rem;
+}
+
+.chat-divider::before,
+.chat-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #d0c8c0;
+}
+
+/* ===== MESSAGE (Full-width, Discord-style) ===== */
+.chat-message-xp {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.3rem 0;
+    width: 100%;
+    border-bottom: 1px solid rgba(0,0,0,0.03);
+}
+
+.msg-avatar-xp {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3a7bd5, #1a4a9e);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: #ffffff;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+}
+
+.msg-bubble-xp {
+    flex: 1;
+    min-width: 0;
+    padding: 0.1rem 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+.msg-header-xp {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.05rem;
+}
+
+.msg-username-xp {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #1a4a9e;
+}
+
+.msg-time-xp {
+    font-size: 0.55rem;
+    color: #6a6a6a;
+    font-weight: 400;
+}
+
+.msg-content-xp {
+    font-size: 0.85rem;
+    color: #1e1e1e;
+    word-wrap: break-word;
+    line-height: 1.5;
+    padding: 0.1rem 0;
+}
+
+.chat-empty-xp {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #6a6a6a;
+    gap: 0.2rem;
+}
+
+.chat-empty-icon {
+    font-size: 3rem;
+    opacity: 0.4;
+}
+
+.chat-empty-text {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1e1e1e;
+}
+
+.chat-empty-sub {
+    font-size: 0.8rem;
+    color: #6a6a6a;
+}
+
+.chat-input-xp {
+    padding: 0.5rem 1rem;
+    background: #ece9d8;
+    border-top: 2px solid #b0a8a0;
+}
+
+.chat-form-xp {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.chat-input-xp-field {
+    flex: 1;
+    padding: 0.4rem 0.75rem;
+    border-radius: 4px;
+    border: 2px solid #b0a8a0;
+    background: #ffffff;
+    font-size: 0.85rem;
+    font-family: inherit;
+    color: #1e1e1e;
+    outline: none;
+    transition: 0.2s;
+}
+
+.chat-input-xp-field:focus {
+    border-color: #3a7bd5;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.chat-send-xp {
+    padding: 0.4rem 1.5rem;
+    border-radius: 4px;
+    border: 2px solid #b0a8a0;
+    background: linear-gradient(180deg, #f0edd8 0%, #d4d0c8 100%);
+    font-weight: 600;
+    font-size: 0.8rem;
+    color: #1e1e1e;
+    cursor: pointer;
+    transition: 0.2s;
+    font-family: inherit;
+    box-shadow: 1px 1px 2px rgba(0,0,0,0.03);
+}
+
+.chat-send-xp:hover {
+    background: #e0dcd0;
+    border-color: #a09890;
+}
+
+/* ===== BANNER DRAG ===== */
+.xp-profile-cover-wrapper {
+    position: relative;
+    overflow: hidden;
+    border-radius: 6px 6px 0 0;
+    height: 180px;
+    background: linear-gradient(135deg, #3a7bd5, #1a4a9e);
+}
+
+.xp-profile-cover {
+    height: 100%;
+    width: 100%;
+    position: relative;
+    cursor: grab;
+    overflow: hidden;
+}
+
+.xp-profile-cover:active {
+    cursor: grabbing;
+}
+
+/* ===== FIX AVATAR CUT OFF ===== */
+.xp-profile-cover-wrapper {
+    position: relative;
+    overflow: visible !important; /* 👈 CHANGE FROM hidden TO visible */
+    border-radius: 6px 6px 0 0;
+    height: 180px;
+}
+
+.xp-profile-cover {
+    height: 100%;
+    width: 100%;
+    position: relative;
+    cursor: grab;
+    overflow: hidden;
+    border-radius: 6px 6px 0 0;
+}
+
+.xp-profile-avatar {
+    position: absolute;
+    bottom: -40px;
+    left: 30px;
+    z-index: 10 !important; /* 👈 HIGHER Z-INDEX */
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: #f0edd8;
+    border: 4px solid #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1a4a9e;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.xp-profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* ===== BANNER FIX ===== */
+.xp-profile-cover {
+    height: 100%;
+    width: 100%;
+    position: relative;
+    cursor: grab;
+    overflow: hidden;
+    border-radius: 6px 6px 0 0;
+}
+
+.xp-profile-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+}
+
+/* ===== TOP 8 BADGES ===== */
+.xp-top-badge {
+    display: inline-block;
+    background: #e0dcd0;
+    border: 1px solid #c0b8b0;
+    border-radius: 4px;
+    padding: 0.1rem 0.6rem;
+    font-size: 0.7rem;
+    color: #1e1e1e;
+    transition: 0.2s;
+}
+
+.xp-top-badge:hover {
+    background: #d4d0c8;
+    border-color: #a09890;
 }

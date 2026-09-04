@@ -8,9 +8,10 @@
     <div class="card">
         <h3>Account</h3>
         <div class="settings-group">
-            <label>Display Name</label>
-            <input type="text" value="{{ Auth::user()->name }}" class="settings-input">
-        </div>
+        <label>Display Name</label>
+        <input type="text" value="{{ Auth::user()->display_name }}" class="settings-input" disabled>
+        <span class="settings-hint">Change your display name on your profile page</span>
+    </div>
         <div class="settings-group">
             <label>Email</label>
             <input type="email" value="{{ Auth::user()->email }}" class="settings-input">
