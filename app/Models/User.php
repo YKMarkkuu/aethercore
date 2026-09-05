@@ -18,11 +18,16 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
-    protected $fillable = [
+        protected $fillable = [
         'username',
         'name',
         'email',
         'password',
+        'status',
+        'theme',
+        'lastfm_username',
+        'lastfm_data',
+        'lastfm_updated_at',
     ];
 
     /**
@@ -43,6 +48,8 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'lastfm_data' => 'array',
+        'lastfm_updated_at' => 'datetime',
     ];
 
     // ===== RELATIONSHIPS =====
@@ -56,6 +63,68 @@ class User extends Authenticatable
     {
         return $this->hasMany(Post::class)->orderBy('created_at', 'desc');
     }
+
+    // ===== STATUS =====
+
+    /**
+     * Get the user's status label.
+     */
+    public function getStatusLabel()
+    {
+        $statuses = [
+            'online' => 'Online',
+            'idle' => 'Idle',
+            'dnd' => 'Do Not Disturb',
+            'offline' => 'Offline',
+        ];
+        return $statuses[$this->status] ?? 'Online';
+    }
+
+    /**
+     * Get the user's status color.
+     */
+    public function getStatusColor()
+    {
+        $colors = [
+            'online' => '#4ade80',
+            'idle' => '#fbbf24',
+            'dnd' => '#ef4444',
+            'offline' => '#6b7280',
+        ];
+        return $colors[$this->status] ?? '#4ade80';
+    }
+
+    /**
+     * Get the user's status icon.
+     */
+    public function getStatusIcon()
+    {
+        $icons = [
+            'online' => '●',
+            'idle' => '◐',
+            'dnd' => '●',
+            'offline' => '○',
+        ];
+        return $icons[$this->status] ?? '●';
+    }
+
+        // ===== THEME =====
+
+        public function getTheme()
+        {
+            return $this->theme ?? 'aethercore';
+        }
+
+        public function getAvailableThemes()
+        {
+            return [
+                'aethercore' => 'AetherCore (XP)',
+                'midnight' => 'Midnight (Dark)',
+                'daylight' => 'Daylight (Light)',
+                'retro' => 'Retro Terminal',
+            ];
+        }
+    
 
     // ===== FRIENDSHIP RELATIONSHIPS =====
     

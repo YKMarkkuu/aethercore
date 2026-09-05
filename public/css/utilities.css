@@ -1,0 +1,478 @@
+/* ============================================
+   UTILITIES — Helpers, Animations, Popups
+   ============================================ */
+
+.hidden {
+    display: none !important;
+}
+
+/* ===== MINI PROFILE POPUP ===== */
+.profile-popup {
+    position: fixed;
+    bottom: 76px;
+    left: 10px;
+    z-index: 1000;
+    width: 280px;
+    background: #f0edd8;
+    border-radius: 6px;
+    padding: 0.8rem;
+    border: 2px solid #b0a8a0;
+    box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.2);
+    animation: popupSlideUp 0.2s ease;
+}
+
+.profile-popup.hidden {
+    display: none;
+}
+
+.popup-close {
+    position: absolute;
+    top: 4px;
+    right: 8px;
+    background: none;
+    border: none;
+    color: #6a6a6a;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.popup-close:hover {
+    color: #1e1e1e;
+}
+
+.popup-header {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+}
+
+.popup-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3a7bd5, #1a4a9e);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #ffffff;
+    flex-shrink: 0;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.popup-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1e1e1e;
+}
+.popup-username {
+    font-size: 0.7rem;
+    color: #6a6a6a;
+}
+.popup-status {
+    font-size: 0.7rem;
+    color: #3a8a3a;
+}
+.popup-pronouns {
+    font-size: 0.6rem;
+    color: #6a6a6a;
+}
+.popup-bio {
+    font-size: 0.7rem;
+    color: #1e1e1e;
+    margin-top: 2px;
+}
+
+.popup-divider {
+    border: none;
+    border-top: 1px solid #c0b8b0;
+    margin: 0.3rem 0;
+}
+
+.popup-actions,
+.popup-actions-bottom {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.popup-action {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0.5rem;
+    border-radius: 4px;
+    color: #1e1e1e;
+    text-decoration: none;
+    font-size: 0.75rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: 0.2s;
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
+}
+.popup-action:hover {
+    background: #e0dcd0;
+}
+.popup-action span {
+    font-size: 0.9rem;
+    width: 24px;
+    text-align: center;
+}
+
+@keyframes popupSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* ============================================
+   STATUS — Readability improvements only
+   ============================================ */
+
+/* ----- Bigger, bolder status text in popup ----- */
+.popup-status {
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+    margin-top: 2px;
+}
+
+/* ----- Status text everywhere (bigger & bolder) ----- */
+.xp-profile-status,
+.right-profile-status,
+.mini-profile-status,
+.friend-status,
+.chat-status-xp {
+    font-weight: 600 !important;
+    font-size: 0.75rem !important;
+}
+
+/* ----- Status options in dropdown (bigger) ----- */
+.status-option {
+    font-size: 0.85rem !important;
+    padding: 0.4rem 0.8rem !important;
+}
+
+.status-option .status-dot {
+    font-size: 1rem !important;
+}
+
+/* ----- Keep XP styling but make status text pop ----- */
+.popup-status .status-dot-text {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+}
+
+.popup-status .status-dot-text.online {
+    background: #4ade80;
+}
+.popup-status .status-dot-text.idle {
+    background: #fbbf24;
+}
+.popup-status .status-dot-text.dnd {
+    background: #ef4444;
+}
+.popup-status .status-dot-text.offline {
+    background: #6b7280;
+}
+
+/* ===== STATUS DROPDOWN ===== */
+.popup-status-menu {
+    position: relative;
+}
+
+.status-menu {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    background: #f0edd8;
+    border: 2px solid #b0a8a0;
+    border-radius: 6px;
+    padding: 0.3rem 0;
+    min-width: 180px;
+    box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1001;
+}
+
+.status-menu.hidden {
+    display: none;
+}
+
+.status-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.3rem 0.8rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.85rem !important;
+    color: #1e1e1e;
+    font-family: inherit;
+    text-align: left;
+    transition: 0.2s;
+}
+
+.status-option:hover {
+    background: #d4d0c8;
+}
+
+.status-dot {
+    font-size: 1rem;
+}
+.status-dot.online {
+    color: #4ade80;
+}
+.status-dot.idle {
+    color: #fbbf24;
+}
+.status-dot.dnd {
+    color: #ef4444;
+}
+.status-dot.offline {
+    color: #6b7280;
+}
+
+/* ===== SETTINGS MODAL ===== */
+.settings-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 99999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.settings-modal:not(.hidden) {
+    display: flex !important;
+}
+.settings-modal.hidden {
+    display: none !important;
+}
+
+.settings-modal-content {
+    background: #f0edd8;
+    border-radius: 6px;
+    max-width: 800px;
+    width: 90%;
+    height: 80vh;  /* 👈 FIXED HEIGHT instead of max-height */
+    max-height: 600px;  /* 👈 CAP THE MAX */
+    overflow: hidden;
+    border: 2px solid #b0a8a0;
+    box-shadow: 6px 6px 16px rgba(0, 0, 0, 0.25);
+    display: flex;
+    flex-direction: column;
+}
+
+.settings-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid #b0a8a0;
+    background: linear-gradient(180deg, #ece9d8 0%, #d4d0c8 100%);
+    flex-shrink: 0;
+}
+
+.settings-modal-header h2 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1e1e1e;
+}
+.settings-modal-close {
+    background: none;
+    border: none;
+    color: #6a6a6a;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.settings-modal-close:hover {
+    color: #1e1e1e;
+}
+
+.settings-modal-body {
+    display: flex;
+    flex: 1;
+    overflow: hidden;  /* 👈 CRITICAL: prevents body from growing */
+    min-height: 0;
+}
+
+.settings-nav {
+    width: 180px;
+    padding: 0.5rem 0.3rem;
+    border-right: 1px solid #b0a8a0;
+    overflow-y: auto;  /* 👈 SCROLLABLE */
+    flex-shrink: 0;
+    background: #e8e4dc;
+}
+
+.settings-nav::-webkit-scrollbar {
+    width: 6px;
+}
+.settings-nav::-webkit-scrollbar-track {
+    background: #e8e4dc;
+}
+.settings-nav::-webkit-scrollbar-thumb {
+    background: #c0b8b0;
+    border: 1px solid #b0a8a0;
+    border-radius: 4px;
+}
+
+.settings-nav-category {
+    font-size: 0.55rem;
+    text-transform: uppercase;
+    color: #6a6a6a;
+    letter-spacing: 0.5px;
+    padding: 0.6rem 0.5rem 0.2rem;
+    font-weight: 700;
+}
+
+.settings-nav-item {
+    display: block;
+    width: 100%;
+    padding: 0.3rem 0.5rem;
+    border-radius: 4px;
+    border: none;
+    background: none;
+    color: #1e1e1e;
+    cursor: pointer;
+    font-size: 0.75rem;
+    text-align: left;
+    transition: 0.2s;
+    font-family: inherit;
+}
+.settings-nav-item:hover {
+    background: #d4d0c8;
+}
+.settings-nav-item.active {
+    background: #3a7bd5;
+    color: #ffffff;
+}
+
+.settings-content {
+    flex: 1;
+    padding: 1rem 1.25rem;
+    overflow-y: auto;  /* 👈 SCROLLABLE */
+    background: #f0edd8;
+    min-height: 0;
+}
+
+.settings-content::-webkit-scrollbar {
+    width: 8px;
+}
+.settings-content::-webkit-scrollbar-track {
+    background: #e8e4dc;
+}
+.settings-content::-webkit-scrollbar-thumb {
+    background: #c8c0b8;
+    border: 1px solid #b0a8a0;
+    border-radius: 4px;
+}
+
+.settings-tab {
+    display: block;
+}
+.settings-tab.hidden {
+    display: none;
+}
+
+.settings-tab h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1e1e1e;
+    margin-bottom: 0.1rem;
+}
+
+.settings-subtitle {
+    font-size: 0.7rem;
+    color: #6a6a6a;
+    margin-bottom: 1rem;
+    margin-top: -0.1rem;
+}
+
+.settings-group {
+    margin-bottom: 1rem;
+}
+.settings-group label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #1e1e1e;
+    margin-bottom: 0.2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.settings-hint {
+    display: block;
+    font-size: 0.6rem;
+    color: #6a6a6a;
+    margin-top: 0.2rem;
+}
+
+.settings-error {
+    color: #ef4444;
+    font-size: 0.7rem;
+    margin-top: 0.2rem;
+}
+
+.settings-alert {
+    padding: 0.3rem 0.8rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    margin-bottom: 0.75rem;
+}
+.settings-alert.success {
+    background: #d4e8d4;
+    border: 1px solid #8ab88a;
+    color: #1e4a1e;
+}
+.settings-alert.error {
+    background: #f0d8d8;
+    border: 1px solid #c8a0a0;
+    color: #6a2a2a;
+}
+
+.settings-btn {
+    padding: 0.3rem 1.2rem;
+    border-radius: 4px;
+    background: linear-gradient(180deg, #f0edd8 0%, #d4d0c8 100%);
+    color: #1e1e1e;
+    border: 2px solid #b0a8a0;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: 0.2s;
+    font-family: inherit;
+}
+.settings-btn:hover {
+    background: #e0dcd0;
+    border-color: #a09890;
+}
+
+.settings-btn-danger {
+    background: #f0d8d8;
+    border-color: #c8a0a0;
+    color: #6a2a2a;
+}
+.settings-btn-danger:hover {
+    background: #e8c8c8;
+}

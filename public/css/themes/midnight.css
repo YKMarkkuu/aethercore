@@ -1,0 +1,679 @@
+/* ============================================
+   MIDNIGHT THEME (Dark Mode)
+   ============================================ */
+
+/* ----- Force Dark Backgrounds ----- */
+body,
+.app,
+.main-body,
+.main-content,
+.sidebar-list,
+.right-sidebar {
+    background: #0d0d1a !important;
+}
+
+.sidebar {
+    background: #111125 !important;
+    border-right-color: #1e1e38 !important;
+}
+
+.xp-profile-header,
+.xp-panel,
+.card,
+.xp-stats-divider,
+.xp-post,
+.post-item,
+.chat-container,
+.chat-messages-xp,
+.settings-modal-content,
+.settings-content,
+.profile-popup {
+    background: #14142a !important;
+    border-color: #1e1e38 !important;
+    box-shadow: none !important;
+}
+
+/* ----- Fix Mini Profile (Bottom of Sidebar) ----- */
+.mini-profile {
+    background: #1a1a32 !important;
+    border-top-color: #1e1e38 !important;
+}
+.mini-profile:hover {
+    background: #222244 !important;
+}
+.mini-profile-avatar {
+    background: #2a2a4a !important;
+    color: #e0e0e0 !important;
+}
+.mini-profile-name {
+    color: #e0e0e0 !important;
+}
+.mini-profile-status {
+    color: #e0e0e0 !important;
+}
+.mini-profile-badge {
+    color: #6a6a8a !important;
+}
+
+/* ----- Fix Right Sidebar ----- */
+.right-sidebar {
+    background: #111125 !important;
+    border-left-color: #1e1e38 !important;
+}
+.right-profile-avatar {
+    background: #2a2a4a !important;
+    color: #e0e0e0 !important;
+}
+.right-profile-name {
+    color: #e0e0e0 !important;
+}
+.right-profile-status {
+    color: #e0e0e0 !important;
+}
+.right-profile-bio {
+    color: #8888aa !important;
+}
+.right-profile-divider {
+    border-top-color: #1e1e38 !important;
+}
+
+/* ----- Fix Status Colors ----- */
+.friend-status,
+.mini-profile-status,
+.xp-profile-status,
+.popup-status {
+    color: #e0e0e0 !important;
+}
+.friend-status.online,
+.mini-profile-status.online,
+.xp-profile-status.online {
+    color: #4ade80 !important;
+}
+.friend-status.idle,
+.mini-profile-status.idle,
+.xp-profile-status.idle {
+    color: #fbbf24 !important;
+}
+.friend-status.dnd,
+.mini-profile-status.dnd,
+.xp-profile-status.dnd {
+    color: #ef4444 !important;
+}
+.friend-status.offline,
+.mini-profile-status.offline,
+.xp-profile-status.offline {
+    color: #6b7280 !important;
+}
+
+/* ----- Fix All Text Colors ----- */
+.xp-profile-name,
+.xp-profile-username,
+.xp-profile-bio,
+.xp-panel-header,
+.xp-info-label,
+.xp-info-value,
+.xp-stat-number,
+.xp-stat-label,
+.xp-post-user,
+.xp-post-content,
+.xp-post-time,
+.xp-post-actions,
+.friend-name,
+.friend-status,
+.conversation-name,
+.conversation-preview,
+.chat-name-xp,
+.chat-status-xp,
+.msg-username-xp,
+.msg-content-xp,
+.msg-time-xp,
+.post-user,
+.post-content,
+.post-time,
+.post-actions,
+.card-header,
+.settings-tab h3,
+.settings-group label,
+.settings-subtitle,
+.settings-hint,
+.settings-nav-item,
+.popup-name,
+.popup-username,
+.popup-status,
+.popup-bio,
+.popup-action,
+.settings-modal-header h2,
+.settings-nav-category,
+.settings-alert.success,
+.settings-alert.error,
+.settings-error {
+    color: #e0e0e0 !important;
+}
+
+/* ----- Fix Black Text on Black Background ----- */
+.xp-profile-username,
+.xp-profile-bio,
+.xp-info-label,
+.xp-info-value,
+.xp-stat-label,
+.friend-name,
+.friend-status,
+.mini-profile-name,
+.mini-profile-status,
+.right-profile-name,
+.right-profile-status,
+.right-profile-bio,
+.popup-username,
+.popup-bio,
+.settings-hint,
+.settings-subtitle,
+.settings-error,
+.chat-status-xp,
+.msg-time-xp,
+.post-time {
+    color: #c0c0d0 !important;
+}
+
+/* ----- Fix Borders ----- */
+.sidebar-tabs,
+.status-group-label,
+.friend-item,
+.xp-divider,
+.popup-divider,
+.conversation-item,
+.chat-header-xp,
+.chat-divider::before,
+.chat-divider::after,
+.right-profile-divider,
+.settings-modal-header,
+.settings-nav {
+    border-color: #1e1e38 !important;
+}
+
+.sidebar-tabs {
+    background: #0d0d1a !important;
+}
+.xp-panel-header {
+    background: #1a1a32 !important;
+    border-color: #1e1e38 !important;
+    color: #e0e0e0 !important;
+}
+.xp-stats-divider {
+    background: #14142a !important;
+    border-color: #1e1e38 !important;
+}
+.xp-stat-divider-line {
+    background: #1e1e38 !important;
+}
+
+/* ----- Fix Inputs & Buttons ----- */
+.settings-input {
+    background: #0d0d1a !important;
+    border-color: #1e1e38 !important;
+    color: #e0e0e0 !important;
+}
+.settings-input:focus {
+    border-color: #6C63FF !important;
+    box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.2) !important;
+}
+.settings-btn {
+    background: #1a1a32 !important;
+    border-color: #1e1e38 !important;
+    color: #e0e0e0 !important;
+}
+.settings-btn:hover {
+    background: #252545 !important;
+}
+.settings-btn-danger {
+    background: #2a1a1a !important;
+    border-color: #4a2a2a !important;
+    color: #ef4444 !important;
+}
+.settings-btn-danger:hover {
+    background: #3a1a1a !important;
+}
+.xp-edit-btn {
+    background: #1a1a32 !important;
+    border-color: #1e1e38 !important;
+    color: #e0e0e0 !important;
+}
+.xp-edit-btn:hover {
+    background: #252545 !important;
+}
+
+/* ----- Fix Badges ----- */
+.xp-top-badge,
+.xp-friend-badge,
+.xp-create-btn {
+    background: #1a1a32 !important;
+    border-color: #1e1e38 !important;
+    color: #a0a0b8 !important;
+}
+.xp-top-badge:hover,
+.xp-friend-badge:hover {
+    background: #252545 !important;
+}
+
+/* ----- Fix Action Buttons ----- */
+.xp-action-btn-primary {
+    background: #1a1a32 !important;
+    border-color: #1e1e38 !important;
+    color: #e0e0e0 !important;
+}
+.xp-action-btn-primary:hover {
+    background: #252545 !important;
+}
+.xp-action-btn-success {
+    background: #1a2a1a !important;
+    border-color: #1a4a1a !important;
+    color: #4ade80 !important;
+}
+.xp-action-btn-warning {
+    background: #2a2a1a !important;
+    border-color: #4a4a1a !important;
+    color: #fbbf24 !important;
+}
+.xp-action-btn-danger {
+    background: #2a1a1a !important;
+    border-color: #4a2a2a !important;
+    color: #ef4444 !important;
+}
+.xp-action-btn-danger:hover {
+    background: #3a1a1a !important;
+}
+
+/* ----- Fix Posts ----- */
+.xp-post,
+.post-item {
+    background: #14142a !important;
+    border-color: #1e1e38 !important;
+}
+.xp-post:hover,
+.post-item:hover {
+    background: #1a1a32 !important;
+}
+
+/* ----- Fix Chat ----- */
+.chat-container {
+    background: #14142a !important;
+    border-color: #1e1e38 !important;
+}
+.chat-header-xp {
+    background: #1a1a32 !important;
+    border-color: #1e1e38 !important;
+}
+.chat-messages-xp {
+    background: #0d0d1a !important;
+}
+.msg-bubble-xp {
+    background: #1a1a32 !important;
+    border-color: #1e1e38 !important;
+}
+.chat-message-xp.sent .msg-bubble-xp {
+    background: #1a2a1a !important;
+    border-color: #1a4a1a !important;
+}
+.chat-input-xp {
+    background: #1a1a32 !important;
+    border-color: #1e1e38 !important;
+}
+.chat-input-xp-field {
+    background: #0d0d1a !important;
+    border-color: #1e1e38 !important;
+    color: #e0e0e0 !important;
+}
+.chat-input-xp-field:focus {
+    border-color: #6C63FF !important;
+}
+.chat-send-xp {
+    background: #1a1a32 !important;
+    border-color: #1e1e38 !important;
+    color: #e0e0e0 !important;
+}
+.chat-send-xp:hover {
+    background: #252545 !important;
+}
+.chat-icon-btn {
+    color: #6a6a8a !important;
+}
+.chat-icon-btn:hover {
+    color: #e0e0e0 !important;
+}
+
+/* ----- Fix Popup ----- */
+.profile-popup {
+    background: #14142a !important;
+    border-color: #1e1e38 !important;
+}
+.popup-close {
+    color: #6a6a8a !important;
+}
+.popup-close:hover {
+    color: #e0e0e0 !important;
+}
+.popup-avatar {
+    background: #2a2a4a !important;
+    color: #e0e0e0 !important;
+}
+.popup-action:hover {
+    background: #1a1a32 !important;
+}
+.popup-divider {
+    border-top-color: #1e1e38 !important;
+}
+
+/* ----- Fix Settings Modal ----- */
+.settings-modal-content {
+    background: #14142a !important;
+    border-color: #1e1e38 !important;
+}
+.settings-modal-header {
+    background: #1a1a32 !important;
+    border-color: #1e1e38 !important;
+}
+.settings-modal-header h2 {
+    color: #e0e0e0 !important;
+}
+.settings-nav {
+    background: #0d0d1a !important;
+    border-color: #1e1e38 !important;
+}
+.settings-nav-item {
+    color: #a0a0b8 !important;
+}
+.settings-nav-item:hover {
+    background: #1a1a32 !important;
+}
+.settings-nav-item.active {
+    background: #6C63FF !important;
+    color: #ffffff !important;
+}
+.settings-content {
+    background: #14142a !important;
+}
+.settings-nav-category {
+    color: #6a6a6a !important;
+}
+.settings-modal-close {
+    color: #6a6a8a !important;
+}
+.settings-modal-close:hover {
+    color: #e0e0e0 !important;
+}
+.settings-alert.success {
+    background: #1a2a1a !important;
+    border-color: #1a4a1a !important;
+    color: #4ade80 !important;
+}
+.settings-alert.error {
+    background: #2a1a1a !important;
+    border-color: #4a2a2a !important;
+    color: #ef4444 !important;
+}
+
+/* ----- Fix Status Ring ----- */
+.avatar-wrapper .status-ring {
+    border-color: #14142a !important;
+}
+
+/* ----- Fix All Scrollbars ----- */
+.sidebar-list::-webkit-scrollbar-track,
+.main-content::-webkit-scrollbar-track,
+.right-sidebar::-webkit-scrollbar-track,
+.chat-messages-xp::-webkit-scrollbar-track,
+.settings-content::-webkit-scrollbar-track,
+.settings-nav::-webkit-scrollbar-track {
+    background: #0d0d1a !important;
+}
+.sidebar-list::-webkit-scrollbar-thumb,
+.main-content::-webkit-scrollbar-thumb,
+.right-sidebar::-webkit-scrollbar-thumb,
+.chat-messages-xp::-webkit-scrollbar-thumb,
+.settings-content::-webkit-scrollbar-thumb,
+.settings-nav::-webkit-scrollbar-thumb {
+    background: #1e1e38 !important;
+    border-color: #1e1e38 !important;
+}
+
+/* ----- Fix Conversation Items ----- */
+.conversation-item {
+    border-bottom-color: #1e1e38 !important;
+}
+.conversation-item:hover {
+    background: #1a1a32 !important;
+}
+.conversation-avatar {
+    background: #2a2a4a !important;
+    color: #e0e0e0 !important;
+}
+
+/* ----- Fix Now Playing ----- */
+.now-playing {
+    background: #1a1a32 !important;
+    border-color: #1e1e38 !important;
+}
+.now-playing-title {
+    color: #6a6a8a !important;
+}
+.now-playing-song {
+    color: #e0e0e0 !important;
+}
+.now-playing-artist {
+    color: #8888aa !important;
+}
+
+/* ----- Fix Status Dropdown ----- */
+.status-menu {
+    background: #14142a !important;
+    border-color: #1e1e38 !important;
+}
+.status-option {
+    color: #e0e0e0 !important;
+}
+.status-option:hover {
+    background: #1a1a32 !important;
+}
+.status-dot.online {
+    color: #4ade80 !important;
+}
+.status-dot.idle {
+    color: #fbbf24 !important;
+}
+.status-dot.dnd {
+    color: #ef4444 !important;
+}
+.status-dot.offline {
+    color: #6b7280 !important;
+}
+
+/* ============================================
+   MIDNIGHT THEME — ADDITIONAL FIXES
+   ============================================ */
+
+/* ----- Fix Tab Text (Feed, Spaces, Friends) ----- */
+.sidebar-tab {
+    color: #8888aa !important;
+}
+.sidebar-tab:hover {
+    color: #e0e0e0 !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+.sidebar-tab.active {
+    color: #ffffff !important;
+    background: #6C63FF !important;
+    border-color: #6C63FF !important;
+}
+
+/* ----- Fix Recent Activity Feed Sidebar ----- */
+.sidebar-view .friend-item .friend-name,
+.sidebar-view .friend-item .friend-status,
+.sidebar-view .friend-item .friend-info {
+    color: #c0c0d0 !important;
+}
+
+.sidebar-view .friend-item .friend-name {
+    color: #a0a0d0 !important;
+    font-weight: 600 !important;
+}
+
+.sidebar-view .friend-item .friend-status {
+    color: #8888aa !important;
+}
+
+.sidebar-view .status-group-label {
+    color: #6a6a8a !important;
+    border-bottom-color: #1e1e38 !important;
+}
+
+.sidebar-view .friend-item:hover .friend-name {
+    color: #e0e0e0 !important;
+}
+
+/* ----- Fix Status Colors Across All Pages ----- */
+/* Profile Status */
+.xp-profile-status {
+    color: #4ade80 !important;
+}
+.xp-profile-status.idle {
+    color: #fbbf24 !important;
+}
+.xp-profile-status.dnd {
+    color: #ef4444 !important;
+}
+.xp-profile-status.offline {
+    color: #6b7280 !important;
+}
+
+/* Friend Status in Sidebar */
+.friend-status {
+    color: #4ade80 !important;
+}
+.friend-status.idle {
+    color: #fbbf24 !important;
+}
+.friend-status.dnd {
+    color: #ef4444 !important;
+}
+.friend-status.offline {
+    color: #6b7280 !important;
+}
+
+/* Mini Profile Status */
+.mini-profile-status {
+    color: #4ade80 !important;
+}
+.mini-profile-status.idle {
+    color: #fbbf24 !important;
+}
+.mini-profile-status.dnd {
+    color: #ef4444 !important;
+}
+.mini-profile-status.offline {
+    color: #6b7280 !important;
+}
+
+/* Right Sidebar Status */
+.right-profile-status {
+    color: #4ade80 !important;
+}
+.right-profile-status.idle {
+    color: #fbbf24 !important;
+}
+.right-profile-status.dnd {
+    color: #ef4444 !important;
+}
+.right-profile-status.offline {
+    color: #6b7280 !important;
+}
+
+/* Chat Status */
+.chat-status-xp {
+    color: #4ade80 !important;
+}
+.chat-status-xp.idle {
+    color: #fbbf24 !important;
+}
+.chat-status-xp.dnd {
+    color: #ef4444 !important;
+}
+.chat-status-xp.offline {
+    color: #6b7280 !important;
+}
+
+/* Popup Status */
+.popup-status {
+    color: #4ade80 !important;
+}
+.popup-status.idle {
+    color: #fbbf24 !important;
+}
+.popup-status.dnd {
+    color: #ef4444 !important;
+}
+.popup-status.offline {
+    color: #6b7280 !important;
+}
+
+/* ----- Fix Status Dropdown Menu ----- */
+.status-option {
+    color: #c0c0d0 !important;
+}
+.status-option:hover {
+    background: #1a1a32 !important;
+    color: #e0e0e0 !important;
+}
+.status-option .status-label {
+    color: #e0e0e0 !important;
+}
+
+/* ----- Fix Recent Activity Post Previews ----- */
+.sidebar-view .friend-item .friend-info .friend-name {
+    color: #a0a0d0 !important;
+}
+.sidebar-view .friend-item .friend-info .friend-status {
+    color: #8888aa !important;
+}
+
+/* ----- Fix "No activity yet" text ----- */
+.sidebar-view p {
+    color: #6a6a8a !important;
+}
+
+/* ----- Fix Status Ring Colors ----- */
+.status-ring.online {
+    background: #4ade80 !important;
+    box-shadow: 0 0 6px rgba(74, 222, 128, 0.3) !important;
+}
+.status-ring.idle {
+    background: #fbbf24 !important;
+    box-shadow: 0 0 6px rgba(251, 191, 36, 0.3) !important;
+}
+.status-ring.dnd {
+    background: #ef4444 !important;
+    box-shadow: 0 0 6px rgba(239, 68, 68, 0.3) !important;
+}
+.status-ring.offline {
+    background: #6b7280 !important;
+}
+
+/* ----- Fix Status Text in Settings Dropdown ----- */
+.settings-group .status-option {
+    color: #c0c0d0 !important;
+}
+.settings-group .status-option:hover {
+    color: #e0e0e0 !important;
+}
+
+/* ----- Fix Direct Messages Status in Sidebar ----- */
+.friend-item .friend-status {
+    color: #4ade80 !important;
+}
+.friend-item .friend-status.idle {
+    color: #fbbf24 !important;
+}
+.friend-item .friend-status.dnd {
+    color: #ef4444 !important;
+}
+.friend-item .friend-status.offline {
+    color: #6b7280 !important;
+}

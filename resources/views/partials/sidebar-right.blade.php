@@ -1,10 +1,18 @@
 <aside class="right-sidebar">
     <!-- Profile Avatar -->
-    <div class="right-profile-avatar">{{ Auth::user()->name[0] ?? '?' }}</div>
+    <div class="right-profile-avatar">
+        @if(Auth::user()->profile && Auth::user()->profile->avatar)
+            <img src="{{ asset('storage/' . Auth::user()->profile->avatar) }}" alt="Avatar" style="width: 72px; height: 72px; border-radius: 50%; object-fit: cover;">
+        @else
+            {{ Auth::user()->name[0] ?? '?' }}
+        @endif
+    </div>
     
     <!-- Profile Name & Status -->
     <div class="right-profile-name">{{ Auth::user()->display_name }}</div>
-    <div class="right-profile-status">Online</div>
+    <div class="right-profile-status" style="color: {{ Auth::user()->getStatusColor() }};">
+        {{ Auth::user()->getStatusLabel() }}
+    </div>
     <div class="right-profile-bio">{{ Auth::user()->profile->bio ?? 'Welcome to AetherCore!' }}</div>
 
     <hr class="right-profile-divider">

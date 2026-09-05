@@ -6,6 +6,9 @@ use App\Http\Controllers\FeedController;
 use App\Http\Controllers\FriendController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ConversationController;
+use App\Http\Controllers\StatusController;
+use App\Http\Controllers\SettingsController;
+
 
 // ============================================
 // AUTH ROUTES (Breeze)
@@ -40,6 +43,16 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::get('/profile/{user}', [ProfileController::class, 'show'])->name('profile.show');
     Route::post('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
+    Route::post('/status/update', [StatusController::class, 'update'])->name('status.update');
+
+    // ---------- SETTINGS ----------
+    Route::middleware(['auth'])->group(function () {
+    Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+    Route::post('/settings/account', [SettingsController::class, 'updateAccount'])->name('settings.account');
+    Route::post('/settings/theme', [SettingsController::class, 'updateTheme'])->name('settings.theme');
+    Route::post('/settings/lastfm', [SettingsController::class, 'connectLastfm'])->name('settings.lastfm');
+    Route::delete('/settings/delete', [SettingsController::class, 'deleteAccount'])->name('settings.delete');
+});
 
     // ---------- FEED ----------
     Route::get('/feed', [FeedController::class, 'index'])->name('feed');

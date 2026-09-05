@@ -6,7 +6,14 @@
 <!-- ===== CREATE POST ===== -->
 <div class="card">
     <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
-        <div class="post-avatar">{{ Auth::user()->name[0] ?? '?' }}</div>
+        <!-- Your Avatar (logged-in user) -->
+        <div class="post-avatar">
+            @if(Auth::user()->getAvatarUrl())
+                <img src="{{ Auth::user()->getAvatarUrl() }}" alt="Avatar" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+            @else
+                {{ Auth::user()->name[0] ?? '?' }}
+            @endif
+        </div>
         <form action="{{ route('posts.store') }}" method="POST" style="flex: 1;">
             @csrf
             <textarea name="content" class="settings-input" rows="2" placeholder="What's on your mind, {{ Auth::user()->display_name }}?" style="resize: none;"></textarea>
@@ -27,7 +34,14 @@
     @forelse($feedPosts as $post)
         <div class="post-item">
             <div class="post-header">
-                <div class="post-avatar">{{ $post->user->name[0] }}</div>
+                <!-- Post Author Avatar -->
+                <div class="post-avatar">
+                    @if($post->user->getAvatarUrl())
+                        <img src="{{ $post->user->getAvatarUrl() }}" alt="Avatar" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+                    @else
+                        {{ $post->user->name[0] }}
+                    @endif
+                </div>
                 <span class="post-user">{{ $post->user->display_name }}</span>
                 <span class="post-time">{{ $post->created_at->diffForHumans() }}</span>
             </div>

@@ -8,10 +8,18 @@
     <!-- ===== CHAT HEADER ===== -->
     <div class="chat-header-xp">
         <div class="chat-header-left">
-            <div class="chat-avatar-xp">{{ $otherUser->name[0] }}</div>
+            <div class="chat-avatar-xp">
+                @if($otherUser->profile && $otherUser->profile->avatar)
+                    <img src="{{ asset('storage/' . $otherUser->profile->avatar) }}" alt="Avatar" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                @else
+                    {{ $otherUser->name[0] }}
+                @endif
+            </div>
             <div>
                 <div class="chat-name-xp">{{ $otherUser->display_name }}</div>
-                <div class="chat-status-xp">🟢 Online</div>
+                <div class="chat-status-xp" style="color: {{ $otherUser->getStatusColor() }};">
+                    {{ $otherUser->getStatusLabel() }}
+                </div>
             </div>
         </div>
         <div class="chat-header-right">
@@ -42,7 +50,13 @@
 
             <!-- Message (EVERY message shows avatar, name, time, and content) -->
             <div class="chat-message-xp">
-                <div class="msg-avatar-xp">{{ $message->user->name[0] }}</div>
+                <div class="msg-avatar-xp">
+                    @if($message->user->profile && $message->user->profile->avatar)
+                        <img src="{{ asset('storage/' . $message->user->profile->avatar) }}" alt="Avatar" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover;">
+                    @else
+                        {{ $message->user->name[0] }}
+                    @endif
+                </div>
                 <div class="msg-bubble-xp">
                     <div class="msg-header-xp">
                         <span class="msg-username-xp">{{ $message->user->display_name }}</span>

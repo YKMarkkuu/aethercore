@@ -5,8 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AetherCore - @yield('title', 'Home')</title>
     
-    <!-- CSS -->
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+        <!-- CSS -->
+    <link rel="stylesheet" href="{{ asset('css/base.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/components.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/utilities.css') }}">
+
+    @if(Auth::check() && Auth::user()->theme && Auth::user()->theme !== 'aethercore')
+        <link rel="stylesheet" href="{{ asset('css/themes/' . Auth::user()->theme . '.css') }}">
+    @endif
 </head>
 <body>
     <div class="app">
@@ -46,55 +52,86 @@
 
             <!-- RIGHT SIDEBAR -->
             @include('partials.sidebar-right')
+
+            <!-- SETTINGS MODAL -->
+            @include('partials.settings-modal')
         </div>
     </div>
-
-    <!-- SETTINGS MODAL -->
-    @include('partials.settings-modal')
 
     <script>
         let currentMode = 'aether';
         let currentView = 'feed';
 
-        // ===== SET VIEW FROM URL =====
-        function setViewFromUrl() {
-            const path = window.location.pathname;
-            
-            if (path === '/feed' || path === '/') {
-                currentView = 'feed';
-            } else if (path === '/spaces') {
-                currentView = 'spaces';
-            } else if (path === '/friends') {
-                currentView = 'friends';
-            } else if (path === '/profile' || path.startsWith('/profile/')) {
-                return;
-            } else if (path === '/conversations' || path.startsWith('/conversations/')) {
-                return;
-            } else {
-                currentView = 'feed';
-            }
-            
-            // Update sidebar view
+        // ===== STORE/LOAD SIDEBAR VIEW =====
+        function saveView(view) {
+            localStorage.setItem('sidebar_view', view);
+        }
+
+        function loadView() {
+            return localStorage.getItem('sidebar_view') || 'feed';
+        }
+
+        // ===== UPDATE SIDEBAR VIEW =====
+        function updateSidebarView(view) {
             document.getElementById('view-feed').classList.add('hidden');
             document.getElementById('view-spaces').classList.add('hidden');
             document.getElementById('view-friends').classList.add('hidden');
             
-            const viewElement = document.getElementById('view-' + currentView);
+            const viewElement = document.getElementById('view-' + view);
             if (viewElement) {
                 viewElement.classList.remove('hidden');
             }
             
-            // Update active tab
             document.querySelectorAll('.sidebar-tab').forEach(tab => {
                 tab.classList.remove('active');
             });
             
             document.querySelectorAll('.sidebar-tab').forEach(tab => {
                 const tabText = tab.textContent.toLowerCase();
-                if (tabText.includes(currentView) ||
-                    (currentView === 'feed' && tabText.includes('feed')) ||
-                    (currentView === 'spaces' && tabText.includes('spaces')) ||
-                    (currentView === 'friends' && tabText.includes('friends'))) {
+                if (tabText.includes(view)) {
+                    tab.classList.add('active');
+                }
+            });
+        }
+
+        // ===== SET VIEW FROM URL (ONLY ON PAGE LOAD) =====
+        function setViewFromUrl() {
+            const path = window.location.pathname;
+            
+            // Only change the sidebar view if we're on a main navigation page
+            if (path === '/feed' || path === '/') {
+                currentView = 'feed';
+                saveView('feed');
+                updateSidebarView('feed');
+            } else if (path === '/spaces') {
+                currentView = 'spaces';
+                saveView('spaces');
+                updateSidebarView('spaces');
+            } else if (path === '/friends') {
+                currentView = 'friends';
+                saveView('friends');
+                updateSidebarView('friends');
+            }
+            // On profile, chat, settings, or any other page, DON'T change the sidebar view
+        }
+
+        // ===== VIEW SWITCHING (User clicks tabs) =====
+        function switchView(view) {
+            currentView = view;
+            saveView(view);
+
+            document.getElementById('view-feed').classList.add('hidden');
+            document.getElementById('view-spaces').classList.add('hidden');
+            document.getElementById('view-friends').classList.add('hidden');
+
+            document.getElementById('view-' + view).classList.remove('hidden');
+
+            document.querySelectorAll('.sidebar-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            document.querySelectorAll('.sidebar-tab').forEach(tab => {
+                if (tab.textContent.toLowerCase().includes(view)) {
                     tab.classList.add('active');
                 }
             });
@@ -122,15 +159,19 @@
                 document.getElementById('sidebar-music').classList.add('hidden');
                 
                 const path = window.location.pathname;
-                const validSocialPages = ['/feed', '/spaces', '/friends', '/profile', '/conversations'];
+                const validSocialPages = ['/feed', '/spaces', '/friends', '/profile', '/conversations', '/settings'];
                 const isProfilePage = path.startsWith('/profile/');
                 const isConversationPage = path.startsWith('/conversations/');
+                const isSettingsPage = path === '/settings' || path.startsWith('/settings/');
                 
-                if (!validSocialPages.includes(path) && !isProfilePage && !isConversationPage) {
+                // Only redirect if we're on a completely unknown page
+                if (!validSocialPages.includes(path) && !isProfilePage && !isConversationPage && !isSettingsPage) {
                     window.location.href = '/feed';
-                } else {
-                    setViewFromUrl();
                 }
+                // Restore the sidebar view from localStorage
+                const savedView = loadView();
+                currentView = savedView;
+                updateSidebarView(savedView);
             } else {
                 aetherBtn.classList.remove('active');
                 musicBtn.classList.add('active');
@@ -150,27 +191,6 @@
             }
         }
 
-        // ===== VIEW SWITCHING =====
-        function switchView(view) {
-            currentView = view;
-
-            document.getElementById('view-feed').classList.add('hidden');
-            document.getElementById('view-spaces').classList.add('hidden');
-            document.getElementById('view-friends').classList.add('hidden');
-
-            document.getElementById('view-' + view).classList.remove('hidden');
-
-            document.querySelectorAll('.sidebar-tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-
-            document.querySelectorAll('.sidebar-tab').forEach(tab => {
-                if (tab.textContent.toLowerCase().includes(view)) {
-                    tab.classList.add('active');
-                }
-            });
-        }
-
         // ===== MINI PROFILE POPUP =====
         function toggleProfilePopup() {
             const popup = document.getElementById('profilePopup');
@@ -188,56 +208,71 @@
             }
         });
 
-        // ===== SETTINGS MODAL =====
-        function openSettings() {
-            const modal = document.getElementById('settingsModal');
-            if (modal) {
-                modal.classList.remove('hidden');
-                const popup = document.getElementById('profilePopup');
-                if (popup) {
-                    popup.classList.add('hidden');
-                }
-            }
+        // ===== STATUS MENU =====
+        function toggleStatusMenu() {
+            const menu = document.getElementById('statusMenu');
+            menu.classList.toggle('hidden');
         }
 
-        function closeSettings() {
-            const modal = document.getElementById('settingsModal');
-            if (modal) {
-                modal.classList.add('hidden');
-            }
-        }
-
-        // ===== SETTINGS TAB SWITCHING =====
-        function switchSettingsTab(tab) {
-            document.querySelectorAll('.settings-tab').forEach(t => {
-                t.classList.add('hidden');
-            });
-            
-            document.getElementById('settings-' + tab).classList.remove('hidden');
-            
-            document.querySelectorAll('.settings-nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            
-            document.querySelectorAll('.settings-nav-item').forEach(item => {
-                if (item.textContent.toLowerCase().includes(tab)) {
-                    item.classList.add('active');
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('statusMenu');
+            const button = document.querySelector('.popup-status-menu .popup-action');
+            if (menu && button) {
+                if (!menu.classList.contains('hidden')) {
+                    if (!menu.contains(event.target) && !button.contains(event.target)) {
+                        menu.classList.add('hidden');
+                    }
                 }
-            });
-        }
+            }
+        });
 
         // ===== ON PAGE LOAD =====
         document.addEventListener('DOMContentLoaded', function() {
             const currentPath = window.location.pathname;
             
+            // Restore the sidebar view from localStorage
+            const savedView = loadView();
+            currentView = savedView;
+            updateSidebarView(savedView);
+            
+            // Handle mode switching
             if (currentPath === '/music') {
                 switchMode('music');
             } else {
                 switchMode('aether');
             }
             
-            setViewFromUrl();
+            // Only set the sidebar view on main navigation pages
+            const isChatPage = currentPath === '/conversations' || currentPath.startsWith('/conversations/');
+            const isProfilePage = currentPath === '/profile' || currentPath.startsWith('/profile/');
+            const isSettingsPage = currentPath === '/settings' || currentPath.startsWith('/settings/');
+            const isMainPage = currentPath === '/feed' || currentPath === '/' || currentPath === '/spaces' || currentPath === '/friends';
+            
+            if (isMainPage && !isChatPage && !isProfilePage && !isSettingsPage) {
+                setViewFromUrl();
+            }
+            // On chat, profile, settings pages, the sidebar stays as-is
         });
+
+        // ===== SETTINGS MODAL =====
+        function openSettingsModal() {
+            document.getElementById('settingsModal').classList.remove('hidden');
+            const popup = document.getElementById('profilePopup');
+            if (popup) popup.classList.add('hidden');
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsModal').classList.add('hidden');
+        }
+
+        function switchSettingsTab(tab) {
+            document.querySelectorAll('.settings-tab').forEach(t => t.classList.add('hidden'));
+            document.getElementById('settings-' + tab).classList.remove('hidden');
+            document.querySelectorAll('.settings-nav-item').forEach(item => item.classList.remove('active'));
+            document.querySelectorAll('.settings-nav-item').forEach(item => {
+                if (item.textContent.toLowerCase().includes(tab)) item.classList.add('active');
+            });
+        }
     </script>
         @stack('scripts')
 </body>
