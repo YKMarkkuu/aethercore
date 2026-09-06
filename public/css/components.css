@@ -739,6 +739,10 @@
 
 .xp-top8-item {
     text-align: center;
+    min-width: 0; /* allows the grid track to shrink below the untruncated
+                     title's natural width, so text-overflow: ellipsis on
+                     .xp-top8-name actually takes effect and all 4 columns
+                     stay equal width instead of stretching to fit long titles */
 }
 
 .xp-top8-thumb {
