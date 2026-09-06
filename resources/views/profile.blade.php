@@ -258,6 +258,37 @@
                 </div>
             </div>
 
+            <!-- ===== TOP 8 PERIOD SELECTOR ===== -->
+            <!-- Owner-controlled: applies to everyone viewing this profile -->
+            <div class="xp-panel">
+                <div class="xp-panel-body" style="padding: 0.3rem 0.4rem; display: flex; align-items: center; gap: 0.5rem;">
+                    @php
+                        $periods = [
+                            'overall' => 'All Time',
+                            '12month' => 'Last 365 Days',
+                            '6month'  => 'Last 180 Days',
+                            '3month'  => 'Last 90 Days',
+                            '1month'  => 'Last 30 Days',
+                            '7day'    => 'Last 7 Days',
+                        ];
+                        $currentPeriod = $user->profile->stats_period ?? 'overall';
+                    @endphp
+                    <span style="font-size: 0.6rem; color: #6a6a6a; white-space: nowrap;">Stats period:</span>
+                    @if(auth()->id() === $user->id)
+                        <form action="{{ route('profile.stats-period') }}" method="POST" style="flex: 1;">
+                            @csrf
+                            <select name="period" class="settings-input" style="font-size: 0.7rem;" onchange="this.form.submit()">
+                                @foreach($periods as $value => $label)
+                                    <option value="{{ $value }}" @selected($currentPeriod === $value)>{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </form>
+                    @else
+                        <span style="font-size: 0.7rem; font-weight: 600; color: #1e1e1e;">{{ $periods[$currentPeriod] ?? 'All Time' }}</span>
+                    @endif
+                </div>
+            </div>
+
             <!-- ===== TOP 8 ARTISTS ===== -->
             <div class="xp-panel">
                 <div class="xp-panel-header">🎵 Top 8 Artists</div>
@@ -288,6 +319,7 @@
                                         @endif
                                     </div>
                                     <div class="xp-top8-name">{{ $artist['name'] }}</div>
+                                    <div class="xp-top8-scrobbles">{{ number_format($artist['playcount'] ?? 0) }} scrobbles</div>
                                 </div>
                             @endforeach
                         </div>
@@ -326,6 +358,7 @@
                                     </div>
                                     <div class="xp-top8-name">{{ $album['name'] }}</div>
                                     <div class="xp-top8-subtext">{{ $album['artist'] ?? 'Unknown Artist' }}</div>
+                                    <div class="xp-top8-scrobbles">{{ number_format($album['playcount'] ?? 0) }} scrobbles</div>
                                 </div>
                             @endforeach
                         </div>
@@ -365,6 +398,7 @@
                                     </div>
                                     <div class="xp-top8-name">{{ $song['name'] }}</div>
                                     <div class="xp-top8-subtext">{{ $song['artist'] ?? 'Unknown Artist' }}</div>
+                                    <div class="xp-top8-scrobbles">{{ number_format($song['playcount'] ?? 0) }} scrobbles</div>
                                 </div>
                             @endforeach
                         </div>

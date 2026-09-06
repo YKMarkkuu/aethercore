@@ -44,6 +44,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile/{user}', [ProfileController::class, 'show'])->name('profile.show');
     Route::post('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
     Route::post('/status/update', [StatusController::class, 'update'])->name('status.update');
+    Route::post('/profile/stats-period', [ProfileController::class, 'updateStatsPeriod'])->name('profile.stats-period');
 
     // ---------- SETTINGS ----------
     Route::middleware(['auth'])->group(function () {

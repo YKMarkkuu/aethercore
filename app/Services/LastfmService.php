@@ -17,8 +17,10 @@ class LastfmService
 
     /**
      * Fetch Top Artists directly from Last.fm (no cache)
+     *
+     * @param string $period overall|7day|1month|3month|6month|12month
      */
-    public function getTopArtistsDirect($username, $limit = 8)
+    public function getTopArtistsDirect($username, $limit = 8, $period = 'overall')
     {
         $url = $this->baseUrl . '?' . http_build_query([
             'method' => 'user.getTopArtists',
@@ -26,6 +28,7 @@ class LastfmService
             'api_key' => $this->apiKey,
             'format' => 'json',
             'limit' => $limit,
+            'period' => $period,
         ]);
 
         $response = Http::get($url);
@@ -45,6 +48,7 @@ class LastfmService
             $result[] = [
                 'name' => $artist['name'],
                 'image' => $this->getImage($artist['image'] ?? []),
+                'playcount' => (int) ($artist['playcount'] ?? 0),
             ];
         }
 
@@ -53,8 +57,10 @@ class LastfmService
 
     /**
      * Fetch Top Tracks directly from Last.fm (no cache)
+     *
+     * @param string $period overall|7day|1month|3month|6month|12month
      */
-    public function getTopTracksDirect($username, $limit = 8)
+    public function getTopTracksDirect($username, $limit = 8, $period = 'overall')
     {
         $url = $this->baseUrl . '?' . http_build_query([
             'method' => 'user.getTopTracks',
@@ -62,6 +68,7 @@ class LastfmService
             'api_key' => $this->apiKey,
             'format' => 'json',
             'limit' => $limit,
+            'period' => $period,
         ]);
 
         $response = Http::get($url);
@@ -89,8 +96,9 @@ class LastfmService
             
             $result[] = [
                 'name' => $track['name'],
-                'artist' => $track['artist']['name'] ?? 'Unknown Artist',
+                'artist' => $this->extractArtistName($track['artist'] ?? null),
                 'image' => $image,
+                'playcount' => (int) ($track['playcount'] ?? 0),
             ];
         }
 
@@ -99,8 +107,10 @@ class LastfmService
 
     /**
      * Fetch Top Albums directly from Last.fm (no cache)
+     *
+     * @param string $period overall|7day|1month|3month|6month|12month
      */
-    public function getTopAlbumsDirect($username, $limit = 8)
+    public function getTopAlbumsDirect($username, $limit = 8, $period = 'overall')
     {
         $url = $this->baseUrl . '?' . http_build_query([
             'method' => 'user.getTopAlbums',
@@ -108,6 +118,7 @@ class LastfmService
             'api_key' => $this->apiKey,
             'format' => 'json',
             'limit' => $limit,
+            'period' => $period,
         ]);
 
         $response = Http::get($url);
@@ -126,8 +137,9 @@ class LastfmService
         foreach ($data['topalbums']['album'] as $album) {
             $result[] = [
                 'name' => $album['name'],
-                'artist' => $album['artist']['name'] ?? 'Unknown Artist',
+                'artist' => $this->extractArtistName($album['artist'] ?? null),
                 'image' => $this->getImage($album['image'] ?? []),
+                'playcount' => (int) ($album['playcount'] ?? 0),
             ];
         }
 
@@ -176,6 +188,25 @@ class LastfmService
             'is_now_playing' => $isNowPlaying,
             'image' => $image,
         ];
+    }
+
+    /**
+     * Extract an artist name from a Last.fm 'artist' field, which is
+     * normally an object ({"name": "...", ...}) but occasionally comes
+     * back as a plain string depending on the endpoint/edge case. Handles
+     * both so "Unknown Artist" only shows when the data is truly missing.
+     */
+    private function extractArtistName($artistField): string
+    {
+        if (is_array($artistField) && !empty($artistField['name'])) {
+            return $artistField['name'];
+        }
+
+        if (is_string($artistField) && $artistField !== '') {
+            return $artistField;
+        }
+
+        return 'Unknown Artist';
     }
 
     /**

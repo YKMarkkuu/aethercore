@@ -18,7 +18,12 @@ use Illuminate\Support\Facades\Cache;
 class ProfileController extends Controller
 {
     // ===== AETHERCORE CUSTOM METHODS =====
-    
+
+    /**
+     * Valid Last.fm chart periods, used to guard against garbage query strings.
+     */
+    protected const VALID_PERIODS = ['overall', '7day', '1month', '3month', '6month', '12month'];
+
     /**
      * Display the logged-in user's profile.
      */
@@ -49,6 +54,8 @@ class ProfileController extends Controller
                         ->get();
 
         // ===== LAST.FM DATA =====
+        // Period always comes from the profile owner's saved preference,
+        // never a visitor's query string — see fetchLastFmData().
         $lastfmData = $this->fetchLastFmData($user);
 
         $user->lastfm_data = $lastfmData;
@@ -86,6 +93,8 @@ class ProfileController extends Controller
                         ->get();
 
         // ===== LAST.FM DATA =====
+        // Period always comes from the profile owner's saved preference,
+        // never a visitor's query string — see fetchLastFmData().
         $lastfmData = $this->fetchLastFmData($user);
 
         $user->lastfm_data = $lastfmData;
@@ -94,15 +103,67 @@ class ProfileController extends Controller
     }
 
     /**
-     * Fetch Last.fm data for a user
+     * Let the profile OWNER change which Last.fm chart period shows on
+     * their profile — this applies to everyone who views it, not just
+     * the owner. The dropdown that posts here is only ever rendered in
+     * the blade template for auth()->id() === $user->id, so a visitor
+     * has no UI path to this route, but it's also behind the auth
+     * middleware in routes/web.php as a second layer of protection.
+     */
+    public function updateStatsPeriod(Request $request)
+    {
+        $request->validate([
+            'period' => 'required|string',
+        ]);
+
+        $period = in_array($request->period, self::VALID_PERIODS, true)
+            ? $request->period
+            : 'overall';
+
+        $user = auth()->user();
+        $profile = $user->profile;
+
+        if (!$profile) {
+            $profile = new \App\Models\Profile();
+            $profile->user_id = $user->id;
+        }
+
+        $profile->stats_period = $period;
+        $profile->save();
+
+        return redirect()->back();
+    }
+
+    /**
+     * Fetch Last.fm data for a user.
+     *
+     * NOTE: LastfmService already fully normalizes each item (flattens
+     * artist to a plain string, resolves the final 300x300 image URL,
+     * falls back to album art for tracks without their own image, and
+     * includes playcount). This method used to re-process that output
+     * with its own duplicate extractImage()/artist-name logic, which
+     * assumed the raw un-flattened Last.fm shape — e.g. doing
+     * $album['artist']['name'] on a value that was already just a
+     * string, which silently always fell through to 'Unknown Artist'.
+     * We now just pass the service's output straight through.
+     *
+     * The period is read from $user->profile->stats_period — i.e. the
+     * PROFILE OWNER'S saved choice — regardless of who is viewing the
+     * page, so everyone sees the same window the owner picked.
      */
     protected function fetchLastFmData($user)
     {
+        $period = $user->profile->stats_period ?? 'overall';
+        if (!in_array($period, self::VALID_PERIODS, true)) {
+            $period = 'overall';
+        }
+
         $lastfmData = [
             'top_artists' => [],
             'top_songs' => [],
             'top_albums' => [],
             'now_playing' => null,
+            'period' => $period,
         ];
 
         if (!$user->lastfm_username) {
@@ -111,60 +172,32 @@ class ProfileController extends Controller
 
         try {
             $lastfm = new LastfmService();
-            
-            // Fetch artists
-            $artists = $lastfm->getTopArtistsDirect($user->lastfm_username, 8);
+
+            $artists = $lastfm->getTopArtistsDirect($user->lastfm_username, 8, $period);
             if ($artists && is_array($artists)) {
-                $lastfmData['top_artists'] = array_slice(array_map(function($artist) {
-                    return [
-                        'name' => $artist['name'] ?? 'Unknown Artist',
-                        'image' => $this->extractImage($artist['image'] ?? [])
-                    ];
-                }, $artists), 0, 8);
+                $lastfmData['top_artists'] = array_slice($artists, 0, 8);
             }
-            
-            // Fetch tracks - with better image extraction
-            $tracks = $lastfm->getTopTracksDirect($user->lastfm_username, 8);
+
+            $tracks = $lastfm->getTopTracksDirect($user->lastfm_username, 8, $period);
             if ($tracks && is_array($tracks)) {
-                $lastfmData['top_songs'] = array_slice(array_map(function($track) {
-                    // Try to get album image if track image is empty
-                    $image = $this->extractImage($track['image'] ?? []);
-                    
-                    // If no track image, try to get album art from the album data
-                    if (!$image && isset($track['album']) && isset($track['album']['image'])) {
-                        $image = $this->extractImage($track['album']['image']);
-                    }
-                    
-                    return [
-                        'name' => $track['name'] ?? 'Unknown Track',
-                        'artist' => $track['artist']['name'] ?? 'Unknown Artist',
-                        'image' => $image
-                    ];
-                }, $tracks), 0, 8);
+                $lastfmData['top_songs'] = array_slice($tracks, 0, 8);
             }
-            
-            // Fetch albums - with better image extraction
-            $albums = $lastfm->getTopAlbumsDirect($user->lastfm_username, 8);
+
+            $albums = $lastfm->getTopAlbumsDirect($user->lastfm_username, 8, $period);
             if ($albums && is_array($albums)) {
-                $lastfmData['top_albums'] = array_slice(array_map(function($album) {
-                    return [
-                        'name' => $album['name'] ?? 'Unknown Album',
-                        'artist' => $album['artist']['name'] ?? 'Unknown Artist',
-                        'image' => $this->extractImage($album['image'] ?? [])
-                    ];
-                }, $albums), 0, 8);
+                $lastfmData['top_albums'] = array_slice($albums, 0, 8);
             }
-            
-            // Fetch now playing
+
+            // Now playing is always "right now", so it isn't affected by period
             $nowPlaying = $lastfm->getNowPlaying($user->lastfm_username);
-            if ($nowPlaying && isset($nowPlaying['is_now_playing']) && $nowPlaying['is_now_playing']) {
+            if ($nowPlaying && !empty($nowPlaying['is_now_playing'])) {
                 $lastfmData['now_playing'] = [
                     'name' => $nowPlaying['name'] ?? 'Unknown Track',
-                    'artist' => $nowPlaying['artist']['name'] ?? 'Unknown Artist',
-                    'image' => $this->extractImage($nowPlaying['image'] ?? [])
+                    'artist' => $nowPlaying['artist'] ?? 'Unknown Artist',
+                    'image' => $nowPlaying['image'] ?? null,
                 ];
             }
-            
+
         } catch (\Exception $e) {
             // Silent fail - just return empty data
             \Log::warning('Last.fm fetch failed for user: ' . ($user->lastfm_username ?? 'unknown'), [
@@ -173,58 +206,6 @@ class ProfileController extends Controller
         }
 
         return $lastfmData;
-    }
-
-    /**
-     * Extract the best available image from Last.fm response.
-     * Improved to handle all Last.fm image formats consistently.
-     */
-    protected function extractImage($images)
-    {
-        if (empty($images)) {
-            return null;
-        }
-
-        // If it's a string URL, return it directly
-        if (is_string($images) && filter_var($images, FILTER_VALIDATE_URL)) {
-            return $images;
-        }
-
-        // If it's a simple array of URLs
-        if (isset($images[0]) && is_string($images[0]) && filter_var($images[0], FILTER_VALIDATE_URL)) {
-            return $images[0];
-        }
-
-        // Handle Last.fm format with size keys
-        if (is_array($images)) {
-            $prioritySizes = ['extralarge', 'large', 'medium', 'small'];
-            
-            foreach ($prioritySizes as $sizeKey) {
-                // Check for keyed array format
-                if (isset($images[$sizeKey]) && !empty($images[$sizeKey])) {
-                    return $images[$sizeKey];
-                }
-                
-                // Check for indexed array with size keys
-                foreach ($images as $img) {
-                    if (is_array($img) && isset($img['size']) && $img['size'] === $sizeKey && !empty($img['#text'])) {
-                        return $img['#text'];
-                    }
-                }
-            }
-            
-            // Fallback: return first valid URL from the array
-            foreach ($images as $img) {
-                if (is_array($img) && isset($img['#text']) && !empty($img['#text'])) {
-                    return $img['#text'];
-                }
-                if (is_string($img) && !empty($img) && filter_var($img, FILTER_VALIDATE_URL)) {
-                    return $img;
-                }
-            }
-        }
-
-        return null;
     }
 
     // ===== LARAVEL DEFAULT METHODS (from Breeze) - REDIRECTED =====

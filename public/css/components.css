@@ -804,6 +804,14 @@
     text-overflow: ellipsis;
 }
 
+.xp-top8-scrobbles {
+    font-size: 0.48rem;
+    color: #9a9488;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .xp-top8-empty {
     font-size: 0.6rem;
     color: #6a6a6a;
