@@ -45,9 +45,17 @@ class LastfmService
 
         $result = [];
         foreach ($data['topartists']['artist'] as $artist) {
+            $image = $this->getImage($artist['image'] ?? []);
+
+            // Last.fm never gives real artist photos anymore — fall back
+            // to Deezer for an actual picture.
+            if (!$image || $this->isPlaceholderImage($image)) {
+                $image = $this->getArtistImage($artist['name']);
+            }
+
             $result[] = [
                 'name' => $artist['name'],
-                'image' => $this->getImage($artist['image'] ?? []),
+                'image' => $image,
                 'playcount' => (int) ($artist['playcount'] ?? 0),
             ];
         }
@@ -85,6 +93,8 @@ class LastfmService
 
         $result = [];
         foreach ($data['toptracks']['track'] as $track) {
+            $trackArtist = $this->extractArtistName($track['artist'] ?? null);
+
             // Try to get image from track first, if not found (or it's just
             // Last.fm's placeholder star, which is now the norm for track
             // images) fall back to the album art instead.
@@ -93,10 +103,17 @@ class LastfmService
             if ((!$image || $this->isPlaceholderImage($image)) && isset($track['album']['image'])) {
                 $image = $this->getImage($track['album']['image']);
             }
+
+            // user.getTopTracks doesn't actually include album data at all
+            // (unlike user.getRecentTracks), so the fallback above almost
+            // never fires. Look up the real album art via track.getInfo.
+            if (!$image || $this->isPlaceholderImage($image)) {
+                $image = $this->getTrackAlbumArt($trackArtist, $track['name']);
+            }
             
             $result[] = [
                 'name' => $track['name'],
-                'artist' => $this->extractArtistName($track['artist'] ?? null),
+                'artist' => $trackArtist,
                 'image' => $image,
                 'playcount' => (int) ($track['playcount'] ?? 0),
             ];
@@ -207,6 +224,85 @@ class LastfmService
         }
 
         return 'Unknown Artist';
+    }
+
+    /**
+     * Get a real artist photo from Deezer's public search API (free, no
+     * key required), since Last.fm intentionally no longer serves real
+     * artist images through ANY of its own endpoints (not just top
+     * artists — artist.getInfo is the same). Cached for a week since
+     * artist photos rarely change, and the cache key is just the artist
+     * name, so it's shared across every user of the app.
+     */
+    public function getArtistImage(string $artistName): ?string
+    {
+        if (empty($artistName)) {
+            return null;
+        }
+
+        $cacheKey = 'artist_image:' . md5(strtolower($artistName));
+
+        return Cache::remember($cacheKey, now()->addDays(7), function () use ($artistName) {
+            try {
+                $response = Http::timeout(5)->get('https://api.deezer.com/search/artist', [
+                    'q' => $artistName,
+                    'limit' => 1,
+                ]);
+
+                if ($response->failed()) {
+                    return null;
+                }
+
+                $data = $response->json();
+
+                return $data['data'][0]['picture_medium']
+                    ?? $data['data'][0]['picture']
+                    ?? null;
+            } catch (\Exception $e) {
+                return null;
+            }
+        });
+    }
+
+    /**
+     * Get real album art for a track via Last.fm's track.getInfo.
+     * user.getTopTracks (unlike user.getRecentTracks) doesn't include
+     * album data in its response at all, so there's nothing to fall
+     * back to without this extra lookup. Cached for a week per
+     * artist+track pair, shared across all users.
+     */
+    public function getTrackAlbumArt(string $artistName, string $trackName): ?string
+    {
+        if (empty($artistName) || empty($trackName)) {
+            return null;
+        }
+
+        $cacheKey = 'track_album_art:' . md5(strtolower($artistName . '|' . $trackName));
+
+        return Cache::remember($cacheKey, now()->addDays(7), function () use ($artistName, $trackName) {
+            try {
+                $url = $this->baseUrl . '?' . http_build_query([
+                    'method' => 'track.getInfo',
+                    'artist' => $artistName,
+                    'track' => $trackName,
+                    'api_key' => $this->apiKey,
+                    'format' => 'json',
+                ]);
+
+                $response = Http::timeout(5)->get($url);
+
+                if ($response->failed()) {
+                    return null;
+                }
+
+                $data = $response->json();
+                $image = $this->getImage($data['track']['album']['image'] ?? []);
+
+                return ($image && !$this->isPlaceholderImage($image)) ? $image : null;
+            } catch (\Exception $e) {
+                return null;
+            }
+        });
     }
 
     /**

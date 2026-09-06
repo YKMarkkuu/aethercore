@@ -29,6 +29,7 @@ class Profile extends Model
         'top_albums' => 'array',
         'top_friends' => 'array',
         'is_public' => 'boolean',
+        'top_friends' => 'array',
     ];
 
     public function user()

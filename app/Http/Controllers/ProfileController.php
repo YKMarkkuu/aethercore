@@ -60,7 +60,12 @@ class ProfileController extends Controller
 
         $user->lastfm_data = $lastfmData;
 
-        return view('profile', compact('user', 'feedPosts'));
+        // Friends available to pick for "Top 8 Friends" — this route is
+        // always the owner viewing their own profile, so $friendIds here
+        // is already the right list.
+        $availableFriends = User::whereIn('id', $friendIds)->get(['id', 'name']);
+
+        return view('profile', compact('user', 'feedPosts', 'availableFriends'));
     }
 
     /**
@@ -98,8 +103,14 @@ class ProfileController extends Controller
         $lastfmData = $this->fetchLastFmData($user);
 
         $user->lastfm_data = $lastfmData;
+
+        // Only needed if you're viewing your own profile via /profile/{you}
+        // rather than /profile — same idea as index() above.
+        $availableFriends = auth()->id() === $user->id
+            ? User::whereIn('id', $friendIds)->get(['id', 'name'])
+            : collect();
         
-        return view('profile', compact('user', 'feedPosts'));
+        return view('profile', compact('user', 'feedPosts', 'availableFriends'));
     }
 
     /**
@@ -132,6 +143,55 @@ class ProfileController extends Controller
         $profile->save();
 
         return redirect()->back();
+    }
+
+    /**
+     * Save the profile owner's chosen "Top 8 Friends". Only ever
+     * reachable by the authenticated user for their OWN profile — the
+     * picker only ever submits IDs from the auth user's own accepted
+     * friends list, and we re-validate that server-side too so a
+     * tampered request can't sneak in an arbitrary user ID.
+     */
+    public function updateTopFriends(Request $request)
+    {
+        $request->validate([
+            'friends' => 'nullable|array|max:8',
+            'friends.*' => 'integer',
+        ]);
+
+        $user = auth()->user();
+        $selected = $request->input('friends', []);
+
+        // Only allow IDs that are actually accepted friends of this user
+        $sentIds = DB::table('friendships')
+            ->where('user_id', $user->id)
+            ->where('status', 'accepted')
+            ->pluck('friend_id')
+            ->toArray();
+
+        $receivedIds = DB::table('friendships')
+            ->where('friend_id', $user->id)
+            ->where('status', 'accepted')
+            ->pluck('user_id')
+            ->toArray();
+
+        $friendIds = array_unique(array_merge($sentIds, $receivedIds));
+
+        $validSelected = array_values(array_intersect(
+            array_map('intval', $selected),
+            $friendIds
+        ));
+
+        $profile = $user->profile;
+        if (!$profile) {
+            $profile = new \App\Models\Profile();
+            $profile->user_id = $user->id;
+        }
+
+        $profile->top_friends = $validSelected;
+        $profile->save();
+
+        return redirect()->back()->with('success', 'Top 8 Friends updated!');
     }
 
     /**
@@ -276,6 +336,10 @@ class ProfileController extends Controller
         
         if ($request->has('bio')) {
             $profile->bio = $request->bio;
+        }
+        
+        if ($request->has('location')) {
+            $profile->location = $request->location;
         }
         
         if ($request->hasFile('avatar')) {

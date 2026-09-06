@@ -45,6 +45,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
     Route::post('/status/update', [StatusController::class, 'update'])->name('status.update');
     Route::post('/profile/stats-period', [ProfileController::class, 'updateStatsPeriod'])->name('profile.stats-period');
+    Route::post('/profile/top-friends', [ProfileController::class, 'updateTopFriends'])->name('profile.top-friends');
 
     // ---------- SETTINGS ----------
     Route::middleware(['auth'])->group(function () {

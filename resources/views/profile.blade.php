@@ -416,13 +416,21 @@
                 <div class="xp-panel-header" style="display: flex; justify-content: space-between; align-items: center; font-size: 0.65rem; padding: 0.2rem 0.6rem;">
                     <span>👥 Top 8 Friends</span>
                     @if(auth()->id() === $user->id)
-                        <button class="xp-edit-btn" onclick="alert('Edit Top 8 Friends coming soon!')" style="font-size: 0.5rem; padding: 0.05rem 0.5rem;">Edit</button>
+                        <button class="xp-edit-btn" onclick="toggleTopFriendsModal()" style="font-size: 0.5rem; padding: 0.05rem 0.5rem;">Edit</button>
                     @endif
                 </div>
                 <div class="xp-panel-body" style="padding: 0.3rem 0.4rem;">
                     @php
                         $topFriends = $user->profile->top_friends ?? [];
-                        $friendUsers = $topFriends ? App\Models\User::whereIn('id', $topFriends)->get() : collect();
+                        $friendUsers = collect();
+                        if (!empty($topFriends)) {
+                            $unordered = App\Models\User::whereIn('id', $topFriends)->get()->keyBy('id');
+                            foreach ($topFriends as $fid) {
+                                if ($unordered->has($fid)) {
+                                    $friendUsers->push($unordered->get($fid));
+                                }
+                            }
+                        }
                     @endphp
                     @if($friendUsers->count() > 0)
                         <div style="display: flex; flex-direction: column; gap: 0.2rem;">
@@ -487,7 +495,62 @@
         </div>
 
     </div>
+
+    <!-- ===== EDIT TOP 8 FRIENDS MODAL ===== -->
+    @if(auth()->id() === $user->id)
+        <div class="settings-modal hidden" id="topFriendsModal">
+            <div class="settings-modal-content" style="max-width: 380px; height: auto; max-height: 70vh;">
+                <div class="settings-modal-header">
+                    <h2>Edit Top 8 Friends</h2>
+                    <button class="settings-modal-close" onclick="toggleTopFriendsModal()">✕</button>
+                </div>
+                <form action="{{ route('profile.top-friends') }}" method="POST">
+                    @csrf
+                    <div style="padding: 0.75rem 1rem; overflow-y: auto; max-height: 50vh;">
+                        <p class="settings-subtitle" style="margin-top: 0;">Pick up to 8 friends, in the order you want them shown.</p>
+                        @php
+                            $selectedIds = $user->profile->top_friends ?? [];
+                        @endphp
+                        @forelse($availableFriends as $friend)
+                            <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.2rem; border-bottom: 1px solid #e0dcd0; font-size: 0.8rem; cursor: pointer;">
+                                <input type="checkbox" name="friends[]" value="{{ $friend->id }}"
+                                    class="top-friend-checkbox"
+                                    @checked(in_array($friend->id, $selectedIds))>
+                                {{ $friend->name }}
+                            </label>
+                        @empty
+                            <p style="font-size: 0.75rem; color: #6a6a6a;">You don't have any friends yet to add here.</p>
+                        @endforelse
+                    </div>
+                    <div style="padding: 0.6rem 1rem; border-top: 1px solid #b0a8a0; display: flex; justify-content: flex-end; gap: 0.5rem;">
+                        <button type="button" class="settings-btn" onclick="toggleTopFriendsModal()">Cancel</button>
+                        <button type="submit" class="settings-btn">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    @endif
 </div>
+
+<script>
+    function toggleTopFriendsModal() {
+        document.getElementById('topFriendsModal').classList.toggle('hidden');
+    }
+
+    // Cap selection at 8 friends
+    document.addEventListener('DOMContentLoaded', function() {
+        const boxes = document.querySelectorAll('.top-friend-checkbox');
+        boxes.forEach(box => {
+            box.addEventListener('change', function() {
+                const checked = document.querySelectorAll('.top-friend-checkbox:checked');
+                if (checked.length > 8) {
+                    this.checked = false;
+                    alert('You can only select up to 8 friends.');
+                }
+            });
+        });
+    });
+</script>
 
 <script>
     function toggleEditMode() {
