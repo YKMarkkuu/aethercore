@@ -503,6 +503,27 @@
     line-height: 1.5;
 }
 
+.xp-profile-note {
+    font-size: 0.8rem;
+    color: #4a5a7a;
+    font-style: italic;
+    margin-top: 0.2rem;
+}
+
+#imageAdjustViewport {
+    cursor: grab;
+    user-select: none;
+    border: 2px solid #b0a8a0;
+}
+#imageAdjustViewport:active {
+    cursor: grabbing;
+}
+#imageAdjustPreview {
+    -webkit-user-drag: none;
+    user-select: none;
+    pointer-events: none;
+}
+
 /* ===== STATS DIVIDER ===== */
 .xp-stats-divider {
     display: flex;

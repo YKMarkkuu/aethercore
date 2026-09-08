@@ -322,6 +322,12 @@ class ProfileController extends Controller
 
     public function updateProfile(Request $request)
     {
+        $request->validate([
+            'status_message' => 'nullable|string|max:100',
+            'avatar' => 'nullable|file|mimes:jpg,jpeg,png,webp,gif|max:5120',
+            'banner' => 'nullable|file|mimes:jpg,jpeg,png,webp,gif|max:8192',
+        ]);
+
         $user = auth()->user();
         $profile = $user->profile;
         
@@ -341,6 +347,10 @@ class ProfileController extends Controller
         if ($request->has('location')) {
             $profile->location = $request->location;
         }
+
+        if ($request->has('status_message')) {
+            $profile->status_message = $request->status_message;
+        }
         
         if ($request->hasFile('avatar')) {
             $avatarPath = $request->file('avatar')->store('avatars', 'public');
@@ -353,6 +363,14 @@ class ProfileController extends Controller
         }
         
         $profile->save();
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'avatar_url' => $user->fresh()->getAvatarUrl(),
+                'banner_url' => $user->fresh()->getBannerUrl(),
+            ]);
+        }
         
         return redirect()->route('profile.index')->with('success', 'Profile updated successfully!');
     }
@@ -403,5 +421,62 @@ class ProfileController extends Controller
         }
 
         return response()->json(['now_playing' => null]);
+    }
+
+    /**
+     * Batch version of nowPlaying() for the sidebar friends list — checks
+     * now-playing status for several friends in ONE request instead of
+     * one request per friend, which would otherwise turn into an N+1
+     * polling problem as someone's friends list grows. Only returns data
+     * for users who are actually accepted friends of the requester, so
+     * this can't be used to snoop on arbitrary users' listening habits.
+     */
+    public function nowPlayingBatch(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array|max:50',
+            'ids.*' => 'integer',
+        ]);
+
+        $authId = auth()->id();
+
+        $sentIds = DB::table('friendships')
+            ->where('user_id', $authId)
+            ->where('status', 'accepted')
+            ->pluck('friend_id')
+            ->toArray();
+
+        $receivedIds = DB::table('friendships')
+            ->where('friend_id', $authId)
+            ->where('status', 'accepted')
+            ->pluck('user_id')
+            ->toArray();
+
+        $friendIds = array_unique(array_merge($sentIds, $receivedIds));
+
+        $requestedIds = array_intersect(array_map('intval', $request->input('ids', [])), $friendIds);
+
+        if (empty($requestedIds)) {
+            return response()->json(['now_playing' => []]);
+        }
+
+        $users = User::whereIn('id', $requestedIds)
+            ->whereNotNull('lastfm_username')
+            ->get(['id', 'lastfm_username']);
+
+        $lastfm = new LastfmService();
+        $result = [];
+
+        foreach ($users as $user) {
+            $nowPlaying = $lastfm->getNowPlaying($user->lastfm_username);
+            if ($nowPlaying && !empty($nowPlaying['is_now_playing'])) {
+                $result[$user->id] = [
+                    'name' => $nowPlaying['name'] ?? 'Unknown Track',
+                    'artist' => $nowPlaying['artist'] ?? 'Unknown Artist',
+                ];
+            }
+        }
+
+        return response()->json(['now_playing' => $result]);
     }
 }

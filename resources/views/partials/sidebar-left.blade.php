@@ -52,8 +52,9 @@
         <div id="view-friends" class="sidebar-view hidden">
             <div class="status-group">
                 <div class="status-group-label">Direct Messages</div>
+                <div id="sidebarFriendsList">
                 @forelse(Auth::user()->getFriends() as $friend)
-                    <a href="{{ route('conversations.start', $friend->id) }}" class="friend-item">
+                    <a href="{{ route('conversations.start', $friend->id) }}" class="friend-item" data-friend-id="{{ $friend->id }}">
                         <div class="friend-avatar">
                             @if($friend->profile && $friend->profile->avatar)
                                 <img src="{{ asset('storage/' . $friend->profile->avatar) }}" alt="Avatar" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover;">
@@ -66,11 +67,20 @@
                             <div class="friend-status" style="color: {{ $friend->getStatusColor() }};">
                     {{ $friend->getStatusLabel() }}
                 </div>
+                            <div class="friend-now-playing" style="display: none; font-size: 0.55rem; color: #3a7bd5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; align-items: center; gap: 0.2rem;">
+                                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
+                                    <path d="M9 18V5l12-2v13"/>
+                                    <circle cx="6" cy="18" r="3"/>
+                                    <circle cx="18" cy="16" r="3"/>
+                                </svg>
+                                <span class="friend-now-playing-text"></span>
+                            </div>
                         </div>
                     </a>
                 @empty
                     <p style="color: #3a3a3a; font-size: 0.75rem; padding: 0.5rem;">No friends yet. Add some!</p>
                 @endforelse
+                </div>
             </div>
         </div>
 
@@ -262,3 +272,45 @@
     </script>
     @endpush
 @endif
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const list = document.getElementById('sidebarFriendsList');
+        if (!list) return;
+
+        const rows = Array.from(list.querySelectorAll('[data-friend-id]'));
+        if (rows.length === 0) return;
+
+        const ids = rows.map(row => row.dataset.friendId);
+
+        function pollFriendsNowPlaying() {
+            const params = new URLSearchParams();
+            ids.forEach(id => params.append('ids[]', id));
+
+            fetch('{{ route("now-playing.batch") }}?' + params.toString(), {
+                headers: { 'Accept': 'application/json' },
+            })
+                .then(response => response.ok ? response.json() : Promise.reject())
+                .then(data => {
+                    const nowPlaying = data.now_playing || {};
+                    rows.forEach(row => {
+                        const id = row.dataset.friendId;
+                        const el = row.querySelector('.friend-now-playing');
+                        const textEl = row.querySelector('.friend-now-playing-text');
+                        if (nowPlaying[id]) {
+                            textEl.textContent = nowPlaying[id].name + ' — ' + nowPlaying[id].artist;
+                            el.style.display = 'flex';
+                        } else {
+                            el.style.display = 'none';
+                        }
+                    });
+                })
+                .catch(() => { /* silent, try again next interval */ });
+        }
+
+        pollFriendsNowPlaying();
+        setInterval(pollFriendsNowPlaying, 20000);
+    });
+</script>
+@endpush

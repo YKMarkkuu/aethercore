@@ -49,6 +49,7 @@ Route::middleware(['auth'])->group(function () {
 
     // ---------- NOW PLAYING (polling) ----------
     Route::get('/now-playing/{user}', [ProfileController::class, 'nowPlaying'])->name('now-playing');
+    Route::get('/now-playing-batch', [ProfileController::class, 'nowPlayingBatch'])->name('now-playing.batch');
 
     // ---------- SETTINGS ----------
     Route::middleware(['auth'])->group(function () {
