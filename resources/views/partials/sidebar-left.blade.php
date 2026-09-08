@@ -81,14 +81,23 @@
         <div class="status-group">
             <div class="status-group-label">Home</div>
             <a href="#" class="friend-item">
-                <div class="friend-avatar">🏠</div>
+                <div class="friend-avatar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 9.5 12 3l9 6.5"/>
+                        <path d="M5 10v10a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10"/>
+                    </svg>
+                </div>
                 <div class="friend-info">
                     <div class="friend-name">Recently Played</div>
                     <div class="friend-status">12 songs</div>
                 </div>
             </a>
             <a href="#" class="friend-item">
-                <div class="friend-avatar">✨</div>
+                <div class="friend-avatar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/>
+                    </svg>
+                </div>
                 <div class="friend-info">
                     <div class="friend-name">Recommendations</div>
                     <div class="friend-status">For you</div>
@@ -98,21 +107,39 @@
         <div class="status-group">
             <div class="status-group-label">Library</div>
             <a href="#" class="friend-item">
-                <div class="friend-avatar">🎤</div>
+                <div class="friend-avatar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                        <line x1="12" y1="19" x2="12" y2="23"/>
+                        <line x1="8" y1="23" x2="16" y2="23"/>
+                    </svg>
+                </div>
                 <div class="friend-info">
                     <div class="friend-name">Artists</div>
                     <div class="friend-status">0 saved</div>
                 </div>
             </a>
             <a href="#" class="friend-item">
-                <div class="friend-avatar">💿</div>
+                <div class="friend-avatar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                </div>
                 <div class="friend-info">
                     <div class="friend-name">Albums</div>
                     <div class="friend-status">0 saved</div>
                 </div>
             </a>
             <a href="#" class="friend-item">
-                <div class="friend-avatar">🎵</div>
+                <div class="friend-avatar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 18V5l12-2v13"/>
+                        <circle cx="6" cy="18" r="3"/>
+                        <circle cx="18" cy="16" r="3"/>
+                    </svg>
+                </div>
                 <div class="friend-info">
                     <div class="friend-name">Songs</div>
                     <div class="friend-status">0 saved</div>
@@ -122,14 +149,26 @@
         <div class="status-group">
             <div class="status-group-label">Playlists</div>
             <a href="#" class="friend-item">
-                <div class="friend-avatar">📋</div>
+                <div class="friend-avatar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="6" y="3" width="12" height="18" rx="2"/>
+                        <line x1="9" y1="8" x2="15" y2="8"/>
+                        <line x1="9" y1="12" x2="15" y2="12"/>
+                        <line x1="9" y1="16" x2="12" y2="16"/>
+                    </svg>
+                </div>
                 <div class="friend-info">
                     <div class="friend-name">Liked Songs</div>
                     <div class="friend-status">0 songs</div>
                 </div>
             </a>
             <a href="#" class="friend-item">
-                <div class="friend-avatar">➕</div>
+                <div class="friend-avatar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"/>
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                </div>
                 <div class="friend-info">
                     <div class="friend-name">Create Playlist</div>
                     <div class="friend-status">New</div>
@@ -139,7 +178,11 @@
         <div class="status-group">
             <div class="status-group-label">Discover</div>
             <a href="#" class="friend-item">
-                <div class="friend-avatar">🔥</div>
+                <div class="friend-avatar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2c1 3-3 4-3 8a3 3 0 0 0 6 0c0-1-1-2-1-3 2 1 3 3 3 5a5 5 0 0 1-10 0c0-4 3-6 5-10z"/>
+                    </svg>
+                </div>
                 <div class="friend-info">
                     <div class="friend-name">Trending</div>
                     <div class="friend-status">Top 50</div>
@@ -149,26 +192,19 @@
     </div>
 
     <!-- NOW PLAYING -->
+    <!-- No server-side Last.fm call anymore — this used to run on EVERY
+         page load anywhere this sidebar renders (feed, profile, spaces,
+         everywhere), blocking the page on a live Last.fm request with no
+         caching. Now it renders instantly with a placeholder and fills
+         in via the polling endpoint below. -->
     <div class="now-playing">
         <div class="now-playing-title">Now Playing</div>
-        @php
-            $nowPlaying = null;
-            if (Auth::user()->lastfm_username) {
-                try {
-                    $lastfm = new \App\Services\LastfmService();
-                    $nowPlaying = $lastfm->getNowPlaying(Auth::user()->lastfm_username);
-                } catch (\Exception $e) {}
-            }
-        @endphp
-        @if($nowPlaying && $nowPlaying['is_now_playing'])
-            <div class="now-playing-song">{{ $nowPlaying['name'] }}</div>
-            <div class="now-playing-artist">{{ $nowPlaying['artist'] }}</div>
-        @else
-            <div class="now-playing-song">Not listening</div>
-            <div class="now-playing-artist">
-                {{ Auth::user()->lastfm_username ? 'No track currently playing' : 'Connect Last.fm' }}
-            </div>
-        @endif
+        <div class="now-playing-song" id="nowPlayingSong">
+            {{ Auth::user()->lastfm_username ? 'Loading…' : 'Not listening' }}
+        </div>
+        <div class="now-playing-artist" id="nowPlayingArtist">
+            {{ Auth::user()->lastfm_username ? '' : 'Connect Last.fm' }}
+        </div>
     </div>
 
     <!-- MINI PROFILE -->
@@ -192,3 +228,37 @@
     <!-- MINI PROFILE POPUP -->
     @include('partials.mini-profile-popup')
 </aside>
+
+@if(Auth::user()->lastfm_username)
+    @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const nowPlayingSong = document.getElementById('nowPlayingSong');
+            const nowPlayingArtist = document.getElementById('nowPlayingArtist');
+
+            function pollNowPlaying() {
+                fetch('{{ route('now-playing', Auth::user()) }}', {
+                    headers: { 'Accept': 'application/json' },
+                })
+                    .then(response => response.ok ? response.json() : Promise.reject())
+                    .then(data => {
+                        if (data.now_playing) {
+                            nowPlayingSong.textContent = data.now_playing.name;
+                            nowPlayingArtist.textContent = data.now_playing.artist;
+                        } else {
+                            nowPlayingSong.textContent = 'Not listening';
+                            nowPlayingArtist.textContent = 'No track currently playing';
+                        }
+                    })
+                    .catch(() => {
+                        // Leave whatever was last shown — try again next
+                        // interval rather than flashing an error state.
+                    });
+            }
+
+            pollNowPlaying();
+            setInterval(pollNowPlaying, 20000);
+        });
+    </script>
+    @endpush
+@endif

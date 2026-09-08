@@ -374,4 +374,34 @@ class ProfileController extends Controller
 
         return Redirect::to('/');
     }
+
+    /**
+     * Polling endpoint for the sidebar's "Now Playing" widget. Any
+     * authenticated user can check any user's now-playing status
+     * (matches how Last.fm's own profile pages work — it's public info,
+     * not a private one). Not cached, since the whole point is freshness;
+     * poll interval on the client side (not this method) is what keeps
+     * this from hammering Last.fm's API.
+     */
+    public function nowPlaying(User $user)
+    {
+        if (!$user->lastfm_username) {
+            return response()->json(['now_playing' => null]);
+        }
+
+        $lastfm = new LastfmService();
+        $nowPlaying = $lastfm->getNowPlaying($user->lastfm_username);
+
+        if ($nowPlaying && !empty($nowPlaying['is_now_playing'])) {
+            return response()->json([
+                'now_playing' => [
+                    'name' => $nowPlaying['name'] ?? 'Unknown Track',
+                    'artist' => $nowPlaying['artist'] ?? 'Unknown Artist',
+                    'image' => $nowPlaying['image'] ?? null,
+                ],
+            ]);
+        }
+
+        return response()->json(['now_playing' => null]);
+    }
 }

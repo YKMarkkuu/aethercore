@@ -101,4 +101,43 @@ class ConversationController extends Controller
         $conversation = Auth::user()->getConversationWith($userId);
         return redirect()->route('conversations.show', $conversation);
     }
+
+    /**
+     * Polling endpoint used by conversation-show.blade.php instead of
+     * WebSocket broadcasting. Returns any messages in this conversation
+     * with an id greater than ?after=, i.e. "what's new since I last
+     * checked". The client tracks its own last-seen id and polls this
+     * every few seconds.
+     */
+    public function latestMessages(Request $request, Conversation $conversation)
+    {
+        if (!$conversation->users()->where('user_id', Auth::id())->exists()) {
+            abort(403);
+        }
+
+        $afterId = (int) $request->query('after', 0);
+
+        $messages = $conversation->messages()
+            ->with('user')
+            ->where('id', '>', $afterId)
+            ->orderBy('id')
+            ->get();
+
+        return response()->json([
+            'messages' => $messages->map(function ($message) {
+                return [
+                    'id' => $message->id,
+                    'content' => $message->content,
+                    'time' => $message->created_at->format('g:i A'),
+                    'created_at' => $message->created_at->toIso8601String(),
+                    'user' => [
+                        'id' => $message->user->id,
+                        'name' => $message->user->name,
+                        'display_name' => $message->user->display_name,
+                        'avatar_url' => $message->user->getAvatarUrl(),
+                    ],
+                ];
+            }),
+        ]);
+    }
 }

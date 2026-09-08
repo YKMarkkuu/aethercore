@@ -119,8 +119,6 @@
 </div>
 
 @push('scripts')
-<script src="https://js.pusher.com/7.2/pusher.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.15.3/dist/echo.iife.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const chatMessages = document.getElementById('chatMessages');
@@ -130,10 +128,17 @@
         const currentUserId = {{ auth()->id() }};
 
         // Grouping state carried over from the server-rendered history,
-        // so the first live message picks up where the page load left off.
+        // so the first polled/sent message picks up where the page load
+        // left off.
         let lastMessageUserId = {{ $lastUserId !== null ? $lastUserId : 'null' }};
         let lastMessageTime = {{ $lastTimestamp ? $lastTimestamp->timestamp * 1000 : 'null' }};
         const GROUP_THRESHOLD_MS = 5 * 60 * 1000;
+
+        // Tracks the highest message id we've rendered, so polling only
+        // ever asks the server for "what's new since this id" — this is
+        // also what keeps our own just-sent message from being fetched
+        // and appended a second time when the next poll runs.
+        let lastMessageId = {{ optional($messages->last())->id ?? 0 }};
 
         function isNearBottom(el, threshold = 80) {
             return el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
@@ -156,14 +161,6 @@
          * Appends a message to the thread, deciding whether it should
          * stack under the previous message (same user, within the group
          * window) or start a new group with its own avatar/name/time.
-         *
-         * NOTE: for messages arriving live over the socket, grouping only
-         * checks "same user as last" rather than the full time-window
-         * check the initial page load does — the broadcast payload
-         * doesn't currently include a raw timestamp to compare against,
-         * only a pre-formatted time string. Close enough for a single
-         * open session; ask me to wire through the raw timestamp in the
-         * broadcast event if you want full parity.
          */
         function appendMessage({ userId, name, avatarInitial, avatarUrl, time, timeMs, content }, isOwnMessage) {
             const isGrouped = userId === lastMessageUserId
@@ -252,6 +249,9 @@
                         timeMs: message.created_at ? new Date(message.created_at).getTime() : Date.now(),
                         content: message.content ?? content,
                     }, true);
+                    if (message.id) {
+                        lastMessageId = message.id;
+                    }
                     chatInput.value = '';
                     chatInput.focus();
                 })
@@ -265,32 +265,40 @@
 
         chatInput.focus();
 
-        // ===== REAL-TIME: RECEIVE MESSAGES FROM THE OTHER USER =====
-        window.Echo = new Echo({
-            broadcaster: 'reverb',
-            key: '{{ env("REVERB_APP_KEY") }}',
-            wsHost: '{{ env("REVERB_HOST", "localhost") }}',
-            wsPort: '{{ env("REVERB_PORT", 8080) }}',
-            forceTLS: false,
-            enabledTransports: ['ws', 'wss'],
-        });
+        // ===== RECEIVE MESSAGES: POLLING =====
+        // Simple and reliable — no WebSocket server to keep running.
+        // Every 3s, ask "anything newer than the last message I've seen?"
+        function pollForNewMessages() {
+            fetch(`{{ route('conversations.latest', $conversation) }}?after=${lastMessageId}`, {
+                headers: { 'Accept': 'application/json' },
+            })
+                .then(response => response.ok ? response.json() : Promise.reject())
+                .then(data => {
+                    (data.messages || []).forEach(message => {
+                        // Our own sent messages are already appended
+                        // optimistically above and lastMessageId already
+                        // advanced past them, so anything that shows up
+                        // here is always from someone else.
+                        appendMessage({
+                            userId: message.user?.id,
+                            name: message.user?.display_name ?? message.user?.name,
+                            avatarInitial: (message.user?.name ?? '?')[0],
+                            avatarUrl: message.user?.avatar_url ?? null,
+                            time: message.time,
+                            timeMs: message.created_at ? new Date(message.created_at).getTime() : Date.now(),
+                            content: message.content,
+                        }, false);
+                        lastMessageId = message.id;
+                    });
+                })
+                .catch(() => {
+                    // Silent — just try again on the next interval rather
+                    // than interrupting the person with an error popup
+                    // over what's likely a momentary blip.
+                });
+        }
 
-        window.Echo.channel('conversation.{{ $conversation->id }}')
-            .listen('NewMessageEvent', (e) => {
-                // Skip our own message — it was already appended
-                // optimistically when we sent it above.
-                if (e.user?.id === currentUserId) return;
-
-                appendMessage({
-                    userId: e.user?.id,
-                    name: e.user?.display_name ?? e.user?.name,
-                    avatarInitial: (e.user?.name ?? '?')[0],
-                    avatarUrl: e.user?.avatar_url ?? null,
-                    time: e.time,
-                    timeMs: e.created_at ? new Date(e.created_at).getTime() : Date.now(),
-                    content: e.content,
-                }, false);
-            });
+        setInterval(pollForNewMessages, 3000);
     });
 </script>
 @endpush

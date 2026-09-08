@@ -43,9 +43,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::get('/profile/{user}', [ProfileController::class, 'show'])->name('profile.show');
     Route::post('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
-    Route::post('/status/update', [StatusController::class, 'update'])->name('status.update');
     Route::post('/profile/stats-period', [ProfileController::class, 'updateStatsPeriod'])->name('profile.stats-period');
     Route::post('/profile/top-friends', [ProfileController::class, 'updateTopFriends'])->name('profile.top-friends');
+    Route::post('/status/update', [StatusController::class, 'update'])->name('status.update');
+
+    // ---------- NOW PLAYING (polling) ----------
+    Route::get('/now-playing/{user}', [ProfileController::class, 'nowPlaying'])->name('now-playing');
 
     // ---------- SETTINGS ----------
     Route::middleware(['auth'])->group(function () {
@@ -83,6 +86,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/conversations', [ConversationController::class, 'index'])->name('conversations.index');
     Route::get('/conversations/{conversation}', [ConversationController::class, 'show'])->name('conversations.show');
     Route::post('/conversations/{conversation}', [ConversationController::class, 'store'])->name('conversations.store');
+    Route::get('/conversations/{conversation}/messages/latest', [ConversationController::class, 'latestMessages'])->name('conversations.latest');
     Route::get('/conversations/start/{user}', [ConversationController::class, 'startWithUser'])->name('conversations.start');
 });
 });

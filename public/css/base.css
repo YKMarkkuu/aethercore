@@ -267,6 +267,12 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
+.friend-avatar svg {
+    width: 16px;
+    height: 16px;
+    stroke: currentColor;
+}
+
 .friend-info {
     flex: 1;
     min-width: 0;
@@ -353,10 +359,16 @@ body {
     font-size: 0.7rem;
     font-weight: 600;
     color: #1e1e1e;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .now-playing-artist {
     font-size: 0.6rem;
     color: #6a6a6a;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* ===== MINI PROFILE ===== */
