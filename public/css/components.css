@@ -1056,7 +1056,6 @@
     padding: 0.75rem 1rem;
     display: flex;
     flex-direction: column;
-    gap: 0.1rem;
     background: #f8f5ec;
 }
 
@@ -1092,13 +1091,29 @@
     background: #d0c8c0;
 }
 
+/* ===== AWAY MESSAGE BANNER ===== */
+.chat-away-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 1rem;
+    background: #fff6d9;
+    border-bottom: 1px solid #e0d090;
+    color: #6a5a2a;
+    font-size: 0.7rem;
+}
+.chat-away-banner strong {
+    font-weight: 700;
+}
+
 .chat-message-xp {
     display: flex;
     align-items: flex-start;
     gap: 0.75rem;
-    padding: 0.3rem 0;
+    padding: 0.25rem 0;
+    margin-bottom: 0.5rem;
     width: 100%;
-    border-bottom: 1px solid rgba(0,0,0,0.03);
+    position: relative;
 }
 
 .msg-avatar-xp {
@@ -1149,6 +1164,27 @@
     line-height: 1.5;
     padding: 0.1rem 0;
 }
+.msg-content-deleted {
+    font-style: italic;
+    color: #9a9488;
+}
+.msg-edited-tag {
+    font-size: 0.6rem;
+    color: #9a9488;
+    margin-left: 0.35rem;
+}
+
+.msg-edit-input {
+    width: 100%;
+    font-size: 0.85rem;
+    font-family: inherit;
+    padding: 0.2rem 0.4rem;
+    border: 1px solid #3a7bd5;
+    border-radius: 3px;
+    background: #ffffff;
+    color: #1e1e1e;
+    outline: none;
+}
 
 .chat-empty-xp {
     display: flex;
@@ -1178,10 +1214,12 @@
 }
 
 /* ===== MESSAGE GROUPING (consecutive messages from the same user) ===== */
+/* Much tighter than a standalone message — this is the "compact when
+   someone sends several in a row" spacing. */
 .chat-message-grouped {
-    margin-top: -0.15rem;
+    margin-top: -0.35rem;
+    margin-bottom: 0.1rem;
     padding-top: 0;
-    border-bottom-color: transparent;
 }
 
 .msg-avatar-spacer {
@@ -1202,6 +1240,110 @@
 
 .chat-message-xp:hover .msg-hover-time {
     opacity: 1;
+}
+
+/* ===== MESSAGE TOOLBAR (react / edit / delete) ===== */
+.msg-toolbar {
+    position: absolute;
+    top: -10px;
+    right: 8px;
+    display: none;
+    align-items: center;
+    gap: 2px;
+    background: #ffffff;
+    border: 1px solid #b0a8a0;
+    border-radius: 4px;
+    box-shadow: 1px 1px 4px rgba(0,0,0,0.1);
+    padding: 2px;
+    z-index: 2;
+}
+.chat-message-xp:hover .msg-toolbar {
+    display: flex;
+}
+.msg-toolbar.msg-toolbar-active {
+    display: flex;
+}
+.msg-toolbar-btn {
+    background: none;
+    border: none;
+    padding: 3px;
+    cursor: pointer;
+    color: #6a6a6a;
+    border-radius: 3px;
+    display: flex;
+}
+.msg-toolbar-btn:hover {
+    background: #e0dcd0;
+    color: #1e1e1e;
+}
+.msg-toolbar-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* ===== REACTION PICKER (popover from the react button) ===== */
+.reaction-picker {
+    position: absolute;
+    top: -38px;
+    right: 8px;
+    display: flex;
+    gap: 2px;
+    background: #ffffff;
+    border: 1px solid #b0a8a0;
+    border-radius: 4px;
+    box-shadow: 1px 1px 4px rgba(0,0,0,0.15);
+    padding: 3px;
+    z-index: 3;
+}
+.reaction-picker-btn {
+    background: none;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    color: #6a6a6a;
+    border-radius: 3px;
+}
+.reaction-picker-btn:hover {
+    background: #e0dcd0;
+    color: #1a4a9e;
+    transform: scale(1.1);
+}
+.reaction-picker-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* ===== REACTION PILLS (shown under a message that has reactions) ===== */
+.msg-reactions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-top: 0.2rem;
+}
+.msg-reaction-pill {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+    background: #ece9d8;
+    border: 1px solid #c0b8b0;
+    border-radius: 10px;
+    padding: 0.05rem 0.4rem;
+    cursor: pointer;
+    color: #6a6a6a;
+    font-size: 0.65rem;
+    transition: 0.15s;
+}
+.msg-reaction-pill:hover {
+    background: #d4d0c8;
+}
+.msg-reaction-pill-mine {
+    background: #d8e6fb;
+    border-color: #3a7bd5;
+    color: #1a4a9e;
+}
+.msg-reaction-pill svg {
+    width: 11px;
+    height: 11px;
 }
 
 .chat-icon-btn svg {

@@ -89,5 +89,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/conversations/{conversation}', [ConversationController::class, 'store'])->name('conversations.store');
     Route::get('/conversations/{conversation}/messages/latest', [ConversationController::class, 'latestMessages'])->name('conversations.latest');
     Route::get('/conversations/start/{user}', [ConversationController::class, 'startWithUser'])->name('conversations.start');
+
+    Route::patch('/messages/{message}', [ConversationController::class, 'updateMessage'])->name('messages.update');
+    Route::delete('/messages/{message}', [ConversationController::class, 'destroyMessage'])->name('messages.destroy');
+    Route::post('/messages/{message}/react', [ConversationController::class, 'reactToMessage'])->name('messages.react');
 });
 });
