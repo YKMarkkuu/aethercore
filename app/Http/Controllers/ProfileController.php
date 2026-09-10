@@ -62,10 +62,17 @@ class ProfileController extends Controller
 
         // Friends available to pick for "Top 8 Friends" — this route is
         // always the owner viewing their own profile, so $friendIds here
-        // is already the right list.
+        // is already the right list. Also reused as $friends for the
+        // Posts panel's Share modal (see partials.share-modal).
         $availableFriends = User::whereIn('id', $friendIds)->get(['id', 'name']);
+        $friends = $availableFriends;
 
-        return view('profile', compact('user', 'feedPosts', 'availableFriends'));
+        // Needed by partials.post-card for the Posts panel below —
+        // without this, likes/comments/repost data isn't loaded and
+        // that panel silently falls back to broken/empty state.
+        $user->load(['posts.likes', 'posts.comments.user', 'posts.sharedPost.user']);
+
+        return view('profile', compact('user', 'feedPosts', 'availableFriends', 'friends'));
     }
 
     /**
@@ -73,9 +80,13 @@ class ProfileController extends Controller
      */
     public function show(User $user)
     {
-        $user->load(['profile', 'posts']);
+        // Also loads what partials.post-card needs for the Posts panel
+        // below (likes/comments/repost data) — without this it silently
+        // falls back to broken/empty state.
+        $user->load(['profile', 'posts.likes', 'posts.comments.user', 'posts.sharedPost.user']);
         
-        // Get the viewed user's friend IDs (NOT the logged-in user's)
+        // Get the viewed user's friend IDs (NOT the logged-in user's) —
+        // used for their Activity Feed panel below.
         $sentIds = DB::table('friendships')
             ->where('user_id', $user->id)
             ->where('status', 'accepted')
@@ -109,8 +120,25 @@ class ProfileController extends Controller
         $availableFriends = auth()->id() === $user->id
             ? User::whereIn('id', $friendIds)->get(['id', 'name'])
             : collect();
+
+        // IMPORTANT: this is the VISITOR'S own friends for the Share
+        // modal's "send to a friend" list — you share posts with YOUR
+        // friends, not the profile owner's, so this is intentionally a
+        // separate query from $friendIds above (which belongs to $user).
+        $authSentIds = DB::table('friendships')
+            ->where('user_id', auth()->id())
+            ->where('status', 'accepted')
+            ->pluck('friend_id')
+            ->toArray();
+        $authReceivedIds = DB::table('friendships')
+            ->where('friend_id', auth()->id())
+            ->where('status', 'accepted')
+            ->pluck('user_id')
+            ->toArray();
+        $friends = User::whereIn('id', array_unique(array_merge($authSentIds, $authReceivedIds)))
+            ->get(['id', 'name']);
         
-        return view('profile', compact('user', 'feedPosts', 'availableFriends'));
+        return view('profile', compact('user', 'feedPosts', 'availableFriends', 'friends'));
     }
 
     /**

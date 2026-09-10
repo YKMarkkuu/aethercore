@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>AetherCore - @yield('title', 'Home')</title>
     
         <!-- CSS -->
@@ -57,6 +58,14 @@
             @include('partials.settings-modal')
         </div>
     </div>
+
+    <!-- Loaded on every page since posts (and their like/comment/share
+         actions) can show up in more than one place — see feed.blade.php
+         and the profile page's Posts panel, both of which include the
+         same partials.post-card. Event listeners are delegated on
+         document.body and only do anything if .post-item elements are
+         actually present, so this is a no-op on pages with no posts. -->
+    <script src="{{ asset('js/post-interactions.js') }}"></script>
 
     <script>
         let currentMode = 'aether';

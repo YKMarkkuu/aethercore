@@ -438,7 +438,7 @@
                         $topFriends = $user->profile->top_friends ?? [];
                         $friendUsers = collect();
                         if (!empty($topFriends)) {
-                            $unordered = App\Models\User::whereIn('id', $topFriends)->get()->keyBy('id');
+                            $unordered = App\Models\User::whereIn('id', $topFriends)->with('profile')->get()->keyBy('id');
                             foreach ($topFriends as $fid) {
                                 if ($unordered->has($fid)) {
                                     $friendUsers->push($unordered->get($fid));
@@ -451,8 +451,12 @@
                             @foreach($friendUsers as $index => $friend)
                                 <div style="display: flex; align-items: center; gap: 0.4rem; padding: 0.15rem 0.3rem; background: #f8f5ec; border: 1px solid #d0c8c0; border-radius: 4px;" data-friend-id="{{ $friend->id }}">
                                     <span style="font-size: 0.55rem; font-weight: 700; color: #1a4a9e; min-width: 16px;">#{{ $index + 1 }}</span>
-                                    <div class="xp-friend-avatar" style="width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, #3a7bd5, #1a4a9e); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.55rem; color: #ffffff; flex-shrink: 0;">
-                                        {{ $friend->name[0] }}
+                                    <div class="xp-friend-avatar" style="width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, #3a7bd5, #1a4a9e); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.55rem; color: #ffffff; flex-shrink: 0; overflow: hidden;">
+                                        @if($friend->profile && $friend->profile->avatar)
+                                            <img src="{{ asset('storage/' . $friend->profile->avatar) }}" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;">
+                                        @else
+                                            {{ $friend->name[0] }}
+                                        @endif
                                     </div>
                                     <div style="flex: 1; min-width: 0;">
                                         <a href="{{ route('profile.show', $friend) }}" style="font-size: 0.65rem; color: #1e1e1e; text-decoration: none; display: block;">
@@ -481,35 +485,22 @@
                 <div class="xp-panel-header" style="font-size: 0.65rem; padding: 0.2rem 0.6rem;">Posts</div>
                 <div class="xp-panel-body" style="padding: 0.3rem 0.4rem;">
                     @if(auth()->id() === $user->id)
-                        <form action="{{ route('posts.store') }}" method="POST" style="margin-bottom: 0.3rem;">
+                        <form action="{{ route('posts.store') }}" method="POST" style="margin-bottom: 0.3rem;" class="post-composer">
                             @csrf
-                            <input type="hidden" name="user_id" value="{{ $user->id }}">
-                            <textarea name="content" class="settings-input" rows="2" placeholder="Share something..." style="resize: none; font-size: 0.75rem; padding: 0.3rem 0.5rem;"></textarea>
+                            <div class="post-format-toolbar">
+                                <button type="button" data-wrap="**" title="Bold"><strong>B</strong></button>
+                                <button type="button" data-wrap="*" title="Italic"><em>I</em></button>
+                                <button type="button" data-wrap="~~" title="Strikethrough"><del>S</del></button>
+                                <button type="button" data-wrap="`" title="Code">&lt;/&gt;</button>
+                            </div>
+                            <textarea name="content" class="settings-input" rows="2" maxlength="500" placeholder="Share something..." style="resize: none; font-size: 0.75rem; padding: 0.3rem 0.5rem;"></textarea>
                             <button type="submit" class="settings-btn" style="margin-top: 0.2rem; font-size: 0.65rem; padding: 0.15rem 0.6rem;">Post</button>
                         </form>
                         <hr class="xp-divider" style="margin: 0.2rem 0;">
                     @endif
 
-                    @forelse($user->posts as $post)
-                        <div class="xp-post" style="padding: 0.25rem 0.4rem; margin-bottom: 0.25rem;">
-                            <div class="xp-post-header" style="font-size: 0.6rem; margin-bottom: 0.1rem;">
-                                <span class="xp-post-user">{{ $user->display_name }}</span>
-                                <span class="xp-post-time">{{ $post->created_at->diffForHumans() }}</span>
-                            </div>
-                            <div class="xp-post-content" style="font-size: 0.7rem; padding: 0.1rem 0;">{{ $post->content }}</div>
-                            <div class="xp-post-actions" style="font-size: 0.5rem; padding-top: 0.1rem; margin-top: 0.1rem;">
-                                <span>Like</span>
-                                <span>Comment</span>
-                                <span>Share</span>
-                                @if(auth()->id() === $post->user_id)
-                                    <form action="{{ route('posts.destroy', $post) }}" method="POST" style="display: inline; margin-left: auto;">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="xp-delete-btn" style="font-size: 0.5rem;">Delete</button>
-                                    </form>
-                                @endif
-                            </div>
-                        </div>
+                    @forelse($user->posts->sortByDesc('created_at') as $post)
+                        @include('partials.post-card', ['post' => $post])
                     @empty
                         <p style="font-size: 0.65rem; color: #6a6a6a; text-align: center; padding: 0.3rem 0;">No posts yet</p>
                     @endforelse
@@ -518,6 +509,8 @@
         </div>
 
     </div>
+
+    @include('partials.share-modal', ['friends' => $friends])
 
     <!-- ===== EDIT TOP 8 FRIENDS MODAL ===== -->
     @if(auth()->id() === $user->id)
