@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -25,14 +26,17 @@ class FeedController extends Controller
             ->toArray();
 
         $friendIds = array_unique(array_merge($sentIds, $receivedIds));
-        
+
         $feedPosts = Post::whereIn('user_id', $friendIds)
                         ->orWhere('user_id', Auth::id())
                         ->orderBy('created_at', 'desc')
                         ->limit(20)
-                        ->with('user')
+                        ->with(['user', 'likes', 'comments.user', 'sharedPost.user'])
                         ->get();
-        
-        return view('feed', compact('feedPosts'));
+
+        // For the "share to a friend" picker in the Share modal
+        $friends = User::whereIn('id', $friendIds)->get(['id', 'name']);
+
+        return view('feed', compact('feedPosts', 'friends'));
     }
 }

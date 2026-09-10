@@ -98,12 +98,17 @@
     color: #ffffff;
     flex-shrink: 0;
     border: 1px solid rgba(255, 255, 255, 0.3);
+    text-decoration: none;
 }
 
 .post-user {
     font-weight: 600;
     font-size: 0.8rem;
     color: #1e1e1e;
+}
+.post-user:hover {
+    text-decoration: underline;
+    color: #1a4a9e;
 }
 .post-time {
     font-size: 0.6rem;
@@ -114,10 +119,30 @@
     font-size: 0.8rem;
     color: #1e1e1e;
     padding: 0.2rem 0 0.3rem 0;
+    line-height: 1.5;
+    word-wrap: break-word;
+}
+.post-content code {
+    background: #e8e4dc;
+    border: 1px solid #d0c8c0;
+    border-radius: 3px;
+    padding: 0.05rem 0.3rem;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 0.75rem;
+}
+
+/* ===== REPOST CARD (nested original post) ===== */
+.post-repost-card {
+    border: 1px solid #d0c8c0;
+    border-radius: 6px;
+    background: #f8f5ec;
+    padding: 0.5rem 0.6rem;
+    margin: 0.3rem 0;
 }
 
 .post-actions {
     display: flex;
+    align-items: center;
     gap: 1rem;
     font-size: 0.65rem;
     color: #6a6a6a;
@@ -126,8 +151,33 @@
     margin-top: 0.3rem;
 }
 
-.post-actions span {
-    cursor: default;
+.post-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #6a6a6a;
+    font-size: 0.65rem;
+    font-family: inherit;
+    padding: 0.15rem 0.3rem;
+    border-radius: 4px;
+    transition: 0.15s;
+}
+.post-action-btn:hover {
+    background: #e0dcd0;
+    color: #1e1e1e;
+}
+.post-action-btn svg {
+    width: 15px;
+    height: 15px;
+}
+.post-like-btn-active {
+    color: #c04040;
+}
+.post-like-btn-active:hover {
+    color: #a03030;
 }
 
 .post-actions .delete-btn {
@@ -141,6 +191,119 @@
 .post-actions .delete-btn:hover {
     color: #a06060;
     text-decoration: underline;
+}
+
+/* ===== POST FORMATTING TOOLBAR ===== */
+.post-format-toolbar {
+    display: flex;
+    gap: 0.2rem;
+    margin-bottom: 0.3rem;
+}
+.post-format-toolbar button {
+    background: #f0edd8;
+    border: 1px solid #b0a8a0;
+    border-radius: 3px;
+    width: 24px;
+    height: 22px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    color: #1e1e1e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.post-format-toolbar button:hover {
+    background: #e0dcd0;
+}
+
+/* ===== COMMENTS ===== */
+.post-comments {
+    border-top: 1px solid #d0c8c0;
+    margin-top: 0.4rem;
+    padding-top: 0.4rem;
+}
+.post-comment {
+    display: flex;
+    gap: 0.4rem;
+    padding: 0.2rem 0;
+}
+.post-comment-avatar {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3a7bd5, #1a4a9e);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.55rem;
+    color: #ffffff;
+    flex-shrink: 0;
+    text-decoration: none;
+}
+.post-comment-body {
+    flex: 1;
+    min-width: 0;
+    background: #f0edd8;
+    border-radius: 8px;
+    padding: 0.25rem 0.5rem;
+}
+.post-comment-user {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #1a4a9e;
+    text-decoration: none;
+    margin-right: 0.3rem;
+}
+.post-comment-user:hover {
+    text-decoration: underline;
+}
+.post-comment-content {
+    font-size: 0.75rem;
+    color: #1e1e1e;
+    word-wrap: break-word;
+}
+.post-comment-meta {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.55rem;
+    color: #9a9488;
+    margin-top: 0.1rem;
+}
+.post-comment-delete {
+    background: none;
+    border: none;
+    color: #b08080;
+    cursor: pointer;
+    font-size: 0.55rem;
+    font-family: inherit;
+    padding: 0;
+}
+.post-comment-delete:hover {
+    text-decoration: underline;
+}
+
+/* ===== SHARE MODAL: friend picker ===== */
+.share-friend-option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: #f0edd8;
+    border: 1px solid #d0c8c0;
+    border-radius: 4px;
+    padding: 0.4rem 0.6rem;
+    margin-bottom: 0.3rem;
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: #1e1e1e;
+    font-family: inherit;
+}
+.share-friend-option:hover {
+    background: #e0dcd0;
+}
+.share-friend-option:disabled {
+    opacity: 0.6;
+    cursor: default;
 }
 
 /* ===== XP CREATE SPACE BUTTON ===== */

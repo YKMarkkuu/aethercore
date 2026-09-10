@@ -5,6 +5,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\FeedController;
 use App\Http\Controllers\FriendController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\StatusController;
 use App\Http\Controllers\SettingsController;
@@ -66,6 +67,11 @@ Route::middleware(['auth'])->group(function () {
     // ---------- POSTS ----------
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
     Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
+    Route::post('/posts/{post}/like', [PostController::class, 'toggleLike'])->name('posts.like');
+    Route::post('/posts/{post}/repost', [PostController::class, 'repost'])->name('posts.repost');
+    Route::post('/posts/{post}/share-to-chat', [PostController::class, 'shareToChat'])->name('posts.share-to-chat');
+    Route::post('/posts/{post}/comments', [CommentController::class, 'store'])->name('comments.store');
+    Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
 
     // ---------- SPACES ----------
     Route::get('/spaces', function () {
