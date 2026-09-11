@@ -31,7 +31,7 @@ class FeedController extends Controller
                         ->orWhere('user_id', Auth::id())
                         ->orderBy('created_at', 'desc')
                         ->limit(20)
-                        ->with(['user', 'likes', 'comments.user', 'sharedPost.user'])
+                        ->with(['user', 'likes', 'comments.user', 'sharedPost.user', 'sharedSpace.members'])
                         ->get();
 
         // For the "share to a friend" picker in the Share modal

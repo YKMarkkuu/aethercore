@@ -9,7 +9,6 @@ use App\Models\PostLike;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class PostController extends Controller
 {
@@ -94,9 +93,10 @@ class PostController extends Controller
 
     /**
      * Send a post as a message to a friend. Reuses the existing chat
-     * infrastructure entirely — this just creates a normal Message with
-     * a formatted reference to the post, so it shows up (and broadcasts
-     * live) exactly like any other chat message.
+     * infrastructure entirely — creates a normal Message, but with
+     * type='shared_post' and shared_post_id set, so the chat view
+     * renders it as a clickable preview card instead of plain text
+     * (see partials in conversation-show.blade.php).
      */
     public function shareToChat(Request $request, Post $post)
     {
@@ -127,13 +127,12 @@ class PostController extends Controller
 
         $conversation = Auth::user()->getConversationWith($friendId);
 
-        $excerpt = Str::limit(strip_tags($post->content), 80);
-        $profileUrl = route('profile.show', $post->user);
-
         $message = Message::create([
             'conversation_id' => $conversation->id,
             'user_id' => $authId,
-            'content' => "Shared {$post->user->display_name}'s post: \"{$excerpt}\" — {$profileUrl}",
+            'content' => '',
+            'type' => 'shared_post',
+            'shared_post_id' => $post->id,
         ]);
 
         $conversation->update(['last_message_at' => now()]);
@@ -147,6 +146,51 @@ class PostController extends Controller
         return response()->json([
             'success' => true,
             'conversation_id' => $conversation->id,
+        ]);
+    }
+
+    /**
+     * Live polling endpoint for the feed and profile Posts panel — given
+     * the set of post ids currently rendered on the page, returns fresh
+     * like/comment state for each so other people's activity shows up
+     * without a refresh. Deliberately simple: no "since" filtering like
+     * the chat polling has, since this only ever covers a small, already-
+     * bounded set of visible posts, so just refetching current truth for
+     * exactly those ids each cycle is simplest and cheap enough.
+     */
+    public function updates(Request $request)
+    {
+        $request->validate([
+            'post_ids' => 'required|array|max:50',
+            'post_ids.*' => 'integer',
+        ]);
+
+        $userId = Auth::id();
+
+        $posts = Post::whereIn('id', $request->post_ids)
+            ->with(['likes', 'comments.user'])
+            ->get();
+
+        return response()->json([
+            'posts' => $posts->map(function ($post) use ($userId) {
+                return [
+                    'id' => $post->id,
+                    'like_count' => $post->likes->count(),
+                    'liked_by_me' => $post->likes->contains('user_id', $userId),
+                    'comments' => $post->comments->sortBy('created_at')->values()->map(function ($c) {
+                        return [
+                            'id' => $c->id,
+                            'content' => $c->content,
+                            'time' => $c->created_at->diffForHumans(),
+                            'user' => [
+                                'display_name' => $c->user->display_name,
+                                'avatar_url' => $c->user->getAvatarUrl(),
+                                'profile_url' => route('profile.show', $c->user),
+                            ],
+                        ];
+                    }),
+                ];
+            }),
         ]);
     }
 }

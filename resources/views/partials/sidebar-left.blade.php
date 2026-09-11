@@ -41,8 +41,23 @@
         <div id="view-spaces" class="sidebar-view hidden">
             <div class="status-group">
                 <div class="status-group-label">Your Spaces</div>
-                <p style="color: #6a6a6a; font-size: 0.7rem; padding: 0.3rem 0.4rem;">You haven't joined any spaces yet.</p>
-                <button class="xp-create-btn" onclick="alert('AetherSpace creation coming soon!')">
+                @forelse($mySpaces ?? [] as $space)
+                    <a href="{{ route('spaces.show', $space) }}" class="space-item">
+                        <div class="space-icon" style="width: 32px; height: 32px; font-size: 0.75rem;">
+                            @if($space->getIconUrl())
+                                <img src="{{ $space->getIconUrl() }}" alt="{{ $space->name }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px;">
+                            @else
+                                {{ strtoupper($space->name[0] ?? '?') }}
+                            @endif
+                        </div>
+                        <div>
+                            <div class="space-name">{{ $space->name }}</div>
+                        </div>
+                    </a>
+                @empty
+                    <p style="color: #6a6a6a; font-size: 0.7rem; padding: 0.3rem 0.4rem;">You haven't joined any spaces yet.</p>
+                @endforelse
+                <button class="xp-create-btn" onclick="document.getElementById('createSpaceModal').classList.remove('hidden')">
                     + Create AetherSpace
                 </button>
             </div>
@@ -314,3 +329,5 @@
     });
 </script>
 @endpush
+
+@include('partials.create-space-modal')

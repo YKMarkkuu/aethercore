@@ -9,6 +9,9 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\StatusController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\SpaceController;
+use App\Http\Controllers\SpaceChannelController;
+use App\Http\Controllers\SpaceMessageController;
 
 
 // ============================================
@@ -72,11 +75,23 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/posts/{post}/share-to-chat', [PostController::class, 'shareToChat'])->name('posts.share-to-chat');
     Route::post('/posts/{post}/comments', [CommentController::class, 'store'])->name('comments.store');
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
+    Route::post('/posts/updates', [PostController::class, 'updates'])->name('posts.updates');
 
     // ---------- SPACES ----------
-    Route::get('/spaces', function () {
-        return view('spaces');
-    })->name('spaces');
+    Route::get('/spaces', [SpaceController::class, 'index'])->name('spaces');
+    Route::post('/spaces', [SpaceController::class, 'store'])->name('spaces.store');
+    Route::get('/spaces/{space}', [SpaceController::class, 'show'])->name('spaces.show');
+    Route::get('/spaces/{space}/channels/{channel}', [SpaceController::class, 'show'])->name('spaces.channel');
+    Route::post('/spaces/{space}/join', [SpaceController::class, 'join'])->name('spaces.join');
+    Route::post('/spaces/{space}/leave', [SpaceController::class, 'leave'])->name('spaces.leave');
+    Route::delete('/spaces/{space}', [SpaceController::class, 'destroy'])->name('spaces.destroy');
+    Route::post('/spaces/{space}/share', [SpaceController::class, 'shareToFeed'])->name('spaces.share');
+
+    Route::post('/spaces/{space}/channels', [SpaceChannelController::class, 'store'])->name('space-channels.store');
+    Route::delete('/space-channels/{channel}', [SpaceChannelController::class, 'destroy'])->name('space-channels.destroy');
+
+    Route::post('/space-channels/{channel}/messages', [SpaceMessageController::class, 'store'])->name('space-messages.store');
+    Route::get('/space-channels/{channel}/messages/latest', [SpaceMessageController::class, 'latestMessages'])->name('space-messages.latest');
 
     // ---------- MUSIC ----------
     Route::get('/music', function () {

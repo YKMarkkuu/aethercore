@@ -10,7 +10,7 @@ class Message extends Model
     use HasFactory;
 
     protected $fillable = [
-        'conversation_id', 'user_id', 'content', 'type', 'is_read'
+        'conversation_id', 'user_id', 'content', 'type', 'is_read', 'shared_post_id'
     ];
 
     protected $casts = [
@@ -25,6 +25,16 @@ class Message extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * The post this message references, when type === 'shared_post'.
+     * Nullable — either this isn't a shared-post message, or the
+     * original post was deleted (see nullOnDelete on the migration).
+     */
+    public function sharedPost()
+    {
+        return $this->belongsTo(Post::class, 'shared_post_id');
     }
 
     public function markAsRead()

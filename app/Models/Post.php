@@ -9,7 +9,7 @@ class Post extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'content', 'shared_post_id'];
+    protected $fillable = ['user_id', 'content', 'shared_post_id', 'shared_space_id'];
 
     public function user()
     {
@@ -34,6 +34,15 @@ class Post extends Model
     public function sharedPost()
     {
         return $this->belongsTo(Post::class, 'shared_post_id');
+    }
+
+    /**
+     * The Space this post is an invite card for, if any. Nullable for
+     * the same reason as sharedPost() — the Space may have been deleted.
+     */
+    public function sharedSpace()
+    {
+        return $this->belongsTo(Space::class, 'shared_space_id');
     }
 
     public function isLikedBy($userId): bool

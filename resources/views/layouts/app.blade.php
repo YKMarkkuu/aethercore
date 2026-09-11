@@ -147,7 +147,7 @@
         }
 
         // ===== MODE SWITCHING =====
-        function switchMode(mode) {
+        function switchMode(mode, isUserInitiated = true) {
             currentMode = mode;
 
             const aetherBtn = document.getElementById('modeAether');
@@ -167,16 +167,23 @@
                 document.getElementById('sidebar-aether').classList.remove('hidden');
                 document.getElementById('sidebar-music').classList.add('hidden');
                 
-                const path = window.location.pathname;
-                const validSocialPages = ['/feed', '/spaces', '/friends', '/profile', '/conversations', '/settings'];
-                const isProfilePage = path.startsWith('/profile/');
-                const isConversationPage = path.startsWith('/conversations/');
-                const isSettingsPage = path === '/settings' || path.startsWith('/settings/');
-                
-                // Only redirect if we're on a completely unknown page
-                if (!validSocialPages.includes(path) && !isProfilePage && !isConversationPage && !isSettingsPage) {
+                // The ONLY real reason to redirect here: you were sitting
+                // on the music-only page and just switched back to social
+                // mode. Every other page Laravel routed you to is, by
+                // definition, a valid page — no need to re-validate it
+                // against a hardcoded list here (that list previously had
+                // to be updated by hand every time a new route/feature
+                // was added, e.g. Spaces, and it's exactly what silently
+                // broke /spaces/{id} pages before this fix).
+                //
+                // isUserInitiated guards this from running on ordinary
+                // page loads at all (see DOMContentLoaded below) — it
+                // should only ever fire from an actual click on the mode
+                // toggle buttons.
+                if (isUserInitiated && window.location.pathname === '/music') {
                     window.location.href = '/feed';
                 }
+
                 // Restore the sidebar view from localStorage
                 const savedView = loadView();
                 currentView = savedView;
@@ -194,7 +201,7 @@
                 document.getElementById('sidebar-aether').classList.add('hidden');
                 document.getElementById('sidebar-music').classList.remove('hidden');
                 
-                if (window.location.pathname !== '/music') {
+                if (isUserInitiated && window.location.pathname !== '/music') {
                     window.location.href = '/music';
                 }
             }
@@ -244,11 +251,13 @@
             currentView = savedView;
             updateSidebarView(savedView);
             
-            // Handle mode switching
+            // Set up mode-specific UI (logo, search placeholder, sidebar
+            // panel) based on the page we're already on — isUserInitiated:false
+            // means this NEVER redirects, it just paints the right cosmetics.
             if (currentPath === '/music') {
-                switchMode('music');
+                switchMode('music', false);
             } else {
-                switchMode('aether');
+                switchMode('aether', false);
             }
             
             // Only set the sidebar view on main navigation pages

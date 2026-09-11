@@ -70,7 +70,7 @@ class ProfileController extends Controller
         // Needed by partials.post-card for the Posts panel below —
         // without this, likes/comments/repost data isn't loaded and
         // that panel silently falls back to broken/empty state.
-        $user->load(['posts.likes', 'posts.comments.user', 'posts.sharedPost.user']);
+        $user->load(['posts.likes', 'posts.comments.user', 'posts.sharedPost.user', 'posts.sharedSpace.members']);
 
         return view('profile', compact('user', 'feedPosts', 'availableFriends', 'friends'));
     }
@@ -83,7 +83,7 @@ class ProfileController extends Controller
         // Also loads what partials.post-card needs for the Posts panel
         // below (likes/comments/repost data) — without this it silently
         // falls back to broken/empty state.
-        $user->load(['profile', 'posts.likes', 'posts.comments.user', 'posts.sharedPost.user']);
+        $user->load(['profile', 'posts.likes', 'posts.comments.user', 'posts.sharedPost.user', 'posts.sharedSpace.members']);
         
         // Get the viewed user's friend IDs (NOT the logged-in user's) —
         // used for their Activity Feed panel below.

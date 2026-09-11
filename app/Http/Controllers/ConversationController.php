@@ -35,7 +35,7 @@ class ConversationController extends Controller
             abort(403);
         }
 
-        $messages = $conversation->messages()->with('user')->get();
+        $messages = $conversation->messages()->with(['user', 'sharedPost.user'])->get();
 
         // Mark messages as read
         Message::markConversationAsRead($conversation->id, Auth::id());
@@ -134,7 +134,7 @@ class ConversationController extends Controller
         $afterId = (int) $request->query('after', 0);
         $since = $request->query('since');
 
-        $query = $conversation->messages()->with('user')->where('id', '>', $afterId);
+        $query = $conversation->messages()->with(['user', 'sharedPost.user'])->where('id', '>', $afterId);
 
         if ($since) {
             $query->orWhere(function ($q) use ($conversation, $since, $afterId) {
@@ -168,6 +168,10 @@ class ConversationController extends Controller
 
         if ($message->is_deleted) {
             abort(422, 'Cannot edit a deleted message.');
+        }
+
+        if ($message->type === 'shared_post') {
+            abort(422, 'Cannot edit a shared post message.');
         }
 
         $request->validate([
@@ -286,9 +290,28 @@ class ConversationController extends Controller
             }
         }
 
+        $sharedPost = null;
+        if ($message->type === 'shared_post' && $message->shared_post_id) {
+            $original = $message->sharedPost;
+            if ($original) {
+                $original->loadMissing('user');
+                $sharedPost = [
+                    'id' => $original->id,
+                    'content_excerpt' => \Illuminate\Support\Str::limit(strip_tags($original->content ?? ''), 120),
+                    'author_name' => $original->user->display_name,
+                    'author_avatar' => $original->user->getAvatarUrl(),
+                    'profile_url' => route('profile.show', $original->user),
+                ];
+            }
+            // else: original post was deleted — sharedPost stays null,
+            // and the client renders a "no longer available" card.
+        }
+
         return [
             'id' => $message->id,
+            'type' => $message->type,
             'content' => $message->is_deleted ? null : $message->content,
+            'shared_post' => $sharedPost,
             'is_deleted' => (bool) $message->is_deleted,
             'edited_at' => $message->edited_at?->toIso8601String(),
             'time' => $message->created_at->format('g:i A'),

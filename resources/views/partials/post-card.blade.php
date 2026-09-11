@@ -65,6 +65,36 @@
         </div>
     @endif
 
+    <!-- ===== SPACE INVITE CARD ===== -->
+    @if($post->shared_space_id)
+        @php $space = $post->sharedSpace; @endphp
+        <div class="post-space-invite-card">
+            @if($space)
+                <div class="space-icon" style="width: 40px; height: 40px; font-size: 0.9rem;">
+                    @if($space->getIconUrl())
+                        <img src="{{ $space->getIconUrl() }}" alt="{{ $space->name }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px;">
+                    @else
+                        {{ strtoupper($space->name[0] ?? '?') }}
+                    @endif
+                </div>
+                <div style="flex: 1; min-width: 0;">
+                    <div style="font-weight: 700; font-size: 0.85rem; color: #1e1e1e;">{{ $space->name }}</div>
+                    <div style="font-size: 0.65rem; color: #6a6a6a;">{{ $space->members->count() }} {{ \Illuminate\Support\Str::plural('member', $space->members->count()) }}</div>
+                </div>
+                @if($space->isMember(Auth::id()))
+                    <a href="{{ route('spaces.show', $space) }}" class="settings-btn" style="font-size: 0.7rem; text-decoration: none;">View</a>
+                @else
+                    <form action="{{ route('spaces.join', $space) }}" method="POST">
+                        @csrf
+                        <button type="submit" class="settings-btn" style="font-size: 0.7rem;">Join</button>
+                    </form>
+                @endif
+            @else
+                <p style="font-size: 0.7rem; color: #6a6a6a; font-style: italic; margin: 0;">This Space is no longer available.</p>
+            @endif
+        </div>
+    @endif
+
     <div class="post-actions">
         <button type="button" class="post-action-btn post-like-btn {{ $isLiked ? 'post-like-btn-active' : '' }}">
             <svg viewBox="0 0 24 24" fill="{{ $isLiked ? 'currentColor' : 'none' }}" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">

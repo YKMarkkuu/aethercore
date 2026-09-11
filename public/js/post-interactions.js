@@ -13,6 +13,33 @@ document.addEventListener('DOMContentLoaded', function () {
         }, extra);
     }
 
+    /**
+     * Builds one comment row DOM element from a comment object (used by
+     * both the "I just submitted a comment" handler and the live-poll
+     * refresh below) — one template, so they can never drift out of sync
+     * with each other the way feed.blade.php and profile.blade.php once did.
+     */
+    function buildCommentRow(c) {
+        const row = document.createElement('div');
+        row.className = 'post-comment';
+        row.dataset.commentId = c.id;
+        row.innerHTML = `
+            <a href="${c.user.profile_url}" class="post-comment-avatar">${c.user.avatar_url ? `<img src="${c.user.avatar_url}" alt="Avatar" style="width:22px;height:22px;border-radius:50%;object-fit:cover;">` : ''}</a>
+            <div class="post-comment-body">
+                <a href="${c.user.profile_url}" class="post-comment-user"></a>
+                <span class="post-comment-content"></span>
+                <div class="post-comment-meta">
+                    <span>${c.time}</span>
+                    <button type="button" class="post-comment-delete">Delete</button>
+                </div>
+            </div>
+        `;
+        row.querySelector('.post-comment-avatar').textContent = c.user.avatar_url ? '' : (c.user.display_name || '?')[0];
+        row.querySelector('.post-comment-user').textContent = c.user.display_name;
+        row.querySelector('.post-comment-content').textContent = c.content;
+        return row;
+    }
+
     // ===== FORMATTING TOOLBAR =====
     document.body.addEventListener('click', function (e) {
         const btn = e.target.closest('.post-composer .post-format-toolbar button');
@@ -79,26 +106,8 @@ document.addEventListener('DOMContentLoaded', function () {
         })
             .then(r => r.ok ? r.json() : Promise.reject())
             .then(data => {
-                const c = data.comment;
                 const list = postItem.querySelector('.post-comments-list');
-                const row = document.createElement('div');
-                row.className = 'post-comment';
-                row.dataset.commentId = c.id;
-                row.innerHTML = `
-                    <a href="${c.user.profile_url}" class="post-comment-avatar">${c.user.avatar_url ? `<img src="${c.user.avatar_url}" alt="Avatar" style="width:22px;height:22px;border-radius:50%;object-fit:cover;">` : ''}</a>
-                    <div class="post-comment-body">
-                        <a href="${c.user.profile_url}" class="post-comment-user"></a>
-                        <span class="post-comment-content"></span>
-                        <div class="post-comment-meta">
-                            <span>${c.time}</span>
-                            <button type="button" class="post-comment-delete">Delete</button>
-                        </div>
-                    </div>
-                `;
-                row.querySelector('.post-comment-avatar').textContent = c.user.avatar_url ? '' : (c.user.display_name || '?')[0];
-                row.querySelector('.post-comment-user').textContent = c.user.display_name;
-                row.querySelector('.post-comment-content').textContent = c.content;
-                list.appendChild(row);
+                list.appendChild(buildCommentRow(data.comment));
 
                 postItem.querySelector('.post-comment-count').textContent =
                     postItem.querySelectorAll('.post-comment').length;
@@ -200,4 +209,57 @@ document.addEventListener('DOMContentLoaded', function () {
                 friendBtn.textContent = friendBtn.textContent.replace('Sending...', '');
             });
     });
+
+    // ===== LIVE POLLING: likes & comments from other people =====
+    // Every few seconds, refetch current like/comment state for exactly
+    // the posts on screen. Simpler than the chat's "since timestamp"
+    // approach since this only ever covers a small, fixed, already-
+    // rendered set of post ids rather than an open-ended growing list.
+    const postItemsOnPage = document.querySelectorAll('.post-item');
+    if (postItemsOnPage.length > 0) {
+        const postIds = Array.from(postItemsOnPage).map(el => el.dataset.postId);
+
+        function pollPostUpdates() {
+            fetch('/posts/updates', {
+                method: 'POST',
+                headers: apiHeaders({ 'Content-Type': 'application/json' }),
+                body: JSON.stringify({ post_ids: postIds }),
+            })
+                .then(r => r.ok ? r.json() : Promise.reject())
+                .then(data => {
+                    (data.posts || []).forEach(postData => {
+                        const postItem = document.querySelector(`.post-item[data-post-id="${postData.id}"]`);
+                        if (!postItem) return;
+
+                        // Like state
+                        const likeBtn = postItem.querySelector('.post-like-btn');
+                        likeBtn.classList.toggle('post-like-btn-active', postData.liked_by_me);
+                        likeBtn.querySelector('svg').setAttribute('fill', postData.liked_by_me ? 'currentColor' : 'none');
+                        likeBtn.querySelector('.post-like-count').textContent = postData.like_count;
+
+                        // Comments — only touch the DOM if the actual set
+                        // of comment ids changed, so we're not re-rendering
+                        // (and losing scroll position within) an unchanged
+                        // list every single poll cycle.
+                        const list = postItem.querySelector('.post-comments-list');
+                        const currentIds = Array.from(list.querySelectorAll('.post-comment'))
+                            .map(el => el.dataset.commentId)
+                            .join(',');
+                        const incomingIds = postData.comments.map(c => String(c.id)).join(',');
+
+                        if (currentIds !== incomingIds) {
+                            list.innerHTML = '';
+                            postData.comments.forEach(c => list.appendChild(buildCommentRow(c)));
+                        }
+
+                        postItem.querySelector('.post-comment-count').textContent = postData.comments.length;
+                    });
+                })
+                .catch(() => {
+                    // Silent — just try again next interval.
+                });
+        }
+
+        setInterval(pollPostUpdates, 5000);
+    }
 });

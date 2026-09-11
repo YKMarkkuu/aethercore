@@ -102,6 +102,25 @@
 
                     @if($message->is_deleted)
                         <div class="msg-content-xp msg-content-deleted">This message was deleted</div>
+                    @elseif($message->type === 'shared_post' && $message->shared_post_id)
+                        @php $sharedPost = $message->sharedPost; @endphp
+                        <a href="{{ $sharedPost ? route('profile.show', $sharedPost->user) : '#' }}" class="msg-shared-post-card">
+                            @if($sharedPost)
+                                <div class="msg-shared-post-header">
+                                    <div class="msg-shared-post-avatar">
+                                        @if($sharedPost->user->getAvatarUrl())
+                                            <img src="{{ $sharedPost->user->getAvatarUrl() }}" alt="Avatar" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover;">
+                                        @else
+                                            {{ $sharedPost->user->name[0] }}
+                                        @endif
+                                    </div>
+                                    <span class="msg-shared-post-author">{{ $sharedPost->user->display_name }}</span>
+                                </div>
+                                <div class="msg-shared-post-excerpt">{{ \Illuminate\Support\Str::limit(strip_tags($sharedPost->content ?? ''), 120) }}</div>
+                            @else
+                                <span class="msg-shared-post-unavailable">This post is no longer available.</span>
+                            @endif
+                        </a>
                     @else
                         <div class="msg-content-xp">{{ $message->content }}<span class="msg-edited-tag" @if(!$message->edited_at) style="display:none;" @endif>(edited)</span></div>
                         <input type="text" class="msg-edit-input hidden" maxlength="1000" value="{{ $message->content }}">
@@ -127,13 +146,15 @@
                                 <line x1="15" y1="9" x2="15.01" y2="9"/>
                             </svg>
                         </button>
-                        @if($isMine)
+                        @if($isMine && $message->type !== 'shared_post')
                             <button type="button" class="msg-toolbar-btn msg-edit-btn" title="Edit">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M12 20h9"/>
                                     <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
                                 </svg>
                             </button>
+                        @endif
+                        @if($isMine)
                             <button type="button" class="msg-toolbar-btn msg-delete-btn" title="Delete">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M3 6h18"/>
@@ -217,6 +238,30 @@
 
         function reactionIconSvg(type) {
             return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${REACTION_ICONS[type] || ''}</svg>`;
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str ?? '';
+            return div.innerHTML;
+        }
+
+        function sharedPostCardHtml(sharedPost) {
+            if (!sharedPost) {
+                return `<a href="#" class="msg-shared-post-card"><span class="msg-shared-post-unavailable">This post is no longer available.</span></a>`;
+            }
+            const avatarInner = sharedPost.author_avatar
+                ? `<img src="${sharedPost.author_avatar}" alt="Avatar" style="width:20px;height:20px;border-radius:50%;object-fit:cover;">`
+                : escapeHtml((sharedPost.author_name || '?')[0]);
+            return `
+                <a href="${sharedPost.profile_url}" class="msg-shared-post-card">
+                    <div class="msg-shared-post-header">
+                        <div class="msg-shared-post-avatar">${avatarInner}</div>
+                        <span class="msg-shared-post-author">${escapeHtml(sharedPost.author_name)}</span>
+                    </div>
+                    <div class="msg-shared-post-excerpt">${escapeHtml(sharedPost.content_excerpt)}</div>
+                </a>
+            `;
         }
 
         function isNearBottom(el, threshold = 80) {
@@ -402,6 +447,7 @@
             if (message.is_deleted) {
                 bubble.querySelector('.msg-content-xp')?.remove();
                 bubble.querySelector('.msg-edit-input')?.remove();
+                bubble.querySelector('.msg-shared-post-card')?.remove();
                 const tombstone = document.createElement('div');
                 tombstone.className = 'msg-content-xp msg-content-deleted';
                 tombstone.textContent = 'This message was deleted';
@@ -478,6 +524,11 @@
                 `<button type="button" class="reaction-picker-btn" data-reaction-type="${type}">${reactionIconSvg(type)}</button>`
             ).join('');
 
+            const isSharedPost = message.type === 'shared_post';
+            const contentHtml = isSharedPost
+                ? sharedPostCardHtml(message.shared_post)
+                : `<div class="msg-content-xp"></div><input type="text" class="msg-edit-input hidden" maxlength="1000">`;
+
             row.innerHTML = `
                 ${avatarHtml}
                 <div class="msg-bubble-xp">
@@ -487,8 +538,7 @@
                             <span class="msg-time-xp">${message.time}</span>
                         </div>
                     `}
-                    <div class="msg-content-xp"></div>
-                    <input type="text" class="msg-edit-input hidden" maxlength="1000">
+                    ${contentHtml}
                     <div class="msg-reactions" style="display:none;"></div>
                 </div>
                 <div class="msg-toolbar">
@@ -497,12 +547,14 @@
                             <circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>
                         </svg>
                     </button>
-                    ${isMine ? `
+                    ${isMine && !isSharedPost ? `
                         <button type="button" class="msg-toolbar-btn msg-edit-btn" title="Edit">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
                             </svg>
                         </button>
+                    ` : ''}
+                    ${isMine ? `
                         <button type="button" class="msg-toolbar-btn msg-delete-btn" title="Delete">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
@@ -513,15 +565,17 @@
                 </div>
             `;
 
-            // Set via textContent (not innerHTML) so message content can
-            // never be interpreted as HTML/JS — avoids an XSS hole.
-            row.querySelector('.msg-content-xp').append(document.createTextNode(message.content || ''));
-            const editedTag = document.createElement('span');
-            editedTag.className = 'msg-edited-tag';
-            editedTag.textContent = '(edited)';
-            editedTag.style.display = message.edited_at ? '' : 'none';
-            row.querySelector('.msg-content-xp').appendChild(editedTag);
-            row.querySelector('.msg-edit-input').value = message.content || '';
+            if (!isSharedPost) {
+                // Set via textContent (not innerHTML) so message content
+                // can never be interpreted as HTML/JS — avoids an XSS hole.
+                row.querySelector('.msg-content-xp').append(document.createTextNode(message.content || ''));
+                const editedTag = document.createElement('span');
+                editedTag.className = 'msg-edited-tag';
+                editedTag.textContent = '(edited)';
+                editedTag.style.display = message.edited_at ? '' : 'none';
+                row.querySelector('.msg-content-xp').appendChild(editedTag);
+                row.querySelector('.msg-edit-input').value = message.content || '';
+            }
 
             chatMessages.appendChild(row);
             renderReactions(row, message.reactions);
