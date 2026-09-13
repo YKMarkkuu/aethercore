@@ -1,4 +1,52 @@
 /* ============================================
+   THEME VARIABLES
+   ============================================
+   The whole point of this block: a future theme file only needs to
+   redefine these (scoped to a class/attribute, e.g. [data-theme="dark"])
+   instead of re-overriding hundreds of individual rules across
+   base.css/components.css/utilities.css. Nothing below this block should
+   ever hardcode a hex color again — always reference one of these.
+   Works in inline style="" attributes too: style="color: var(--text-muted)".
+*/
+:root {
+    /* Surfaces */
+    --surface-primary: #f0edd8;
+    --surface-secondary: #d4d0c8;
+    --surface-panel-header: #ece9d8;
+    --surface-hover: #e0dcd0;
+    --surface-input: #ffffff;
+    --surface-post: #f8f5ec;
+    --surface-sunken: #e8e4dc;
+
+    /* Borders */
+    --border-default: #b0a8a0;
+    --border-light: #d0c8c0;
+    --border-subtle: #e0dcd0;
+    --border-dark: #a09890;
+
+    /* Text */
+    --text-primary: #1e1e1e;
+    --text-muted: #6a6a6a;
+    --text-faint: #9a9488;
+
+    /* Accent (blue — links, buttons, active states) */
+    --accent-light: #245edb;
+    --accent: #3a7bd5;
+    --accent-dark: #1a4a9e;
+
+    /* Status colors */
+    --success-bg: #d4e8d4;
+    --success-border: #8ab88a;
+    --success-text: #1e4a1e;
+    --warning-bg: #f0e8c8;
+    --warning-border: #c8b888;
+    --warning-text: #6a5a2a;
+    --danger-bg: #f0d8d8;
+    --danger-border: #c8a0a0;
+    --danger-text: #6a2a2a;
+}
+
+/* ============================================
    BASE — Reset + Layout
    ============================================ */
 
@@ -10,8 +58,8 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #d4d0c8;
-    color: #1e1e1e;
+    background: var(--surface-secondary);
+    color: var(--text-primary);
     height: 100vh;
     overflow: hidden;
 }

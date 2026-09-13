@@ -25,7 +25,15 @@ require __DIR__.'/auth.php';
 // ============================================
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('welcome');
+
+Route::get('/terms', function () {
+    return view('legal.terms');
+})->name('legal.terms');
+
+Route::get('/privacy', function () {
+    return view('legal.privacy');
+})->name('legal.privacy');
 
 
 // ============================================
