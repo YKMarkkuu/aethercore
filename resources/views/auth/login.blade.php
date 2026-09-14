@@ -26,21 +26,21 @@
 
             <div class="feature-list">
                 <div class="feature-item">
-                    <span class="feature-icon">🏠</span>
+                    <span class="feature-icon">@include('partials.icon', ['type' => 'home', 'size' => 20])</span>
                     <div>
                         <span class="feature-title">AetherSpaces</span>
                         <span class="feature-desc">Create and join communities</span>
                     </div>
                 </div>
                 <div class="feature-item">
-                    <span class="feature-icon">🎵</span>
+                    <span class="feature-icon">@include('partials.icon', ['type' => 'music', 'size' => 20])</span>
                     <div>
                         <span class="feature-title">AetherTunes</span>
                         <span class="feature-desc">Discover music with friends</span>
                     </div>
                 </div>
                 <div class="feature-item">
-                    <span class="feature-icon">💬</span>
+                    <span class="feature-icon">@include('partials.icon', ['type' => 'chat', 'size' => 20])</span>
                     <div>
                         <span class="feature-title">AetherChat</span>
                         <span class="feature-desc">Real-time messaging</span>
@@ -56,7 +56,7 @@
                 <div class="auth-field">
                     <label for="email">Email Address</label>
                     <div class="field-wrapper">
-                        <span class="field-icon">✉</span>
+                        <span class="field-icon">@include('partials.icon', ['type' => 'envelope', 'size' => 15])</span>
                         <input type="email" name="email" id="email" value="{{ old('email') }}" placeholder="you@example.com" required autofocus>
                     </div>
                     @error('email')
@@ -67,7 +67,7 @@
                 <div class="auth-field">
                     <label for="password">Password</label>
                     <div class="field-wrapper">
-                        <span class="field-icon">🔒</span>
+                        <span class="field-icon">@include('partials.icon', ['type' => 'lock', 'size' => 15])</span>
                         <input type="password" name="password" id="password" placeholder="••••••••" required>
                     </div>
                     @error('password')

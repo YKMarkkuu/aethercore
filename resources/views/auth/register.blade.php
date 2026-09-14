@@ -26,21 +26,21 @@
 
             <div class="feature-list">
                 <div class="feature-item">
-                    <span class="feature-icon">✨</span>
+                    <span class="feature-icon">@include('partials.icon', ['type' => 'sparkle', 'size' => 20])</span>
                     <div>
                         <span class="feature-title">Free Forever</span>
                         <span class="feature-desc">No hidden fees, no credit card</span>
                     </div>
                 </div>
                 <div class="feature-item">
-                    <span class="feature-icon">🎨</span>
+                    <span class="feature-icon">@include('partials.icon', ['type' => 'palette', 'size' => 20])</span>
                     <div>
                         <span class="feature-title">Custom Profiles</span>
                         <span class="feature-desc">Make it yours</span>
                     </div>
                 </div>
                 <div class="feature-item">
-                    <span class="feature-icon">🔒</span>
+                    <span class="feature-icon">@include('partials.icon', ['type' => 'lock', 'size' => 20])</span>
                     <div>
                         <span class="feature-title">Privacy First</span>
                         <span class="feature-desc">You control your data</span>
@@ -56,7 +56,7 @@
                 <div class="auth-field">
                     <label for="name">Display Name</label>
                     <div class="field-wrapper">
-                        <span class="field-icon">👤</span>
+                        <span class="field-icon">@include('partials.icon', ['type' => 'person', 'size' => 15])</span>
                         <input type="text" name="name" id="name" value="{{ old('name') }}" placeholder="Your name" required>
                     </div>
                     @error('name')
@@ -79,7 +79,7 @@
                 <div class="auth-field">
                     <label for="email">Email Address</label>
                     <div class="field-wrapper">
-                        <span class="field-icon">✉</span>
+                        <span class="field-icon">@include('partials.icon', ['type' => 'envelope', 'size' => 15])</span>
                         <input type="email" name="email" id="email" value="{{ old('email') }}" placeholder="you@example.com" required>
                     </div>
                     @error('email')
@@ -90,7 +90,7 @@
                 <div class="auth-field">
                     <label for="password">Password</label>
                     <div class="field-wrapper">
-                        <span class="field-icon">🔒</span>
+                        <span class="field-icon">@include('partials.icon', ['type' => 'lock', 'size' => 15])</span>
                         <input type="password" name="password" id="password" placeholder="••••••••" required>
                     </div>
                     @error('password')
@@ -101,7 +101,7 @@
                 <div class="auth-field">
                     <label for="password_confirmation">Confirm Password</label>
                     <div class="field-wrapper">
-                        <span class="field-icon">✅</span>
+                        <span class="field-icon">@include('partials.icon', ['type' => 'check', 'size' => 15])</span>
                         <input type="password" name="password_confirmation" id="password_confirmation" placeholder="••••••••" required>
                     </div>
                 </div>

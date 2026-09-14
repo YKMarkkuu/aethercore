@@ -30,21 +30,21 @@
 
             <div class="feature-list">
                 <div class="feature-item">
-                    <span class="feature-icon">🏠</span>
+                    <span class="feature-icon">@include('partials.icon', ['type' => 'home', 'size' => 20])</span>
                     <div>
                         <span class="feature-title">AetherSpaces</span>
                         <span class="feature-desc">Create and join your own multi-channel communities</span>
                     </div>
                 </div>
                 <div class="feature-item">
-                    <span class="feature-icon">🎵</span>
+                    <span class="feature-icon">@include('partials.icon', ['type' => 'music', 'size' => 20])</span>
                     <div>
                         <span class="feature-title">AetherTunes</span>
                         <span class="feature-desc">Your Top 8 Artists, Albums & Songs, live from Last.fm</span>
                     </div>
                 </div>
                 <div class="feature-item">
-                    <span class="feature-icon">💬</span>
+                    <span class="feature-icon">@include('partials.icon', ['type' => 'chat', 'size' => 20])</span>
                     <div>
                         <span class="feature-title">AetherChat</span>
                         <span class="feature-desc">Real-time DMs with reactions, edits, and shared posts</span>

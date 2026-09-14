@@ -6,7 +6,7 @@
 <div class="window window-narrow">
     <div class="window-title-bar">
         <div class="window-title">
-            <span class="window-icon">🔒</span>
+            <span class="window-icon">@include('partials.icon', ['type' => 'lock', 'size' => 16])</span>
             <span>AetherCore — Privacy Policy</span>
         </div>
         <div class="window-controls">
