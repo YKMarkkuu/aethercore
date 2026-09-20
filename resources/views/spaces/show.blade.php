@@ -76,7 +76,7 @@
                             && $lastTimestamp !== null
                             && $message->created_at->diffInSeconds($lastTimestamp) <= $groupThresholdSeconds;
                         $isMine = $message->user_id === auth()->id();
-                        $msgReactions = $reactionsByMessage[$message->id] ?? ['counts' => [], 'mine' => null];
+                        $msgReactions = $reactionsByMessage[$message->id] ?? ['counts' => [], 'mine' => []];
                     @endphp
                     <div class="chat-message-xp @if($isGrouped) chat-message-grouped @endif" data-message-id="{{ $message->id }}" data-user-id="{{ $message->user_id }}">
                         @if($isGrouped)
@@ -221,6 +221,12 @@
             },
             features: { reply: true, sharedPost: false },
             profileUrl: (id) => `/profile/${id}`,
+            currentUser: {
+                id: {{ auth()->id() }},
+                name: @json(auth()->user()->name),
+                display_name: @json(auth()->user()->display_name ?? auth()->user()->name),
+                avatar_url: @json(auth()->user()->getAvatarUrl()),
+            },
         });
     });
 </script>

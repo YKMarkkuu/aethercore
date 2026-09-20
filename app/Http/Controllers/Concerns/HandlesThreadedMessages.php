@@ -8,19 +8,14 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Shared behavior for anything that acts like a "message" — editable,
- * soft-deletable (tombstone), reactable. Used by both DM chat
- * (ConversationController → messages/message_reactions) and Space channel
- * chat (SpaceMessageController → space_messages/space_message_reactions).
+ * soft-deletable (tombstone), reactable with multiple simultaneous
+ * reaction types per user. Used by both DM chat (ConversationController)
+ * and Space channel chat (SpaceMessageController).
  *
  * A using controller only needs to implement three small things:
  *  - reactionsTable(): the pivot table name for that message type
  *  - serializeMessage($message): the full JSON shape sent to the client
  *  - userBelongsToThread($message, $userId): authorization check for reacting
- *
- * Everything else (edit, delete, toggle-reaction, and the "new since this
- * id OR changed since this timestamp" polling shape) lives here once, so a
- * future fix or feature (new reaction type, reaction limits, whatever)
- * only has to be written once and both chat surfaces get it.
  */
 trait HandlesThreadedMessages
 {
@@ -36,8 +31,9 @@ trait HandlesThreadedMessages
     abstract protected function userBelongsToThread($message, int $userId): bool;
 
     /**
-     * Reaction counts + "which one is mine" — both controllers' serializeMessage()
-     * call into this so the counting logic itself isn't duplicated either.
+     * Reaction counts per type, plus every type the CURRENT user has
+     * reacted with on this message ('mine' is an array now — a user can
+     * have several active reaction types on one message at once).
      */
     protected function serializeReactions($message): array
     {
@@ -46,23 +42,17 @@ trait HandlesThreadedMessages
             ->get();
 
         $counts = [];
-        $mine = null;
+        $mine = [];
         foreach ($rows as $row) {
             $counts[$row->type] = ($counts[$row->type] ?? 0) + 1;
             if ($row->user_id === Auth::id()) {
-                $mine = $row->type;
+                $mine[] = $row->type;
             }
         }
 
         return ['counts' => $counts, 'mine' => $mine];
     }
 
-    /**
-     * Edit a message's content. Author-only. Blocked once deleted, and
-     * blocked for a "shared_post"-style message if the model has that
-     * concept (DM messages do, Space messages currently don't — the
-     * isset() guard makes this a no-op for models without a `type` column).
-     */
     protected function updateMessageContent(Request $request, $message)
     {
         if ($message->user_id !== Auth::id()) {
@@ -88,10 +78,6 @@ trait HandlesThreadedMessages
         return response()->json(['message' => $this->serializeMessage($message)]);
     }
 
-    /**
-     * Soft-delete: wipe content, flip the tombstone flag, clear any
-     * reactions (a reaction on a tombstone means nothing). Author-only.
-     */
     protected function softDeleteMessage($message)
     {
         if ($message->user_id !== Auth::id()) {
@@ -108,9 +94,9 @@ trait HandlesThreadedMessages
     }
 
     /**
-     * Toggle a reaction: same type again removes it, a different type
-     * swaps it, nothing existing inserts a new one. One active reaction
-     * per user per message.
+     * Toggle ONE reaction type: on if the user doesn't have it yet on this
+     * message, off if they do — fully independent of any other types they
+     * already have. Multiple simultaneous types are allowed.
      */
     protected function toggleReaction(Request $request, $message, int $userId)
     {
@@ -132,15 +118,11 @@ trait HandlesThreadedMessages
         $existing = DB::table($table)
             ->where('message_id', $message->id)
             ->where('user_id', $userId)
+            ->where('type', $type)
             ->first();
 
-        if ($existing && $existing->type === $type) {
+        if ($existing) {
             DB::table($table)->where('id', $existing->id)->delete();
-        } elseif ($existing) {
-            DB::table($table)->where('id', $existing->id)->update([
-                'type' => $type,
-                'updated_at' => now(),
-            ]);
         } else {
             DB::table($table)->insert([
                 'message_id' => $message->id,

@@ -2139,3 +2139,45 @@
 .msg-highlight-flash {
     animation: jumpHighlight 1.2s ease;
 }
+
+/* ===== OPTIMISTIC SEND / RETRY STATES ===== */
+.msg-pending .msg-bubble-xp {
+    opacity: 0.6;
+}
+.msg-pending .msg-time-xp {
+    font-style: italic;
+}
+
+.msg-failed .msg-bubble-xp {
+    opacity: 0.9;
+}
+.msg-failed-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.2rem;
+    font-size: 0.65rem;
+    color: #a03030;
+}
+.msg-retry-btn,
+.msg-remove-btn {
+    background: none;
+    border: 1px solid #c8a0a0;
+    border-radius: 3px;
+    color: #a03030;
+    font-size: 0.6rem;
+    padding: 0.05rem 0.4rem;
+    cursor: pointer;
+    font-family: inherit;
+}
+.msg-retry-btn:hover,
+.msg-remove-btn:hover {
+    background: #f0d8d8;
+}
+
+/* ===== REACTION PICKER: shows which types you already used ===== */
+.reaction-picker-btn-active {
+    background: #d8e6fb;
+    color: #1a4a9e;
+    border-radius: 3px;
+}

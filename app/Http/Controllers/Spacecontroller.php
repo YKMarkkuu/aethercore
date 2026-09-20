@@ -102,12 +102,12 @@ class SpaceController extends Controller
 
             foreach ($rows as $row) {
                 if (!isset($reactionsByMessage[$row->message_id])) {
-                    $reactionsByMessage[$row->message_id] = ['counts' => [], 'mine' => null];
+                    $reactionsByMessage[$row->message_id] = ['counts' => [], 'mine' => []];
                 }
                 $reactionsByMessage[$row->message_id]['counts'][$row->type] =
                     ($reactionsByMessage[$row->message_id]['counts'][$row->type] ?? 0) + 1;
                 if ($row->user_id === Auth::id()) {
-                    $reactionsByMessage[$row->message_id]['mine'] = $row->type;
+                    $reactionsByMessage[$row->message_id]['mine'][] = $row->type;
                 }
             }
         }

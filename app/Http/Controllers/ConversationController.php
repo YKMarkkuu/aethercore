@@ -30,14 +30,15 @@ class ConversationController extends Controller
             abort(403);
         }
 
-        $messages = $conversation->messages()->with(['user', 'sharedPost.user'])->get();
+        $messages = $conversation->messages()->with(['user', 'sharedPost.user', 'replyTo.user'])->get();
 
         Message::markConversationAsRead($conversation->id, Auth::id());
 
         $otherUser = $conversation->getOtherParticipant(Auth::id());
 
         // Reaction data for the initial paint, so pills don't "pop in" a
-        // few seconds late waiting on the first poll cycle.
+        // few seconds late waiting on the first poll cycle. 'mine' is an
+        // array now — a user can have several reaction types on one message.
         $reactionsByMessage = [];
         if ($messages->isNotEmpty()) {
             $rows = DB::table($this->reactionsTable())
@@ -46,12 +47,12 @@ class ConversationController extends Controller
 
             foreach ($rows as $row) {
                 if (!isset($reactionsByMessage[$row->message_id])) {
-                    $reactionsByMessage[$row->message_id] = ['counts' => [], 'mine' => null];
+                    $reactionsByMessage[$row->message_id] = ['counts' => [], 'mine' => []];
                 }
                 $reactionsByMessage[$row->message_id]['counts'][$row->type] =
                     ($reactionsByMessage[$row->message_id]['counts'][$row->type] ?? 0) + 1;
                 if ($row->user_id === Auth::id()) {
-                    $reactionsByMessage[$row->message_id]['mine'] = $row->type;
+                    $reactionsByMessage[$row->message_id]['mine'][] = $row->type;
                 }
             }
         }
@@ -67,21 +68,35 @@ class ConversationController extends Controller
 
         $request->validate([
             'content' => 'required|string|max:1000',
+            'reply_to_id' => 'nullable|integer',
         ]);
+
+        $replyToId = null;
+        if ($request->filled('reply_to_id')) {
+            // Reply target must be a real, non-deleted message in THIS
+            // conversation — otherwise silently drop the link (stale
+            // client) rather than erroring.
+            $validReply = $conversation->messages()
+                ->where('id', $request->reply_to_id)
+                ->where('is_deleted', false)
+                ->exists();
+
+            if ($validReply) {
+                $replyToId = (int) $request->reply_to_id;
+            }
+        }
 
         $message = Message::create([
             'conversation_id' => $conversation->id,
             'user_id' => Auth::id(),
             'content' => $request->content,
+            'reply_to_id' => $replyToId,
         ]);
 
         $conversation->update(['last_message_at' => now()]);
 
-        $message->load('user');
+        $message->load(['user', 'replyTo.user']);
 
-        // Wrapped in try/catch: the message is already safely saved above
-        // by this point, so a broadcasting failure should never turn into
-        // a failed response for the sender.
         try {
             broadcast(new NewMessageEvent($message));
         } catch (\Throwable $e) {
@@ -101,10 +116,6 @@ class ConversationController extends Controller
         return redirect()->route('conversations.show', $conversation);
     }
 
-    /**
-     * Polling endpoint used by conversation-show.blade.php's ChatThread
-     * instance instead of WebSocket broadcasting.
-     */
     public function latestMessages(Request $request, Conversation $conversation)
     {
         if (!$conversation->users()->where('user_id', Auth::id())->exists()) {
@@ -114,7 +125,7 @@ class ConversationController extends Controller
         $afterId = (int) $request->query('after', 0);
         $since = $request->query('since');
 
-        $query = $conversation->messages()->with(['user', 'sharedPost.user'])->where('id', '>', $afterId);
+        $query = $conversation->messages()->with(['user', 'sharedPost.user', 'replyTo.user'])->where('id', '>', $afterId);
 
         if ($since) {
             $query->orWhere(function ($q) use ($conversation, $since, $afterId) {
@@ -129,19 +140,19 @@ class ConversationController extends Controller
 
     public function updateMessage(Request $request, Message $message)
     {
-        $message->load('user');
+        $message->load(['user', 'replyTo.user']);
         return $this->updateMessageContent($request, $message);
     }
 
     public function destroyMessage(Message $message)
     {
-        $message->load('user');
+        $message->load(['user', 'replyTo.user']);
         return $this->softDeleteMessage($message);
     }
 
     public function reactToMessage(Request $request, Message $message)
     {
-        $message->load('user');
+        $message->load(['user', 'replyTo.user']);
         return $this->toggleReaction($request, $message, Auth::id());
     }
 
@@ -155,11 +166,6 @@ class ConversationController extends Controller
         return $message->conversation->users()->where('user_id', $userId)->exists();
     }
 
-    /**
-     * Consistent JSON shape for a DM message, used by store(), the
-     * polling payload, and every trait-driven action so the client only
-     * ever needs one render/patch code path.
-     */
     protected function serializeMessage($message): array
     {
         $sharedPost = null;
@@ -175,8 +181,25 @@ class ConversationController extends Controller
                     'profile_url' => route('profile.show', $original->user),
                 ];
             }
-            // else: original post was deleted — sharedPost stays null, and
-            // the client renders a "no longer available" card.
+        }
+
+        $replyTo = null;
+        if ($message->reply_to_id) {
+            $original = $message->replyTo;
+            if ($original) {
+                $excerpt = $original->is_deleted
+                    ? null
+                    : ($original->type === 'shared_post'
+                        ? 'Shared a post'
+                        : \Illuminate\Support\Str::limit(strip_tags($original->content ?? ''), 80));
+
+                $replyTo = [
+                    'id' => $original->id,
+                    'author_name' => $original->user->display_name,
+                    'content_excerpt' => $excerpt,
+                    'is_deleted' => (bool) $original->is_deleted,
+                ];
+            }
         }
 
         return [
@@ -184,6 +207,7 @@ class ConversationController extends Controller
             'type' => $message->type,
             'content' => $message->is_deleted ? null : $message->content,
             'shared_post' => $sharedPost,
+            'reply_to' => $replyTo,
             'is_deleted' => (bool) $message->is_deleted,
             'edited_at' => $message->edited_at?->toIso8601String(),
             'time' => $message->created_at->format('g:i A'),

@@ -1,12 +1,11 @@
-// Shared chat-thread engine for BOTH DM chat (conversations/show.blade.php)
-// and Space channel chat (spaces/show.blade.php). Handles: send, poll,
-// append/patch DOM, edit, delete (tombstone), reactions, and optional
-// reply-to threading / shared-post cards behind feature flags. Behavior
-// lives ONLY here — a future feature (mentions, pins, whatever) gets
-// written once and both surfaces pick it up by turning the flag on.
+// Shared chat-thread engine for BOTH DM chat and Space channel chat.
+// Handles: optimistic send, poll, append/patch DOM, edit, delete
+// (tombstone), multi-type reactions, and optional reply-to threading /
+// shared-post cards behind feature flags. Behavior lives ONLY here — a
+// future feature gets written once and both surfaces pick it up by
+// turning a flag on.
 //
-// Usage: window.ChatThread.init({ ...config }) — see spaces/show.blade.php
-// or conversations/show.blade.php for a worked example.
+// Usage: window.ChatThread.init({ ...config })
 (function () {
     const REACTION_TYPES = ['like', 'love', 'laugh', 'wow', 'sad'];
     const REACTION_ICONS = {
@@ -31,7 +30,7 @@
     function init(config) {
         const {
             containerId, formId, inputId, sendBtnId,
-            currentUserId, endpoints, initialState,
+            currentUserId, currentUser, endpoints, initialState,
             features = {}, profileUrl, pollIntervalMs = 3000,
         } = config;
 
@@ -47,6 +46,8 @@
         let lastMessageTime = initialState.lastMessageTime;
         let lastMessageId = initialState.lastMessageId;
         let lastPollTime = initialState.lastPollTime;
+        let pollInFlight = false;
+        let pendingSeq = 0;
 
         let replyBar, replyBarTarget, replyBarCancel, currentReplyTo = null;
         if (features.reply) {
@@ -57,7 +58,7 @@
         }
 
         function setReplyTarget(id, authorName, excerpt) {
-            currentReplyTo = { id, authorName };
+            currentReplyTo = { id, authorName, excerpt };
             if (replyBarTarget) replyBarTarget.textContent = authorName + (excerpt ? ' — ' + excerpt : '');
             replyBar?.classList.remove('hidden');
             chatInput.focus();
@@ -113,8 +114,112 @@
             </a>`;
         }
 
-        // ===== toolbar / reaction / edit / delete / reply-jump wiring =====
+        // ===== BUILD A MESSAGE ROW (used for real messages AND optimistic ones) =====
+        function buildRow(message, isGrouped, opts = {}) {
+            const interactive = opts.interactive !== false;
+            const isMine = message.user.id === currentUserId;
+            const isSharedPost = features.sharedPost && message.type === 'shared_post';
+
+            const row = document.createElement('div');
+            row.className = 'chat-message-xp'
+                + (isGrouped ? ' chat-message-grouped' : '')
+                + (opts.pending ? ' msg-pending' : '');
+            row.dataset.messageId = message.id;
+            row.dataset.userId = message.user.id;
+
+            let avatarHtml;
+            if (isGrouped) {
+                avatarHtml = `<div class="msg-avatar-spacer"><span class="msg-hover-time">${message.time}</span></div>`;
+            } else if (message.user.avatar_url) {
+                avatarHtml = `<div class="msg-avatar-xp"><img src="${message.user.avatar_url}" alt="Avatar" style="width:36px;height:36px;border-radius:50%;object-fit:cover;"></div>`;
+            } else {
+                avatarHtml = `<div class="msg-avatar-xp">${escapeHtml((message.user.display_name || message.user.name || '?')[0])}</div>`;
+            }
+
+            const pickerButtonsHtml = REACTION_TYPES.map(type =>
+                `<button type="button" class="reaction-picker-btn" data-reaction-type="${type}">${reactionIconSvg(type)}</button>`
+            ).join('');
+
+            const contentHtml = isSharedPost
+                ? sharedPostCardHtml(message.shared_post)
+                : `${replyPreviewHtml(message.reply_to)}<div class="msg-content-xp"></div><input type="text" class="msg-edit-input hidden" maxlength="1000">`;
+
+            const toolbarHtml = !interactive ? '' : `
+                <div class="msg-toolbar">
+                    <button type="button" class="msg-toolbar-btn msg-react-btn" title="React">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>
+                        </svg>
+                    </button>
+                    ${features.reply ? `
+                    <button type="button" class="msg-toolbar-btn msg-reply-btn" title="Reply">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/>
+                        </svg>
+                    </button>` : ''}
+                    ${isMine && !isSharedPost ? `
+                        <button type="button" class="msg-toolbar-btn msg-edit-btn" title="Edit">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                            </svg>
+                        </button>
+                    ` : ''}
+                    ${isMine ? `
+                        <button type="button" class="msg-toolbar-btn msg-delete-btn" title="Delete">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                            </svg>
+                        </button>
+                    ` : ''}
+                    <div class="reaction-picker hidden">${pickerButtonsHtml}</div>
+                </div>
+            `;
+
+            row.innerHTML = `
+                ${avatarHtml}
+                <div class="msg-bubble-xp">
+                    ${isGrouped ? '' : `<div class="msg-header-xp">${usernameHtml(message)}<span class="msg-time-xp">${message.time}</span></div>`}
+                    ${contentHtml}
+                    <div class="msg-reactions" style="display:none;"></div>
+                </div>
+                ${toolbarHtml}
+            `;
+
+            if (!isSharedPost) {
+                row.querySelector('.msg-content-xp').append(document.createTextNode(message.content || ''));
+                const editedTag = document.createElement('span');
+                editedTag.className = 'msg-edited-tag';
+                editedTag.textContent = '(edited)';
+                editedTag.style.display = message.edited_at ? '' : 'none';
+                row.querySelector('.msg-content-xp').appendChild(editedTag);
+                const editInput = row.querySelector('.msg-edit-input');
+                if (editInput) editInput.value = message.content || '';
+            }
+
+            return row;
+        }
+
+        // ===== TOOLBAR / REACTION PICKER / EDIT / DELETE / REPLY-JUMP / RETRY =====
         chatMessages.addEventListener('click', function (e) {
+            const retryBtn = e.target.closest('.msg-retry-btn');
+            if (retryBtn) {
+                const row = retryBtn.closest('.chat-message-xp');
+                const contentEl = row.querySelector('.msg-content-xp');
+                const text = contentEl ? contentEl.textContent.replace('(edited)', '').trim() : '';
+                const replyTarget = row.dataset.pendingReplyId
+                    ? { id: row.dataset.pendingReplyId, authorName: row.dataset.pendingReplyAuthor, excerpt: row.dataset.pendingReplyExcerpt }
+                    : null;
+                row.remove();
+                sendMessage(text, replyTarget);
+                return;
+            }
+
+            const removeBtn = e.target.closest('.msg-remove-btn');
+            if (removeBtn) {
+                removeBtn.closest('.chat-message-xp').remove();
+                return;
+            }
+
             if (features.reply) {
                 const replyPreview = e.target.closest('.msg-reply-preview');
                 if (replyPreview && replyPreview.dataset.jumpTo) {
@@ -138,7 +243,16 @@
                 const wasOpen = !picker.classList.contains('hidden');
                 document.querySelectorAll('.reaction-picker').forEach(p => p.classList.add('hidden'));
                 document.querySelectorAll('.msg-toolbar').forEach(t => t.classList.remove('msg-toolbar-active'));
-                if (!wasOpen) { picker.classList.remove('hidden'); toolbar.classList.add('msg-toolbar-active'); }
+                if (!wasOpen) {
+                    picker.classList.remove('hidden');
+                    toolbar.classList.add('msg-toolbar-active');
+                    // Show which types the user already has active, so the
+                    // picker itself doubles as a quick "your reactions" view.
+                    const mineTypes = Array.from(row.querySelectorAll('.msg-reaction-pill-mine')).map(p => p.dataset.reactionType);
+                    picker.querySelectorAll('.reaction-picker-btn').forEach(btn => {
+                        btn.classList.toggle('reaction-picker-btn-active', mineTypes.includes(btn.dataset.reactionType));
+                    });
+                }
                 return;
             }
 
@@ -258,97 +372,36 @@
             const container = row.querySelector('.msg-reactions');
             if (!container) return;
             const counts = reactions?.counts || {};
-            const mine = reactions?.mine || null;
+            const mine = reactions?.mine || [];
             const types = Object.keys(counts);
             if (types.length === 0) { container.style.display = 'none'; container.innerHTML = ''; return; }
             container.style.display = 'flex';
             container.innerHTML = types.map(type => `
-                <button type="button" class="msg-reaction-pill ${mine === type ? 'msg-reaction-pill-mine' : ''}" data-reaction-type="${type}">
+                <button type="button" class="msg-reaction-pill ${mine.includes(type) ? 'msg-reaction-pill-mine' : ''}" data-reaction-type="${type}">
                     ${reactionIconSvg(type)}
                     <span class="msg-reaction-count">${counts[type]}</span>
                 </button>`).join('');
         }
 
+        // ===== APPEND (real messages — from the store response or a poll) =====
         function appendMessage(message, isOwnMessage) {
+            // Dedupe guard: if this id is already rendered (a poll racing
+            // with the message you just sent, or a duplicate delivery),
+            // patch it instead of creating a second row. This is the fix
+            // for messages briefly appearing to send twice.
+            if (chatMessages.querySelector(`[data-message-id="${message.id}"]`)) {
+                patchMessage(message);
+                return;
+            }
+
             const timeMs = message.created_at ? new Date(message.created_at).getTime() : Date.now();
             const isGrouped = message.user.id === lastMessageUserId
                 && lastMessageTime !== null
                 && (timeMs - lastMessageTime) <= GROUP_THRESHOLD_MS
-                && !(features.reply && message.reply_to); // a reply always starts its own group
+                && !(features.reply && message.reply_to);
 
             const wasNearBottom = isNearBottom(chatMessages);
-            const isMine = message.user.id === currentUserId;
-            const isSharedPost = features.sharedPost && message.type === 'shared_post';
-
-            const row = document.createElement('div');
-            row.className = 'chat-message-xp' + (isGrouped ? ' chat-message-grouped' : '');
-            row.dataset.messageId = message.id;
-            row.dataset.userId = message.user.id;
-
-            let avatarHtml;
-            if (isGrouped) {
-                avatarHtml = `<div class="msg-avatar-spacer"><span class="msg-hover-time">${message.time}</span></div>`;
-            } else if (message.user.avatar_url) {
-                avatarHtml = `<div class="msg-avatar-xp"><img src="${message.user.avatar_url}" alt="Avatar" style="width:36px;height:36px;border-radius:50%;object-fit:cover;"></div>`;
-            } else {
-                avatarHtml = `<div class="msg-avatar-xp">${(message.user.display_name || message.user.name || '?')[0]}</div>`;
-            }
-
-            const pickerButtonsHtml = REACTION_TYPES.map(type =>
-                `<button type="button" class="reaction-picker-btn" data-reaction-type="${type}">${reactionIconSvg(type)}</button>`
-            ).join('');
-
-            const contentHtml = isSharedPost
-                ? sharedPostCardHtml(message.shared_post)
-                : `${replyPreviewHtml(message.reply_to)}<div class="msg-content-xp"></div><input type="text" class="msg-edit-input hidden" maxlength="1000">`;
-
-            row.innerHTML = `
-                ${avatarHtml}
-                <div class="msg-bubble-xp">
-                    ${isGrouped ? '' : `<div class="msg-header-xp">${usernameHtml(message)}<span class="msg-time-xp">${message.time}</span></div>`}
-                    ${contentHtml}
-                    <div class="msg-reactions" style="display:none;"></div>
-                </div>
-                <div class="msg-toolbar">
-                    <button type="button" class="msg-toolbar-btn msg-react-btn" title="React">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>
-                        </svg>
-                    </button>
-                    ${features.reply ? `
-                    <button type="button" class="msg-toolbar-btn msg-reply-btn" title="Reply">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/>
-                        </svg>
-                    </button>` : ''}
-                    ${isMine && !isSharedPost ? `
-                        <button type="button" class="msg-toolbar-btn msg-edit-btn" title="Edit">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
-                            </svg>
-                        </button>
-                    ` : ''}
-                    ${isMine ? `
-                        <button type="button" class="msg-toolbar-btn msg-delete-btn" title="Delete">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-                            </svg>
-                        </button>
-                    ` : ''}
-                    <div class="reaction-picker hidden">${pickerButtonsHtml}</div>
-                </div>
-            `;
-
-            if (!isSharedPost) {
-                row.querySelector('.msg-content-xp').append(document.createTextNode(message.content || ''));
-                const editedTag = document.createElement('span');
-                editedTag.className = 'msg-edited-tag';
-                editedTag.textContent = '(edited)';
-                editedTag.style.display = message.edited_at ? '' : 'none';
-                row.querySelector('.msg-content-xp').appendChild(editedTag);
-                row.querySelector('.msg-edit-input').value = message.content || '';
-            }
-
+            const row = buildRow(message, isGrouped);
             chatMessages.appendChild(row);
             renderReactions(row, message.reactions);
 
@@ -358,14 +411,43 @@
             if (wasNearBottom || isOwnMessage) scrollToBottom();
         }
 
-        chatForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-            const content = chatInput.value.trim();
-            if (!content || chatSendBtn.disabled) return;
-            chatSendBtn.disabled = true;
+        // ===== OPTIMISTIC SEND =====
+        // Shows the message immediately (dimmed, "Sending…") rather than
+        // waiting on the round trip, then swaps it for the real row once
+        // the server confirms — or shows a retry/remove option if it fails.
+        function sendMessage(content, replyTarget) {
+            if (!content) return;
+
+            const tempId = 'pending-' + (++pendingSeq);
+            const optimisticMessage = {
+                id: tempId,
+                content,
+                is_deleted: false,
+                edited_at: null,
+                reply_to: replyTarget ? { id: replyTarget.id, author_name: replyTarget.authorName, content_excerpt: replyTarget.excerpt, is_deleted: false } : null,
+                time: 'Sending…',
+                created_at: new Date().toISOString(),
+                user: currentUser || { id: currentUserId, name: '', display_name: '', avatar_url: null },
+                reactions: { counts: {}, mine: [] },
+            };
+
+            const wasNearBottom = isNearBottom(chatMessages);
+            const isGrouped = optimisticMessage.user.id === lastMessageUserId
+                && lastMessageTime !== null
+                && (Date.now() - lastMessageTime) <= GROUP_THRESHOLD_MS
+                && !(features.reply && optimisticMessage.reply_to);
+
+            const row = buildRow(optimisticMessage, isGrouped, { pending: true, interactive: false });
+            if (replyTarget) {
+                row.dataset.pendingReplyId = replyTarget.id;
+                row.dataset.pendingReplyAuthor = replyTarget.authorName;
+                row.dataset.pendingReplyExcerpt = replyTarget.excerpt || '';
+            }
+            chatMessages.appendChild(row);
+            if (wasNearBottom) scrollToBottom();
 
             const body = { content };
-            if (features.reply && currentReplyTo) body.reply_to_id = currentReplyTo.id;
+            if (features.reply && replyTarget) body.reply_to_id = replyTarget.id;
 
             fetch(endpoints.store, {
                 method: 'POST',
@@ -375,19 +457,42 @@
                 .then(r => { if (!r.ok) throw new Error(); return r.json(); })
                 .then(data => {
                     const message = data.message ?? data;
+                    row.remove();
                     appendMessage(message, true);
                     if (message.id) lastMessageId = message.id;
-                    chatInput.value = '';
-                    chatInput.focus();
-                    if (features.reply) clearReplyTarget();
                 })
-                .catch(() => alert('Message failed to send. Please try again.'))
-                .finally(() => { chatSendBtn.disabled = false; });
+                .catch(() => {
+                    row.classList.remove('msg-pending');
+                    row.classList.add('msg-failed');
+                    const bubble = row.querySelector('.msg-bubble-xp');
+                    const failBanner = document.createElement('div');
+                    failBanner.className = 'msg-failed-banner';
+                    failBanner.innerHTML = `<span>Failed to send</span><button type="button" class="msg-retry-btn">Retry</button><button type="button" class="msg-remove-btn" title="Remove">✕</button>`;
+                    bubble.appendChild(failBanner);
+                });
+        }
+
+        chatForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const content = chatInput.value.trim();
+            if (!content) return;
+
+            const replyTarget = features.reply && currentReplyTo ? currentReplyTo : null;
+            chatInput.value = '';
+            if (features.reply) clearReplyTarget();
+            sendMessage(content, replyTarget);
+            chatInput.focus();
         });
 
         chatInput.focus();
 
         function pollForUpdates() {
+            // Skip this cycle if the previous poll hasn't resolved yet —
+            // prevents two overlapping requests from both trying to
+            // append/patch the same batch of messages.
+            if (pollInFlight) return;
+            pollInFlight = true;
+
             const params = new URLSearchParams({ after: lastMessageId, since: lastPollTime });
             fetch(`${endpoints.latest}?${params.toString()}`, { headers: { 'Accept': 'application/json' } })
                 .then(r => r.ok ? r.json() : Promise.reject())
@@ -398,7 +503,8 @@
                     });
                     if (data.server_time) lastPollTime = data.server_time;
                 })
-                .catch(() => {});
+                .catch(() => {})
+                .finally(() => { pollInFlight = false; });
         }
 
         setInterval(pollForUpdates, pollIntervalMs);

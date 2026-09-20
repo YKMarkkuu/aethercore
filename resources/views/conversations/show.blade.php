@@ -32,9 +32,6 @@
         </div>
     </div>
 
-    <!-- ===== AWAY MESSAGE BANNER ===== -->
-    <!-- Old AIM-style touch: their status note shows right in the chat,
-         not just buried on their profile. -->
     @if($otherUser->profile->status_message ?? null)
         <div class="chat-away-banner">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -51,7 +48,7 @@
             $lastDate = null;
             $lastUserId = null;
             $lastTimestamp = null;
-            $groupThresholdSeconds = 300; // 5 minutes — matches the JS-side grouping below
+            $groupThresholdSeconds = 300;
         @endphp
 
         @forelse($messages as $message)
@@ -65,19 +62,18 @@
                 $isGrouped = !$isNewDateGroup
                     && $lastUserId === $message->user_id
                     && $lastTimestamp !== null
-                    && $message->created_at->diffInSeconds($lastTimestamp) <= $groupThresholdSeconds;
+                    && $message->created_at->diffInSeconds($lastTimestamp) <= $groupThresholdSeconds
+                    && !$message->reply_to_id;
 
                 $isMine = $message->user_id === auth()->id();
-                $msgReactions = $reactionsByMessage[$message->id] ?? ['counts' => [], 'mine' => null];
+                $msgReactions = $reactionsByMessage[$message->id] ?? ['counts' => [], 'mine' => []];
             @endphp
 
-            <!-- Date Divider -->
             @if($isNewDateGroup)
                 <div class="chat-divider">{{ $displayDate }}</div>
                 @php $lastDate = $messageDate; @endphp
             @endif
 
-            <!-- Message -->
             <div class="chat-message-xp @if($isGrouped) chat-message-grouped @endif" data-message-id="{{ $message->id }}" data-user-id="{{ $message->user_id }}">
                 @if($isGrouped)
                     <div class="msg-avatar-spacer">
@@ -99,6 +95,18 @@
                             <span class="msg-time-xp">{{ $message->created_at->format('g:i A') }}</span>
                         </div>
                     @endunless
+
+                    @if($message->reply_to_id)
+                        @php $replyTo = $message->replyTo; @endphp
+                        <div class="msg-reply-preview" data-jump-to="{{ $message->reply_to_id }}">
+                            @if($replyTo)
+                                <span class="msg-reply-preview-author">{{ $replyTo->user->display_name }}</span>
+                                <span class="msg-reply-preview-text">{{ $replyTo->is_deleted ? 'Message was deleted' : ($replyTo->type === 'shared_post' ? 'Shared a post' : \Illuminate\Support\Str::limit(strip_tags($replyTo->content ?? ''), 80)) }}</span>
+                            @else
+                                <span class="msg-reply-preview-unavailable">Original message unavailable</span>
+                            @endif
+                        </div>
+                    @endif
 
                     @if($message->is_deleted)
                         <div class="msg-content-xp msg-content-deleted">This message was deleted</div>
@@ -128,7 +136,7 @@
 
                     <div class="msg-reactions" @if(empty($msgReactions['counts'])) style="display:none;" @endif>
                         @foreach($msgReactions['counts'] as $type => $count)
-                            <button type="button" class="msg-reaction-pill @if($msgReactions['mine'] === $type) msg-reaction-pill-mine @endif" data-reaction-type="{{ $type }}">
+                            <button type="button" class="msg-reaction-pill @if(in_array($type, $msgReactions['mine'])) msg-reaction-pill-mine @endif" data-reaction-type="{{ $type }}">
                                 @include('partials.reaction-icon', ['type' => $type])
                                 <span class="msg-reaction-count">{{ $count }}</span>
                             </button>
@@ -140,25 +148,25 @@
                     <div class="msg-toolbar">
                         <button type="button" class="msg-toolbar-btn msg-react-btn" title="React">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="10"/>
-                                <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
-                                <line x1="9" y1="9" x2="9.01" y2="9"/>
-                                <line x1="15" y1="9" x2="15.01" y2="9"/>
+                                <circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>
+                            </svg>
+                        </button>
+                        <button type="button" class="msg-toolbar-btn msg-reply-btn" title="Reply">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/>
                             </svg>
                         </button>
                         @if($isMine && $message->type !== 'shared_post')
                             <button type="button" class="msg-toolbar-btn msg-edit-btn" title="Edit">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M12 20h9"/>
-                                    <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                                    <path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
                                 </svg>
                             </button>
                         @endif
                         @if($isMine)
                             <button type="button" class="msg-toolbar-btn msg-delete-btn" title="Delete">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M3 6h18"/>
-                                    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                                    <path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
                                 </svg>
                             </button>
                         @endif
@@ -190,6 +198,12 @@
             </div>
         @endforelse
 
+    </div>
+
+    <!-- ===== REPLY COMPOSER BAR ===== -->
+    <div class="reply-composer-bar hidden" id="replyComposerBar">
+        <div class="reply-composer-bar-text">Replying to <strong id="replyComposerTarget"></strong></div>
+        <button type="button" class="reply-composer-cancel" id="replyComposerCancel" title="Cancel reply">✕</button>
     </div>
 
     <!-- ===== CHAT INPUT ===== -->
@@ -225,10 +239,14 @@
                 lastMessageTime: {{ $lastTimestamp ? $lastTimestamp->timestamp * 1000 : 'null' }},
                 lastPollTime: '{{ now()->toIso8601String() }}',
             },
-            // reply stays off for DMs for now — flip to true (and add the
-            // reply-composer-bar markup + reply_to_id handling to
-            // ConversationController::store) to enable it here too later.
-            features: { reply: false, sharedPost: true },
+            features: { reply: true, sharedPost: true },
+            profileUrl: (id) => `/profile/${id}`,
+            currentUser: {
+                id: {{ auth()->id() }},
+                name: @json(auth()->user()->name),
+                display_name: @json(auth()->user()->display_name),
+                avatar_url: @json(auth()->user()->getAvatarUrl()),
+            },
         });
     });
 </script>

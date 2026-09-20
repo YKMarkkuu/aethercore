@@ -10,7 +10,7 @@ class Message extends Model
     use HasFactory;
 
     protected $fillable = [
-        'conversation_id', 'user_id', 'content', 'type', 'is_read', 'shared_post_id'
+        'conversation_id', 'user_id', 'content', 'type', 'is_read', 'shared_post_id', 'reply_to_id'
     ];
 
     protected $casts = [
@@ -28,14 +28,19 @@ class Message extends Model
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * The post this message references, when type === 'shared_post'.
-     * Nullable — either this isn't a shared-post message, or the
-     * original post was deleted (see nullOnDelete on the migration).
-     */
     public function sharedPost()
     {
         return $this->belongsTo(Post::class, 'shared_post_id');
+    }
+
+    /**
+     * The message this one is replying to, if any. Nullable — either this
+     * isn't a reply, or the original was hard-deleted (normal delete is
+     * the is_deleted tombstone, so this is mostly a safety net).
+     */
+    public function replyTo()
+    {
+        return $this->belongsTo(Message::class, 'reply_to_id');
     }
 
     public function markAsRead()
@@ -45,12 +50,10 @@ class Message extends Model
 
     public static function markConversationAsRead($conversationId, $userId)
     {
-        // Mark all messages in the conversation as read
         self::where('conversation_id', $conversationId)
             ->where('user_id', '!=', $userId)
             ->update(['is_read' => true]);
 
-        // Update the participant's last_read_at
         ConversationParticipant::where('conversation_id', $conversationId)
             ->where('user_id', $userId)
             ->update(['last_read_at' => now()]);
