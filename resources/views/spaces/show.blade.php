@@ -75,8 +75,10 @@
                         $isGrouped = $lastUserId === $message->user_id
                             && $lastTimestamp !== null
                             && $message->created_at->diffInSeconds($lastTimestamp) <= $groupThresholdSeconds;
+                        $isMine = $message->user_id === auth()->id();
+                        $msgReactions = $reactionsByMessage[$message->id] ?? ['counts' => [], 'mine' => null];
                     @endphp
-                    <div class="chat-message-xp @if($isGrouped) chat-message-grouped @endif" data-message-id="{{ $message->id }}">
+                    <div class="chat-message-xp @if($isGrouped) chat-message-grouped @endif" data-message-id="{{ $message->id }}" data-user-id="{{ $message->user_id }}">
                         @if($isGrouped)
                             <div class="msg-avatar-spacer">
                                 <span class="msg-hover-time">{{ $message->created_at->format('g:i A') }}</span>
@@ -97,8 +99,69 @@
                                     <span class="msg-time-xp">{{ $message->created_at->format('g:i A') }}</span>
                                 </div>
                             @endunless
-                            <div class="msg-content-xp">{{ $message->content }}</div>
+
+                            @if($message->reply_to_id)
+                                @php $replyTo = $message->replyTo; @endphp
+                                <div class="msg-reply-preview" data-jump-to="{{ $message->reply_to_id }}">
+                                    @if($replyTo)
+                                        <span class="msg-reply-preview-author">{{ $replyTo->user->display_name }}</span>
+                                        <span class="msg-reply-preview-text">{{ $replyTo->is_deleted ? 'Message was deleted' : \Illuminate\Support\Str::limit(strip_tags($replyTo->content ?? ''), 80) }}</span>
+                                    @else
+                                        <span class="msg-reply-preview-unavailable">Original message unavailable</span>
+                                    @endif
+                                </div>
+                            @endif
+
+                            @if($message->is_deleted)
+                                <div class="msg-content-xp msg-content-deleted">This message was deleted</div>
+                            @else
+                                <div class="msg-content-xp">{{ $message->content }}<span class="msg-edited-tag" @if(!$message->edited_at) style="display:none;" @endif>(edited)</span></div>
+                                <input type="text" class="msg-edit-input hidden" maxlength="1000" value="{{ $message->content }}">
+                            @endif
+
+                            <div class="msg-reactions" @if(empty($msgReactions['counts'])) style="display:none;" @endif>
+                                @foreach($msgReactions['counts'] as $type => $count)
+                                    <button type="button" class="msg-reaction-pill @if($msgReactions['mine'] === $type) msg-reaction-pill-mine @endif" data-reaction-type="{{ $type }}">
+                                        @include('partials.reaction-icon', ['type' => $type])
+                                        <span class="msg-reaction-count">{{ $count }}</span>
+                                    </button>
+                                @endforeach
+                            </div>
                         </div>
+
+                        @if(!$message->is_deleted)
+                            <div class="msg-toolbar">
+                                <button type="button" class="msg-toolbar-btn msg-react-btn" title="React">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>
+                                    </svg>
+                                </button>
+                                <button type="button" class="msg-toolbar-btn msg-reply-btn" title="Reply">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/>
+                                    </svg>
+                                </button>
+                                @if($isMine)
+                                    <button type="button" class="msg-toolbar-btn msg-edit-btn" title="Edit">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                                        </svg>
+                                    </button>
+                                    <button type="button" class="msg-toolbar-btn msg-delete-btn" title="Delete">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                                        </svg>
+                                    </button>
+                                @endif
+                                <div class="reaction-picker hidden">
+                                    @foreach(['like', 'love', 'laugh', 'wow', 'sad'] as $type)
+                                        <button type="button" class="reaction-picker-btn" data-reaction-type="{{ $type }}">
+                                            @include('partials.reaction-icon', ['type' => $type])
+                                        </button>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
                     </div>
                     @php
                         $lastUserId = $message->user_id;
@@ -110,6 +173,12 @@
                         <div class="chat-empty-sub">Say something in #{{ $activeChannel->name }}!</div>
                     </div>
                 @endforelse
+            </div>
+
+            <!-- ===== REPLY COMPOSER BAR (hidden until a reply is picked) ===== -->
+            <div class="reply-composer-bar hidden" id="replyComposerBar">
+                <div class="reply-composer-bar-text">Replying to <strong id="replyComposerTarget"></strong></div>
+                <button type="button" class="reply-composer-cancel" id="replyComposerCancel" title="Cancel reply">✕</button>
             </div>
 
             <div class="chat-input-xp">
@@ -131,122 +200,28 @@
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const chatMessages = document.getElementById('spaceChatMessages');
-        const chatForm = document.getElementById('spaceChatForm');
-        const chatInput = document.getElementById('spaceChatInput');
-        const chatSendBtn = document.getElementById('spaceChatSendBtn');
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-        const channelId = {{ $activeChannel->id }};
-        const currentUserId = {{ auth()->id() }};
-
-        let lastMessageUserId = {{ $lastUserId !== null ? $lastUserId : 'null' }};
-        let lastMessageTime = {{ $lastTimestamp ? $lastTimestamp->timestamp * 1000 : 'null' }};
-        let lastMessageId = {{ optional($messages->last())->id ?? 0 }};
-        const GROUP_THRESHOLD_MS = 5 * 60 * 1000;
-
-        function isNearBottom(el, threshold = 80) {
-            return el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
-        }
-        function scrollToBottom() {
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-        scrollToBottom();
-
-        function appendMessage(message, isOwnMessage) {
-            const timeMs = message.created_at ? new Date(message.created_at).getTime() : Date.now();
-            const isGrouped = message.user.id === lastMessageUserId
-                && lastMessageTime !== null
-                && (timeMs - lastMessageTime) <= GROUP_THRESHOLD_MS;
-
-            const wasNearBottom = isNearBottom(chatMessages);
-
-            const row = document.createElement('div');
-            row.className = 'chat-message-xp' + (isGrouped ? ' chat-message-grouped' : '');
-            row.dataset.messageId = message.id;
-
-            let avatarHtml;
-            if (isGrouped) {
-                avatarHtml = `<div class="msg-avatar-spacer"><span class="msg-hover-time">${message.time}</span></div>`;
-            } else if (message.user.avatar_url) {
-                avatarHtml = `<div class="msg-avatar-xp"><img src="${message.user.avatar_url}" alt="Avatar" style="width:36px;height:36px;border-radius:50%;object-fit:cover;"></div>`;
-            } else {
-                avatarHtml = `<div class="msg-avatar-xp">${(message.user.display_name || message.user.name || '?')[0]}</div>`;
-            }
-
-            row.innerHTML = `
-                ${avatarHtml}
-                <div class="msg-bubble-xp">
-                    ${isGrouped ? '' : `
-                        <div class="msg-header-xp">
-                            <a href="/profile/${message.user.id}" class="msg-username-xp" style="text-decoration:none;"></a>
-                            <span class="msg-time-xp">${message.time}</span>
-                        </div>
-                    `}
-                    <div class="msg-content-xp"></div>
-                </div>
-            `;
-
-            if (!isGrouped) {
-                row.querySelector('.msg-username-xp').textContent = message.user.display_name || message.user.name;
-            }
-            // textContent, not innerHTML — never let message content be
-            // interpreted as HTML/JS.
-            row.querySelector('.msg-content-xp').textContent = message.content;
-
-            chatMessages.appendChild(row);
-
-            lastMessageUserId = message.user.id;
-            lastMessageTime = timeMs;
-
-            if (wasNearBottom || isOwnMessage) {
-                scrollToBottom();
-            }
-        }
-
-        chatForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-            const content = chatInput.value.trim();
-            if (!content || chatSendBtn.disabled) return;
-
-            chatSendBtn.disabled = true;
-
-            fetch(`/space-channels/${channelId}/messages`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken,
-                },
-                body: JSON.stringify({ content }),
-            })
-                .then(r => r.ok ? r.json() : Promise.reject())
-                .then(data => {
-                    appendMessage(data.message, true);
-                    lastMessageId = data.message.id;
-                    chatInput.value = '';
-                    chatInput.focus();
-                })
-                .catch(() => alert('Message failed to send. Please try again.'))
-                .finally(() => { chatSendBtn.disabled = false; });
+        window.ChatThread.init({
+            containerId: 'spaceChatMessages',
+            formId: 'spaceChatForm',
+            inputId: 'spaceChatInput',
+            sendBtnId: 'spaceChatSendBtn',
+            currentUserId: {{ auth()->id() }},
+            endpoints: {
+                store: '{{ route('space-messages.store', $activeChannel) }}',
+                latest: '{{ route('space-messages.latest', $activeChannel) }}',
+                update: (id) => `/space-messages/${id}`,
+                destroy: (id) => `/space-messages/${id}`,
+                react: (id) => `/space-messages/${id}/react`,
+            },
+            initialState: {
+                lastMessageId: {{ optional($messages->last())->id ?? 0 }},
+                lastMessageUserId: {{ $lastUserId !== null ? $lastUserId : 'null' }},
+                lastMessageTime: {{ $lastTimestamp ? $lastTimestamp->timestamp * 1000 : 'null' }},
+                lastPollTime: '{{ now()->toIso8601String() }}',
+            },
+            features: { reply: true, sharedPost: false },
+            profileUrl: (id) => `/profile/${id}`,
         });
-
-        chatInput.focus();
-
-        function pollForNewMessages() {
-            fetch(`/space-channels/${channelId}/messages/latest?after=${lastMessageId}`, {
-                headers: { 'Accept': 'application/json' },
-            })
-                .then(r => r.ok ? r.json() : Promise.reject())
-                .then(data => {
-                    (data.messages || []).forEach(message => {
-                        appendMessage(message, false);
-                        lastMessageId = message.id;
-                    });
-                })
-                .catch(() => { /* silent, try again next interval */ });
-        }
-
-        setInterval(pollForNewMessages, 3000);
     });
 </script>
 @endpush

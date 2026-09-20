@@ -101,6 +101,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/space-channels/{channel}/messages', [SpaceMessageController::class, 'store'])->name('space-messages.store');
     Route::get('/space-channels/{channel}/messages/latest', [SpaceMessageController::class, 'latestMessages'])->name('space-messages.latest');
 
+    Route::patch('/space-messages/{message}', [SpaceMessageController::class, 'updateMessage'])->name('space-messages.update');
+    Route::delete('/space-messages/{message}', [SpaceMessageController::class, 'destroyMessage'])->name('space-messages.destroy');
+    Route::post('/space-messages/{message}/react', [SpaceMessageController::class, 'reactToMessage'])->name('space-messages.react');
+
     // ---------- MUSIC ----------
     Route::get('/music', function () {
         return view('music');

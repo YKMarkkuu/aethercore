@@ -8,6 +8,7 @@ use App\Models\SpaceChannel;
 use App\Models\SpaceMember;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class SpaceController extends Controller
 {
@@ -86,14 +87,36 @@ class SpaceController extends Controller
             abort(404);
         }
 
-        $messages = $activeChannel
-            ? $activeChannel->messages()->with('user')->get()
+            $messages = $activeChannel
+            ? $activeChannel->messages()->with(['user', 'replyTo.user'])->get()
             : collect();
+
+        // Reaction data for the initial paint, same pattern as
+        // ConversationController::show() — avoids pills "popping in" late
+        // waiting on the first poll cycle.
+        $reactionsByMessage = [];
+        if ($messages->isNotEmpty()) {
+            $rows = DB::table('space_message_reactions')
+                ->whereIn('message_id', $messages->pluck('id'))
+                ->get();
+
+            foreach ($rows as $row) {
+                if (!isset($reactionsByMessage[$row->message_id])) {
+                    $reactionsByMessage[$row->message_id] = ['counts' => [], 'mine' => null];
+                }
+                $reactionsByMessage[$row->message_id]['counts'][$row->type] =
+                    ($reactionsByMessage[$row->message_id]['counts'][$row->type] ?? 0) + 1;
+                if ($row->user_id === Auth::id()) {
+                    $reactionsByMessage[$row->message_id]['mine'] = $row->type;
+                }
+            }
+        }
 
         return view('spaces.show', [
             'space' => $space,
             'activeChannel' => $activeChannel,
             'messages' => $messages,
+            'reactionsByMessage' => $reactionsByMessage,
             'isOwner' => $space->isOwner(Auth::id()),
         ]);
     }

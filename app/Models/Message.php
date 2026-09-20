@@ -15,6 +15,7 @@ class Message extends Model
 
     protected $casts = [
         'is_read' => 'boolean',
+        'edited_at' => 'datetime',
     ];
 
     public function conversation()
