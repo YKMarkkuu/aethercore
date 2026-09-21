@@ -12,7 +12,7 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SpaceController;
 use App\Http\Controllers\SpaceChannelController;
 use App\Http\Controllers\SpaceMessageController;
-
+use App\Http\Controllers\PresenceController;
 
 // ============================================
 // AUTH ROUTES (Breeze)
@@ -58,6 +58,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/profile/stats-period', [ProfileController::class, 'updateStatsPeriod'])->name('profile.stats-period');
     Route::post('/profile/top-friends', [ProfileController::class, 'updateTopFriends'])->name('profile.top-friends');
     Route::post('/status/update', [StatusController::class, 'update'])->name('status.update');
+
+    Route::post('/presence/heartbeat', [PresenceController::class, 'heartbeat'])->name('presence.heartbeat');
+    Route::post('/presence/offline', [PresenceController::class, 'goOffline'])->name('presence.offline');
 
     // ---------- NOW PLAYING (polling) ----------
     Route::get('/now-playing/{user}', [ProfileController::class, 'nowPlaying'])->name('now-playing');

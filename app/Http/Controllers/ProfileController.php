@@ -431,15 +431,21 @@ class ProfileController extends Controller
      */
     public function nowPlaying(User $user)
     {
+        $payload = [
+            'status' => $user->getEffectiveStatus(),
+            'status_label' => $user->getStatusLabel(),
+            'status_color' => $user->getStatusColor(),
+        ];
+
         if (!$user->lastfm_username) {
-            return response()->json(['now_playing' => null]);
+            return response()->json($payload + ['now_playing' => null]);
         }
 
         $lastfm = new LastfmService();
         $nowPlaying = $lastfm->getNowPlaying($user->lastfm_username);
 
         if ($nowPlaying && !empty($nowPlaying['is_now_playing'])) {
-            return response()->json([
+            return response()->json($payload + [
                 'now_playing' => [
                     'name' => $nowPlaying['name'] ?? 'Unknown Track',
                     'artist' => $nowPlaying['artist'] ?? 'Unknown Artist',
@@ -448,63 +454,51 @@ class ProfileController extends Controller
             ]);
         }
 
-        return response()->json(['now_playing' => null]);
+        return response()->json($payload + ['now_playing' => null]);
     }
 
-    /**
-     * Batch version of nowPlaying() for the sidebar friends list — checks
-     * now-playing status for several friends in ONE request instead of
-     * one request per friend, which would otherwise turn into an N+1
-     * polling problem as someone's friends list grows. Only returns data
-     * for users who are actually accepted friends of the requester, so
-     * this can't be used to snoop on arbitrary users' listening habits.
-     */
     public function nowPlayingBatch(Request $request)
     {
-        $request->validate([
-            'ids' => 'required|array|max:50',
-            'ids.*' => 'integer',
-        ]);
+        $request->validate(['ids' => 'required|array|max:50', 'ids.*' => 'integer']);
 
-        $authId = auth()->id();
-
-        $sentIds = DB::table('friendships')
-            ->where('user_id', $authId)
-            ->where('status', 'accepted')
-            ->pluck('friend_id')
-            ->toArray();
-
-        $receivedIds = DB::table('friendships')
-            ->where('friend_id', $authId)
-            ->where('status', 'accepted')
-            ->pluck('user_id')
-            ->toArray();
-
+        $authId = Auth::id();
+        $sentIds = DB::table('friendships')->where('user_id', $authId)->where('status', 'accepted')->pluck('friend_id')->toArray();
+        $receivedIds = DB::table('friendships')->where('friend_id', $authId)->where('status', 'accepted')->pluck('user_id')->toArray();
         $friendIds = array_unique(array_merge($sentIds, $receivedIds));
 
         $requestedIds = array_intersect(array_map('intval', $request->input('ids', [])), $friendIds);
-
         if (empty($requestedIds)) {
-            return response()->json(['now_playing' => []]);
+            return response()->json(['now_playing' => [], 'status' => []]);
         }
 
-        $users = User::whereIn('id', $requestedIds)
-            ->whereNotNull('lastfm_username')
-            ->get(['id', 'lastfm_username']);
+        // No longer filtered to whereNotNull('lastfm_username') — status is
+        // wanted for every friend, music data only for those with it.
+        $users = User::whereIn('id', $requestedIds)->get(['id', 'lastfm_username', 'status', 'last_seen_at', 'last_active_at']);
 
         $lastfm = new LastfmService();
-        $result = [];
+        $nowPlayingResult = [];
+        $statusResult = [];
 
         foreach ($users as $user) {
+            $statusResult[$user->id] = [
+                'status' => $user->getEffectiveStatus(),
+                'label' => $user->getStatusLabel(),
+                'color' => $user->getStatusColor(),
+            ];
+
+            if (!$user->lastfm_username) {
+                continue;
+            }
+
             $nowPlaying = $lastfm->getNowPlaying($user->lastfm_username);
             if ($nowPlaying && !empty($nowPlaying['is_now_playing'])) {
-                $result[$user->id] = [
+                $nowPlayingResult[$user->id] = [
                     'name' => $nowPlaying['name'] ?? 'Unknown Track',
                     'artist' => $nowPlaying['artist'] ?? 'Unknown Artist',
                 ];
             }
         }
 
-        return response()->json(['now_playing' => $result]);
+        return response()->json(['now_playing' => $nowPlayingResult, 'status' => $statusResult]);
     }
 }

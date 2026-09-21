@@ -50,6 +50,8 @@ class User extends Authenticatable
         'password' => 'hashed',
         'lastfm_data' => 'array',
         'lastfm_updated_at' => 'datetime',
+        'last_seen_at' => 'datetime',
+        'last_active_at' => 'datetime',
     ];
 
     // ===== RELATIONSHIPS =====
@@ -64,48 +66,67 @@ class User extends Authenticatable
         return $this->hasMany(Post::class)->orderBy('created_at', 'desc');
     }
 
-    // ===== STATUS =====
+    // ===== PRESENCE =====
+
+    public const ONLINE_TIMEOUT_SECONDS = 60; // no heartbeat within this => offline
+    public const IDLE_TIMEOUT_SECONDS = 300;  // connected but no activity => idle
+
+    public function isConnected(): bool
+    {
+        return $this->last_seen_at && $this->last_seen_at->gt(now()->subSeconds(self::ONLINE_TIMEOUT_SECONDS));
+    }
+
+    public function isActive(): bool
+    {
+        return $this->last_active_at && $this->last_active_at->gt(now()->subSeconds(self::IDLE_TIMEOUT_SECONDS));
+    }
 
     /**
-     * Get the user's status label.
+     * What's actually shown to other people — combines the user's own pick
+     * with whether they're really connected right now, so a closed laptop
+     * can't sit "Online" forever and DND/appear-offline always win.
      */
+    public function getEffectiveStatus(): string
+    {
+        if (!$this->isConnected()) {
+            return 'offline';
+        }
+
+        if (in_array($this->status, ['offline', 'dnd'], true)) {
+            return $this->status;
+        }
+
+        if (!$this->isActive()) {
+            return 'idle';
+        }
+
+        return $this->status === 'idle' ? 'idle' : 'online';
+    }
+
+    public function getLastSeenLabel(): ?string
+    {
+        if ($this->getEffectiveStatus() !== 'offline' || !$this->last_seen_at) {
+            return null;
+        }
+        return 'Last seen ' . $this->last_seen_at->diffForHumans();
+    }
+
     public function getStatusLabel()
     {
-        $statuses = [
-            'online' => 'Online',
-            'idle' => 'Idle',
-            'dnd' => 'Do Not Disturb',
-            'offline' => 'Offline',
-        ];
-        return $statuses[$this->status] ?? 'Online';
+        $statuses = ['online' => 'Online', 'idle' => 'Idle', 'dnd' => 'Do Not Disturb', 'offline' => 'Offline'];
+        return $statuses[$this->getEffectiveStatus()] ?? 'Offline';
     }
 
-    /**
-     * Get the user's status color.
-     */
     public function getStatusColor()
     {
-        $colors = [
-            'online' => '#4ade80',
-            'idle' => '#fbbf24',
-            'dnd' => '#ef4444',
-            'offline' => '#6b7280',
-        ];
-        return $colors[$this->status] ?? '#4ade80';
+        $colors = ['online' => '#4ade80', 'idle' => '#fbbf24', 'dnd' => '#ef4444', 'offline' => '#6b7280'];
+        return $colors[$this->getEffectiveStatus()] ?? '#6b7280';
     }
 
-    /**
-     * Get the user's status icon.
-     */
     public function getStatusIcon()
     {
-        $icons = [
-            'online' => '●',
-            'idle' => '◐',
-            'dnd' => '●',
-            'offline' => '○',
-        ];
-        return $icons[$this->status] ?? '●';
+        $icons = ['online' => '●', 'idle' => '◐', 'dnd' => '●', 'offline' => '○'];
+        return $icons[$this->getEffectiveStatus()] ?? '○';
     }
 
         // ===== THEME =====

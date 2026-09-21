@@ -292,6 +292,7 @@
             });
         }
     </script>
+    <script src="{{ asset('js/presence.js') }}"></script>
         @stack('scripts')
 </body>
 </html>

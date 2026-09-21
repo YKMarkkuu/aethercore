@@ -248,6 +248,26 @@
                 avatar_url: @json(auth()->user()->getAvatarUrl()),
             },
         });
+
+        const statusEl = document.querySelector('.chat-status-xp');
+        if (!statusEl) return;
+
+        function pollOtherUserStatus() {
+            fetch('{{ route('now-playing', $otherUser) }}', {
+                headers: { 'Accept': 'application/json' }
+            })
+                .then(r => r.ok ? r.json() : Promise.reject())
+                .then(data => {
+                    if (data.status_label) {
+                        statusEl.textContent = data.status_label;
+                        statusEl.style.color = data.status_color;
+                    }
+                })
+                .catch(() => {});
+        }
+
+        pollOtherUserStatus();
+        setInterval(pollOtherUserStatus, 15000);
     });
 </script>
 @endpush

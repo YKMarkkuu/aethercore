@@ -70,12 +70,13 @@
                 <div id="sidebarFriendsList">
                 @forelse(Auth::user()->getFriends() as $friend)
                     <a href="{{ route('conversations.start', $friend->id) }}" class="friend-item" data-friend-id="{{ $friend->id }}">
-                        <div class="friend-avatar">
+                        <div class="friend-avatar" style="position: relative;">
                             @if($friend->profile && $friend->profile->avatar)
                                 <img src="{{ asset('storage/' . $friend->profile->avatar) }}" alt="Avatar" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover;">
                             @else
                                 {{ $friend->name[0] }}
                             @endif
+                            <span class="status-dot {{ $friend->getEffectiveStatus() }}"></span>
                         </div>
                         <div class="friend-info">
                             <div class="friend-name">{{ $friend->display_name }}</div>
@@ -298,34 +299,55 @@
         if (rows.length === 0) return;
 
         const ids = rows.map(row => row.dataset.friendId);
+        const rank = { online: 0, idle: 1, dnd: 2, offline: 3 };
 
-        function pollFriendsNowPlaying() {
+        function pollFriendsPresence() {
             const params = new URLSearchParams();
             ids.forEach(id => params.append('ids[]', id));
 
             fetch('{{ route("now-playing.batch") }}?' + params.toString(), {
                 headers: { 'Accept': 'application/json' },
             })
-                .then(response => response.ok ? response.json() : Promise.reject())
+                .then(r => r.ok ? r.json() : Promise.reject())
                 .then(data => {
                     const nowPlaying = data.now_playing || {};
+                    const status = data.status || {};
+
                     rows.forEach(row => {
                         const id = row.dataset.friendId;
-                        const el = row.querySelector('.friend-now-playing');
-                        const textEl = row.querySelector('.friend-now-playing-text');
-                        if (nowPlaying[id]) {
-                            textEl.textContent = nowPlaying[id].name + ' — ' + nowPlaying[id].artist;
-                            el.style.display = 'flex';
-                        } else {
-                            el.style.display = 'none';
+
+                        const npEl = row.querySelector('.friend-now-playing');
+                        const npText = row.querySelector('.friend-now-playing-text');
+                        if (npEl && npText) {
+                            if (nowPlaying[id]) {
+                                npText.textContent = nowPlaying[id].name + ' — ' + nowPlaying[id].artist;
+                                npEl.style.display = 'flex';
+                            } else {
+                                npEl.style.display = 'none';
+                            }
+                        }
+
+                        const statusEl = row.querySelector('.friend-status');
+                        const dotEl = row.querySelector('.status-dot');
+                        if (status[id]) {
+                            if (statusEl) {
+                                statusEl.textContent = status[id].label;
+                                statusEl.style.color = status[id].color;
+                            }
+                            if (dotEl) dotEl.className = 'status-dot ' + status[id].status;
+                            row.dataset.status = status[id].status;
                         }
                     });
+
+                    // Reorder in place — online/idle friends float up, offline sink down.
+                    rows.slice().sort((a, b) => (rank[a.dataset.status] ?? 0) - (rank[b.dataset.status] ?? 0))
+                        .forEach(row => list.appendChild(row));
                 })
                 .catch(() => { /* silent, try again next interval */ });
         }
 
-        pollFriendsNowPlaying();
-        setInterval(pollFriendsNowPlaying, 20000);
+        pollFriendsPresence();
+        setInterval(pollFriendsPresence, 15000);
     });
 </script>
 @endpush

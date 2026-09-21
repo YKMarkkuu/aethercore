@@ -720,3 +720,17 @@ body {
         padding: 0.75rem;
     }
 }
+
+.status-dot {
+    position: absolute;
+    bottom: -1px;
+    right: -1px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid #ece9d8;
+}
+.status-dot.online { background: #4ade80; }
+.status-dot.idle { background: #fbbf24; }
+.status-dot.dnd { background: #ef4444; }
+.status-dot.offline { background: #6b7280; }
