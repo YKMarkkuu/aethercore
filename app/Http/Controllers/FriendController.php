@@ -36,6 +36,10 @@ class FriendController extends Controller
         if ($user->id === $friend->id) {
             return back()->with('error', 'You cannot befriend yourself.');
         }
+
+        if ($user->isBlocking($friend->id) || $friend->isBlocking($user->id)) {
+            return back()->with('error', 'You cannot send a friend request to this user.');
+        }
         
         // Check if already friends
         if ($user->isFriendWith($friend->id)) {

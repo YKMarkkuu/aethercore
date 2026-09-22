@@ -1,0 +1,119 @@
+🚨 TIER 1: Legal / Safety Essentials (Build These First)
+
+These are the ones that actually matter for liability, especially under Philippine DPA and general platform law.
+1. Report System ⚠️ URGENT
+
+Users must be able to report:
+
+    Posts
+
+    Comments
+
+    Users (profiles)
+
+    Messages (DMs)
+
+    Spaces / Space messages
+
+Why: Any platform with UGC needs a report mechanism. Without it, you have no way to know what's happening, and no defense if a user sues for "you allowed this."
+
+Minimum: A "Report" button + reports table + basic admin review list.
+2. Block System ⚠️ URGENT
+
+Users must be able to block other users. When blocked:
+
+    Their posts don't show in your feed
+
+    Their messages don't reach you
+
+    They can't see your profile (or see a limited version)
+
+    They can't send you friend requests
+
+    They can't mention/notify you
+
+Why: This is a safety feature, not a "nice to have." If a user is being harassed and can't block the harasser, that's a real problem — legally and ethically.
+
+Minimum: A blocks table + filter in feed/DMs/profile queries.
+3. Admin Dashboard (Minimal) ⚠️ URGENT
+
+Without it, you can't actually use the report or block data. You need at minimum:
+
+    A page listing reports
+
+    One-click delete post/comment
+
+    One-click ban/suspend user
+
+    User search
+
+Why: A report system without a way to action reports is useless. This is the piece that ties it together.
+4. Terms of Service — Actually Enforceable ⚠️ REVIEW
+
+Your current ToS exists, but does it clearly state:
+
+    What content is prohibited (harassment, CSAM, doxxing, etc.)
+
+    Your right to remove content and ban users
+
+    Your DMCA/takedown process
+
+    User responsibility for their content
+
+Why: If a user posts illegal content, you need a ToS that says "we can remove this and ban you." Without it, you have less legal cover.
+5. Age Restriction / Verification ⚠️ CONSIDER
+
+Most platforms require 13+ (COPPA) or 18+ for certain features. If a minor joins and something bad happens, you could be liable.
+
+Minimum: A checkbox on signup: "I confirm I am 13+ years old."
+🎯 TIER 2: Strongly Recommended (Build Right After)
+6. Content Moderation Tools
+
+    Auto-flag content with certain keywords
+
+    Ability to soft-delete (hide from public but keep in DB for legal records)
+
+    Edit user content (rare, but sometimes needed)
+
+7. Account Suspension System
+
+Not just "ban/unban" — you'll want:
+
+    Temporary suspension (7 days, 30 days)
+
+    Reason attached to the ban
+
+    User-visible ban notice when they try to log in
+
+8. Privacy Controls
+
+    Private account toggle (only friends see posts)
+
+    Who can DM me? (Everyone / Friends only / Nobody)
+
+    Who can see my Spaces?
+
+9. Data Export / Deletion (DPA Requirement)
+
+Under DPA, users have the right to access and delete their data. You need:
+
+    "Download my data" button
+
+    "Delete my account" (you have this — make sure it's complete)
+
+10. Session / Device Management
+
+See where you're logged in. Log out other sessions. This prevents account takeover.
+🎯 TIER 3: Important but Not Urgent
+11. Email Verification
+
+Prevents fake accounts and improves safety.
+12. Rate Limiting
+
+Prevents spam floods. Laravel has this built-in — just apply it to post/comment/message routes.
+13. 2FA (Optional)
+
+For high-value accounts, but not required for MVP.
+14. Content Warning / NSFW Flags
+
+Optional, but useful for user-generated content.

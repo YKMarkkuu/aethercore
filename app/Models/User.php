@@ -8,10 +8,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -52,6 +53,8 @@ class User extends Authenticatable
         'lastfm_updated_at' => 'datetime',
         'last_seen_at' => 'datetime',
         'last_active_at' => 'datetime',
+        'suspended_until' => 'datetime',
+        'banned_at' => 'datetime',
     ];
 
     // ===== RELATIONSHIPS =====
@@ -264,5 +267,45 @@ class User extends Authenticatable
         }
         
         return null;
+    }
+
+    // ===== MODERATION / ROLES =====
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isBanned(): bool
+    {
+        return $this->banned_at !== null;
+    }
+
+    public function isSuspended(): bool
+    {
+        return $this->suspended_until !== null && $this->suspended_until->isFuture();
+    }
+
+    // ===== BLOCKING =====
+
+    public function blockedUsers()
+    {
+        return $this->belongsToMany(User::class, 'blocks', 'blocker_id', 'blocked_id');
+    }
+
+    public function isBlocking($userId): bool
+    {
+        return DB::table('blocks')
+            ->where('blocker_id', $this->id)
+            ->where('blocked_id', $userId)
+            ->exists();
+    }
+
+    public function isBlockedBy($userId): bool
+    {
+        return DB::table('blocks')
+            ->where('blocker_id', $userId)
+            ->where('blocked_id', $this->id)
+            ->exists();
     }
 }

@@ -66,6 +66,11 @@ class ConversationController extends Controller
             abort(403);
         }
 
+        $other = $conversation->getOtherParticipant(Auth::id());
+        if ($other && (Auth::user()->isBlocking($other->id) || Auth::user()->isBlockedBy($other->id))) {
+            abort(403, 'You cannot message this user.');
+        }
+
         $request->validate([
             'content' => 'required|string|max:1000',
             'reply_to_id' => 'nullable|integer',

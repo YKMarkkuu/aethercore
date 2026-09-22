@@ -27,6 +27,16 @@ class FeedController extends Controller
 
         $friendIds = array_unique(array_merge($sentIds, $receivedIds));
 
+        $blockedIds = DB::table('blocks')
+            ->where('blocker_id', Auth::id())
+            ->pluck('blocked_id')
+            ->toArray();
+        $blockedByIds = DB::table('blocks')
+            ->where('blocked_id', Auth::id())
+            ->pluck('blocker_id')
+            ->toArray();
+        $friendIds = array_diff($friendIds, $blockedIds, $blockedByIds);
+
         $feedPosts = Post::whereIn('user_id', $friendIds)
                         ->orWhere('user_id', Auth::id())
                         ->orderBy('created_at', 'desc')

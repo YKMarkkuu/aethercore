@@ -13,6 +13,8 @@ use App\Http\Controllers\SpaceController;
 use App\Http\Controllers\SpaceChannelController;
 use App\Http\Controllers\SpaceMessageController;
 use App\Http\Controllers\PresenceController;
+use App\Http\Controllers\BlockController;
+
 
 // ============================================
 // AUTH ROUTES (Breeze)
@@ -130,4 +132,11 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/messages/{message}', [ConversationController::class, 'destroyMessage'])->name('messages.destroy');
     Route::post('/messages/{message}/react', [ConversationController::class, 'reactToMessage'])->name('messages.react');
 });
+    //---------- BLOCKING ----------
+    Route::post('/users/{user}/block', [BlockController::class, 'store'])->name('users.block');
+    Route::delete('/users/{user}/block', [BlockController::class, 'destroy'])->name('users.unblock');
+    // Stub for next phase — wire in Admin\ReportController / Admin\UserController later
+    Route::middleware(['admin'])->prefix('admin')->name('admin.')->group(function () {
+        //
+    });
 });

@@ -186,6 +186,18 @@
                             <button type="submit" class="xp-action-btn xp-action-btn-primary">Add Friend</button>
                         </form>
                     @endif
+
+                    @if(auth()->user()->isBlocking($user->id))
+                        <form action="{{ route('users.unblock', $user->id) }}" method="POST" style="display:inline;">
+                            @csrf @method('DELETE')
+                            <button type="submit" class="xp-action-btn xp-action-btn-danger">Unblock</button>
+                        </form>
+                    @else
+                        <form action="{{ route('users.block', $user->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Block this user? This will also unfriend them.')">
+                            @csrf
+                            <button type="submit" class="xp-action-btn xp-action-btn-danger">Block</button>
+                        </form>
+                    @endif
                 @endif
             </div>
 
