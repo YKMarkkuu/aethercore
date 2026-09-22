@@ -75,7 +75,32 @@
         function isNearBottom(el, threshold = 80) {
             return el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
         }
-        function scrollToBottom() { chatMessages.scrollTop = chatMessages.scrollHeight; }
+
+        // new
+        // Set it immediately (covers the common case), then again after the
+        // browser finishes any pending layout/paint (covers a long history
+        // where images/fonts are still settling and scrollHeight grows after
+        // our first measurement), and once more on window 'load' as a final
+        // safety net for very long conversations where a lot of avatar images
+        // are still resolving. Idempotent — calling it extra times is harmless.
+        function scrollToBottom() {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            requestAnimationFrame(() => {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            });
+        }
+        window.addEventListener('load', scrollToBottom, { once: true });
+
+        // Only the Blade @empty state exists at page-load time. Once the first
+        // message is appended via JS this needs to go, or it keeps occupying
+        // the container (it's styled height:100% to center its icon) and
+        // pushes every real message below the fold — which is exactly the
+        // "jumps back to the top" symptom, even though scrollTop is technically
+        // correct.
+        function removeEmptyState() {
+            chatMessages.querySelector('.chat-empty-xp')?.remove();
+        }
+
         scrollToBottom();
 
         function usernameHtml(message) {
@@ -385,14 +410,12 @@
 
         // ===== APPEND (real messages — from the store response or a poll) =====
         function appendMessage(message, isOwnMessage) {
-            // Dedupe guard: if this id is already rendered (a poll racing
-            // with the message you just sent, or a duplicate delivery),
-            // patch it instead of creating a second row. This is the fix
-            // for messages briefly appearing to send twice.
             if (chatMessages.querySelector(`[data-message-id="${message.id}"]`)) {
                 patchMessage(message);
                 return;
             }
+
+            removeEmptyState();
 
             const timeMs = message.created_at ? new Date(message.created_at).getTime() : Date.now();
             const isGrouped = message.user.id === lastMessageUserId
@@ -409,6 +432,15 @@
             lastMessageTime = timeMs;
 
             if (wasNearBottom || isOwnMessage) scrollToBottom();
+
+            // An avatar image loading in late can change the row's real height
+            // after we already measured/scrolled. Re-anchor once it lands, but
+            // only if we were already heading to the bottom — never yank the
+            // view if the user had scrolled up to read history.
+            const avatarImg = row.querySelector('.msg-avatar-xp img');
+            if (avatarImg && !avatarImg.complete && (wasNearBottom || isOwnMessage)) {
+                avatarImg.addEventListener('load', scrollToBottom, { once: true });
+            }
         }
 
         // ===== OPTIMISTIC SEND =====
@@ -418,33 +450,52 @@
         function sendMessage(content, replyTarget) {
             if (!content) return;
 
+            removeEmptyState();
+
             const tempId = 'pending-' + (++pendingSeq);
             const optimisticMessage = {
                 id: tempId,
                 content,
                 is_deleted: false,
                 edited_at: null,
-                reply_to: replyTarget ? { id: replyTarget.id, author_name: replyTarget.authorName, content_excerpt: replyTarget.excerpt, is_deleted: false } : null,
+                reply_to: replyTarget ? {
+                    id: replyTarget.id,
+                    author_name: replyTarget.authorName,
+                    content_excerpt: replyTarget.excerpt,
+                    is_deleted: false,
+                } : null,
                 time: 'Sending…',
                 created_at: new Date().toISOString(),
-                user: currentUser || { id: currentUserId, name: '', display_name: '', avatar_url: null },
+                user: currentUser || {
+                    id: currentUserId,
+                    name: '',
+                    display_name: '',
+                    avatar_url: null,
+                },
                 reactions: { counts: {}, mine: [] },
             };
 
-            const wasNearBottom = isNearBottom(chatMessages);
             const isGrouped = optimisticMessage.user.id === lastMessageUserId
                 && lastMessageTime !== null
                 && (Date.now() - lastMessageTime) <= GROUP_THRESHOLD_MS
                 && !(features.reply && optimisticMessage.reply_to);
 
             const row = buildRow(optimisticMessage, isGrouped, { pending: true, interactive: false });
+
             if (replyTarget) {
                 row.dataset.pendingReplyId = replyTarget.id;
                 row.dataset.pendingReplyAuthor = replyTarget.authorName;
                 row.dataset.pendingReplyExcerpt = replyTarget.excerpt || '';
             }
+
             chatMessages.appendChild(row);
-            if (wasNearBottom) scrollToBottom();
+
+            // Your own outgoing message always pulls the view to it — matches
+            // what happens moments later anyway once the server confirms it
+            // (appendMessage(..., true) always scrolls), so the optimistic
+            // bubble and the confirmed one stay visually consistent instead of
+            // one scrolling and the other not.
+            scrollToBottom();
 
             const body = { content };
             if (features.reply && replyTarget) body.reply_to_id = replyTarget.id;
@@ -454,7 +505,10 @@
                 headers: apiHeaders({ 'Content-Type': 'application/json' }),
                 body: JSON.stringify(body),
             })
-                .then(r => { if (!r.ok) throw new Error(); return r.json(); })
+                .then(r => {
+                    if (!r.ok) throw new Error();
+                    return r.json();
+                })
                 .then(data => {
                     const message = data.message ?? data;
                     row.remove();
@@ -464,10 +518,15 @@
                 .catch(() => {
                     row.classList.remove('msg-pending');
                     row.classList.add('msg-failed');
+
                     const bubble = row.querySelector('.msg-bubble-xp');
                     const failBanner = document.createElement('div');
                     failBanner.className = 'msg-failed-banner';
-                    failBanner.innerHTML = `<span>Failed to send</span><button type="button" class="msg-retry-btn">Retry</button><button type="button" class="msg-remove-btn" title="Remove">✕</button>`;
+                    failBanner.innerHTML = `
+                        <span>Failed to send</span>
+                        <button type="button" class="msg-retry-btn">Retry</button>
+                        <button type="button" class="msg-remove-btn" title="Remove">✕</button>
+                    `;
                     bubble.appendChild(failBanner);
                 });
         }

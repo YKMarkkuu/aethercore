@@ -437,7 +437,9 @@ class ProfileController extends Controller
             'status_color' => $user->getStatusColor(),
         ];
 
-        if (!$user->lastfm_username) {
+        // Offline (whether from disconnecting or from "appear offline") means
+        // no activity is shown either — consistent with what "offline" implies.
+        if (!$user->lastfm_username || $payload['status'] === 'offline') {
             return response()->json($payload + ['now_playing' => null]);
         }
 
@@ -471,8 +473,6 @@ class ProfileController extends Controller
             return response()->json(['now_playing' => [], 'status' => []]);
         }
 
-        // No longer filtered to whereNotNull('lastfm_username') — status is
-        // wanted for every friend, music data only for those with it.
         $users = User::whereIn('id', $requestedIds)->get(['id', 'lastfm_username', 'status', 'last_seen_at', 'last_active_at']);
 
         $lastfm = new LastfmService();
@@ -480,13 +480,15 @@ class ProfileController extends Controller
         $statusResult = [];
 
         foreach ($users as $user) {
+            $effective = $user->getEffectiveStatus();
             $statusResult[$user->id] = [
-                'status' => $user->getEffectiveStatus(),
+                'status' => $effective,
                 'label' => $user->getStatusLabel(),
                 'color' => $user->getStatusColor(),
             ];
 
-            if (!$user->lastfm_username) {
+            // Same rule as nowPlaying() above — offline hides activity too.
+            if (!$user->lastfm_username || $effective === 'offline') {
                 continue;
             }
 

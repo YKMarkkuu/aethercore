@@ -220,6 +220,7 @@
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        // ===== INIT CHAT THREAD =====
         window.ChatThread.init({
             containerId: 'chatMessages',
             formId: 'chatForm',
@@ -249,18 +250,29 @@
             },
         });
 
+        // ===== LIVE STATUS POLLING =====
         const statusEl = document.querySelector('.chat-status-xp');
         if (!statusEl) return;
 
+        const otherUserId = '{{ $otherUser->id }}';
+        const cached = window.PresenceCache.get('friend:' + otherUserId);
+        if (cached && cached.label) {
+            statusEl.textContent = cached.label;
+            statusEl.style.color = cached.color;
+        }
+
         function pollOtherUserStatus() {
-            fetch('{{ route('now-playing', $otherUser) }}', {
-                headers: { 'Accept': 'application/json' }
-            })
+            fetch('{{ route('now-playing', $otherUser) }}', { headers: { 'Accept': 'application/json' } })
                 .then(r => r.ok ? r.json() : Promise.reject())
                 .then(data => {
                     if (data.status_label) {
                         statusEl.textContent = data.status_label;
                         statusEl.style.color = data.status_color;
+                        window.PresenceCache.set('friend:' + otherUserId, {
+                            status: data.status,
+                            label: data.status_label,
+                            color: data.status_color,
+                        });
                     }
                 })
                 .catch(() => {});

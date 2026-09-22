@@ -846,44 +846,11 @@
 
         canvas.toBlob((blob) => finishUpload(blob), imgAdjustState.file.type === 'image/png' ? 'image/png' : 'image/jpeg', 0.92);
     }
+</script>
 
-    // ===== LIVE "NOW PLAYING" IN TOP 8 FRIENDS =====
-    document.addEventListener('DOMContentLoaded', function() {
-        const list = document.getElementById('topFriendsList');
-        if (!list) return;
-
-        const rows = Array.from(list.querySelectorAll('[data-friend-id]'));
-        if (rows.length === 0) return;
-
-        const ids = rows.map(row => row.dataset.friendId);
-
-        function pollFriendsNowPlaying() {
-            const params = new URLSearchParams();
-            ids.forEach(id => params.append('ids[]', id));
-
-            fetch('{{ route("now-playing.batch") }}?' + params.toString(), {
-                headers: { 'Accept': 'application/json' },
-            })
-                .then(response => response.ok ? response.json() : Promise.reject())
-                .then(data => {
-                    const nowPlaying = data.now_playing || {};
-                    rows.forEach(row => {
-                        const id = row.dataset.friendId;
-                        const el = row.querySelector('.friend-now-playing');
-                        const textEl = row.querySelector('.friend-now-playing-text');
-                        if (nowPlaying[id]) {
-                            textEl.textContent = nowPlaying[id].name + ' — ' + nowPlaying[id].artist;
-                            el.style.display = 'flex';
-                        } else {
-                            el.style.display = 'none';
-                        }
-                    });
-                })
-                .catch(() => { /* silent, try again next interval */ });
-        }
-
-        pollFriendsNowPlaying();
-        setInterval(pollFriendsNowPlaying, 20000);
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        window.PresenceFriends.init('topFriendsList', { reorder: false, intervalMs: 20000 });
     });
 </script>
 

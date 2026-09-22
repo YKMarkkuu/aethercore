@@ -293,6 +293,7 @@
         }
     </script>
     <script src="{{ asset('js/presence.js') }}"></script>
+    <script src="{{ asset('js/presence-friends.js') }}"></script>
         @stack('scripts')
 </body>
 </html>

@@ -1155,6 +1155,7 @@
     border: 2px solid #b0a8a0;
     border-radius: 6px;
     overflow: hidden;
+    min-height: 0;
 }
 
 .chat-header-xp {
@@ -1220,6 +1221,10 @@
     display: flex;
     flex-direction: column;
     background: #f8f5ec;
+    overflow-anchor: none; /* stop the browser "correcting" our manual
+                               scroll position — with long histories this
+                               was fighting scrollToBottom() and yanking
+                               the view back up after we set it */
 }
 
 .chat-messages-xp::-webkit-scrollbar {

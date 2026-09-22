@@ -2,7 +2,38 @@
 // person has actually touched anything recently, so idle/offline can be
 // computed server-side and shown live to everyone else via the existing
 // polling endpoints (now-playing-batch, now-playing).
+//
+// Also exposes window.PresenceCache — a tiny localStorage wrapper so
+// pages can hydrate friend/self presence INSTANTLY on load (before the
+// first poll resolves) instead of flashing blank -> fetch -> populate
+// on every full-page navigation (the sidebar tabs are real page loads,
+// not client-side view swaps).
 (function () {
+    const CACHE_PREFIX = 'presence:';
+    const CACHE_MAX_AGE_MS = 60000; // stale cache past this age is ignored
+
+    window.PresenceCache = {
+        get(key) {
+            try {
+                const raw = localStorage.getItem(CACHE_PREFIX + key);
+                if (!raw) return null;
+                const parsed = JSON.parse(raw);
+                if (Date.now() - parsed.ts > CACHE_MAX_AGE_MS) return null;
+                return parsed.value;
+            } catch (e) {
+                return null;
+            }
+        },
+        set(key, value) {
+            try {
+                localStorage.setItem(CACHE_PREFIX + key, JSON.stringify({ value, ts: Date.now() }));
+            } catch (e) {
+                // localStorage full/unavailable — presence just won't
+                // pre-hydrate next load, no functional loss.
+            }
+        },
+    };
+
     const meta = document.querySelector('meta[name="csrf-token"]');
     if (!meta) return;
     const csrfToken = meta.content;
@@ -29,7 +60,13 @@
             el.textContent = LABELS[status] || 'Online';
             el.style.color = COLORS[status] || COLORS.online;
         });
+        window.PresenceCache.set('self:status', status);
     }
+
+    // Hydrate our own status immediately from cache, before the first
+    // heartbeat response lands.
+    const cachedSelf = window.PresenceCache.get('self:status');
+    if (cachedSelf) applyOwnStatus(cachedSelf);
 
     function sendHeartbeat() {
         const active = document.visibilityState === 'visible'
@@ -37,7 +74,11 @@
 
         fetch('/presence/heartbeat', {
             method: 'POST',
-            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+            },
             body: JSON.stringify({ active }),
             keepalive: true,
         })
