@@ -56,6 +56,9 @@
 
             <!-- SETTINGS MODAL -->
             @include('partials.settings-modal')
+
+            <!-- REPORT MODAL -->
+            @include('partials.report-modal')
         </div>
     </div>
 
@@ -67,6 +70,7 @@
          actually present, so this is a no-op on pages with no posts. -->
         <script src="{{ asset('js/post-interactions.js') }}"></script>
         <script src="{{ asset('js/chat-thread.js') }}"></script>
+        <script src="{{ asset('js/report-modal.js') }}"></script>
     <script>
         let currentMode = 'aether';
         let currentView = 'feed';

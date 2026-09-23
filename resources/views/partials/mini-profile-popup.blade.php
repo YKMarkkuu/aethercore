@@ -33,6 +33,11 @@
             <button class="popup-action" onclick="openSettingsModal()">
                 <span>⚙️</span> Settings
             </button>
+            @if(Auth::user()->isAdmin())
+                <a href="{{ route('admin.reports.index') }}" class="popup-action">
+                    <span>🛡️</span> Admin Dashboard
+                </a>
+            @endif
             <a href="#" class="popup-action">
                 <span>🎵</span> Library
             </a>

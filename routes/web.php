@@ -14,6 +14,9 @@ use App\Http\Controllers\SpaceChannelController;
 use App\Http\Controllers\SpaceMessageController;
 use App\Http\Controllers\PresenceController;
 use App\Http\Controllers\BlockController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\Admin\ReportController as AdminReportController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 
 
 // ============================================
@@ -89,6 +92,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/posts/{post}/comments', [CommentController::class, 'store'])->name('comments.store');
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
     Route::post('/posts/updates', [PostController::class, 'updates'])->name('posts.updates');
+    Route::post('/reports', [ReportController::class, 'store'])->name('reports.store');
 
     // ---------- SPACES ----------
     Route::get('/spaces', [SpaceController::class, 'index'])->name('spaces');
@@ -135,8 +139,16 @@ Route::middleware(['auth'])->group(function () {
     //---------- BLOCKING ----------
     Route::post('/users/{user}/block', [BlockController::class, 'store'])->name('users.block');
     Route::delete('/users/{user}/block', [BlockController::class, 'destroy'])->name('users.unblock');
-    // Stub for next phase — wire in Admin\ReportController / Admin\UserController later
-    Route::middleware(['admin'])->prefix('admin')->name('admin.')->group(function () {
-        //
+    Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/reports', [AdminReportController::class, 'index'])->name('reports.index');
+        Route::post('/reports/{report}/dismiss', [AdminReportController::class, 'dismiss'])->name('reports.dismiss');
+        Route::post('/reports/{report}/delete-content', [AdminReportController::class, 'deleteContent'])->name('reports.delete-content');
+
+        Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+        Route::post('/users/{user}/suspend', [AdminUserController::class, 'suspend'])->name('users.suspend');
+        Route::post('/users/{user}/unsuspend', [AdminUserController::class, 'unsuspend'])->name('users.unsuspend');
+        Route::post('/users/{user}/ban', [AdminUserController::class, 'ban'])->name('users.ban');
+        Route::post('/users/{user}/unban', [AdminUserController::class, 'unban'])->name('users.unban');
+        Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
     });
 });

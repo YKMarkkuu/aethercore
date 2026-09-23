@@ -114,6 +114,14 @@
                 <line x1="8.6" y1="10.6" x2="15.4" y2="6.4"/><line x1="8.6" y1="13.4" x2="15.4" y2="17.6"/>
             </svg>
         </button>
+        @if($post->user_id !== Auth::id())
+            <button type="button" class="post-action-btn" onclick="openReportModal('post', {{ $post->id }})" title="Report">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
+                    <line x1="4" y1="22" x2="4" y2="15"/>
+                </svg>
+            </button>
+        @endif
         @if($post->user_id === Auth::id())
             <form action="{{ route('posts.destroy', $post) }}" method="POST" style="display: inline; margin-left: auto;">
                 @csrf

@@ -198,6 +198,8 @@
                             <button type="submit" class="xp-action-btn xp-action-btn-danger">Block</button>
                         </form>
                     @endif
+
+                    <button type="button" class="xp-action-btn xp-action-btn-danger" onclick="openReportModal('user', {{ $user->id }})">Report</button>
                 @endif
             </div>
 
