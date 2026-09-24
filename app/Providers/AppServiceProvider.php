@@ -32,5 +32,11 @@ class AppServiceProvider extends ServiceProvider
                 ? Space::whereHas('members', fn ($q) => $q->where('user_id', Auth::id()))->get()
                 : collect());
         });
+
+        View::composer('layouts.admin', function ($view) {
+            $view->with('pendingReportsCount', Auth::check() && Auth::user()->isAdmin()
+                ? \App\Models\Report::where('status', 'pending')->count()
+                : 0);
+        });
     }
 }

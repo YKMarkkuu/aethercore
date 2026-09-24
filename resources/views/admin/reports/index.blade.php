@@ -2,13 +2,32 @@
 @section('title', 'Reports')
 @section('content')
 
-<div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+<div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem;">
     @foreach(['pending' => 'Pending', 'actioned' => 'Actioned', 'dismissed' => 'Dismissed', 'all' => 'All'] as $key => $label)
-        <a href="{{ route('admin.reports.index', ['status' => $key]) }}"
+        <a href="{{ route('admin.reports.index', array_merge(request()->only(['type', 'reason']), ['status' => $key])) }}"
            class="settings-btn {{ $status === $key ? 'settings-btn-danger' : '' }}"
            style="text-decoration: none;">{{ $label }}</a>
     @endforeach
 </div>
+
+<form method="GET" class="admin-filter-bar">
+    <input type="hidden" name="status" value="{{ $status }}">
+    <select name="type" class="settings-input" onchange="this.form.submit()">
+        <option value="">All types</option>
+        @foreach(['post' => 'Posts', 'comment' => 'Comments', 'message' => 'Messages', 'space_message' => 'Space Messages', 'user' => 'Users'] as $key => $label)
+            <option value="{{ $key }}" @selected($type === $key)>{{ $label }}</option>
+        @endforeach
+    </select>
+    <select name="reason" class="settings-input" onchange="this.form.submit()">
+        <option value="">All reasons</option>
+        @foreach(\App\Models\Report::REASONS as $r)
+            <option value="{{ $r }}" @selected($reason === $r)>{{ ucfirst(str_replace('_', ' ', $r)) }}</option>
+        @endforeach
+    </select>
+    @if($type || $reason)
+        <a href="{{ route('admin.reports.index', ['status' => $status]) }}" class="settings-btn" style="font-size: 0.75rem;">Clear filters</a>
+    @endif
+</form>
 
 <div class="xp-panel">
     <div class="xp-panel-header">Reports ({{ $reports->total() }})</div>

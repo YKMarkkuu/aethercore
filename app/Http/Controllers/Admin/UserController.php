@@ -31,8 +31,14 @@ class UserController extends Controller
     }
 
     /**
-     * Moderation fields are deliberately not mass assignable. Assign them
-     * directly here so only this controller can change account state.
+     * IMPORTANT: these four actions assign attributes directly and call
+     * save(), rather than $user->update([...]). update() only writes
+     * keys present in the model's $fillable array — suspended_until,
+     * banned_at, and role are moderation-only fields that should NEVER
+     * be user-mass-assignable (that would be a privilege-escalation
+     * hole), so they're deliberately absent from $fillable. Direct
+     * property assignment bypasses that guard safely, since it's this
+     * controller — not user input — choosing which attribute to set.
      */
     public function suspend(Request $request, User $user)
     {

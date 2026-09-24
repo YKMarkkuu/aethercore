@@ -15,6 +15,7 @@ use App\Http\Controllers\SpaceMessageController;
 use App\Http\Controllers\PresenceController;
 use App\Http\Controllers\BlockController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 
@@ -140,6 +141,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/users/{user}/block', [BlockController::class, 'store'])->name('users.block');
     Route::delete('/users/{user}/block', [BlockController::class, 'destroy'])->name('users.unblock');
     Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
         Route::get('/reports', [AdminReportController::class, 'index'])->name('reports.index');
         Route::post('/reports/{report}/dismiss', [AdminReportController::class, 'dismiss'])->name('reports.dismiss');
         Route::post('/reports/{report}/delete-content', [AdminReportController::class, 'deleteContent'])->name('reports.delete-content');

@@ -283,7 +283,11 @@ class User extends Authenticatable
 
     public function isSuspended(): bool
     {
-        return $this->suspended_until !== null && $this->suspended_until->isFuture();
+        if (!$this->suspended_until) {
+            return false;
+        }
+
+        return \Carbon\Carbon::parse($this->suspended_until)->isFuture();
     }
 
     // ===== BLOCKING =====

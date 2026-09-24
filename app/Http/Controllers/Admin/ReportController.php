@@ -13,14 +13,18 @@ class ReportController extends Controller
     public function index(Request $request)
     {
         $status = $request->query('status', 'pending');
+        $type = $request->query('type');
+        $reason = $request->query('reason');
 
         $reports = Report::with(['reporter', 'reportable', 'reviewer'])
             ->when($status !== 'all', fn ($q) => $q->where('status', $status))
+            ->when($type, fn ($q) => $q->where('reportable_type', Report::REPORTABLE_TYPES[$type] ?? '___none___'))
+            ->when($reason, fn ($q) => $q->where('reason', $reason))
             ->orderByDesc('created_at')
             ->paginate(25)
             ->withQueryString();
 
-        return view('admin.reports.index', compact('reports', 'status'));
+        return view('admin.reports.index', compact('reports', 'status', 'type', 'reason'));
     }
 
     public function dismiss(Report $report)
