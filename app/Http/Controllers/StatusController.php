@@ -19,6 +19,14 @@ class StatusController extends Controller
         $user->last_active_at = now();
         $user->save();
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'status' => $user->getEffectiveStatus(),
+                'status_label' => $user->getStatusLabel(),
+                'status_color' => $user->getStatusColor(),
+            ]);
+        }
+
         return back()->with('success', 'Status updated!');
     }
 

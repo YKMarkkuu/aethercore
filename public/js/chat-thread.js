@@ -105,10 +105,8 @@
 
         function usernameHtml(message) {
             const name = escapeHtml(message.user.display_name || message.user.name);
-            if (profileUrl) {
-                return `<a href="${profileUrl(message.user.id)}" class="msg-username-xp" style="text-decoration:none;">${name}</a>`;
-            }
-            return `<span class="msg-username-xp">${name}</span>`;
+            const href = profileUrl ? profileUrl(message.user.id) : '#';
+            return `<a href="${href}" class="msg-username-xp" data-user-popover="${message.user.id}" style="text-decoration:none;">${name}</a>`;
         }
 
         function replyPreviewHtml(replyTo) {
@@ -156,9 +154,9 @@
             if (isGrouped) {
                 avatarHtml = `<div class="msg-avatar-spacer"><span class="msg-hover-time">${message.time}</span></div>`;
             } else if (message.user.avatar_url) {
-                avatarHtml = `<div class="msg-avatar-xp"><img src="${message.user.avatar_url}" alt="Avatar" style="width:36px;height:36px;border-radius:50%;object-fit:cover;"></div>`;
+                avatarHtml = `<div class="msg-avatar-xp" data-user-popover="${message.user.id}"><img src="${message.user.avatar_url}" alt="Avatar" style="width:36px;height:36px;border-radius:50%;object-fit:cover;"></div>`;
             } else {
-                avatarHtml = `<div class="msg-avatar-xp">${escapeHtml((message.user.display_name || message.user.name || '?')[0])}</div>`;
+                avatarHtml = `<div class="msg-avatar-xp" data-user-popover="${message.user.id}">${escapeHtml((message.user.display_name || message.user.name || '?')[0])}</div>`;
             }
 
             const pickerButtonsHtml = REACTION_TYPES.map(type =>

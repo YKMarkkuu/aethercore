@@ -56,10 +56,20 @@
         // Only elements that are always "you" — the mini-profile and its
         // popup live in the sidebar on every page and never show anyone
         // else's status.
-        document.querySelectorAll('.mini-profile-status, .popup-status').forEach(el => {
+        document.querySelectorAll('.mini-profile-status').forEach(el => {
             el.textContent = LABELS[status] || 'Online';
             el.style.color = COLORS[status] || COLORS.online;
         });
+
+        const popupLabel = document.getElementById('popupStatusLabel');
+        if (popupLabel) popupLabel.textContent = LABELS[status] || 'Online';
+
+        const popupDot = document.getElementById('popupStatusDot');
+        if (popupDot) popupDot.className = 'status-dot-mini status-dot-' + status;
+
+        const setStatusIcon = document.getElementById('popupSetStatusIcon');
+        if (setStatusIcon) setStatusIcon.className = 'popup-action-icon status-icon-' + status;
+
         window.PresenceCache.set('self:status', status);
     }
 
@@ -94,5 +104,31 @@
         const data = new FormData();
         data.append('_token', csrfToken);
         navigator.sendBeacon('/presence/offline', data);
+    });
+
+    // ===== INSTANT (NO-RELOAD) STATUS PICKER =====
+    document.addEventListener('click', function (e) {
+        const btn = e.target.closest('[data-set-status]');
+        if (!btn) return;
+
+        const status = btn.dataset.setStatus;
+        btn.disabled = true;
+
+        fetch('/status/update', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+            },
+            body: JSON.stringify({ status }),
+        })
+            .then(r => r.ok ? r.json() : Promise.reject())
+            .then(data => {
+                applyOwnStatus(data.status);
+                document.getElementById('statusMenu')?.classList.add('hidden');
+            })
+            .catch(() => alert('Could not update your status. Please try again.'))
+            .finally(() => { btn.disabled = false; });
     });
 })();

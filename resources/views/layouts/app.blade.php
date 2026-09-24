@@ -59,6 +59,9 @@
 
             <!-- REPORT MODAL -->
             @include('partials.report-modal')
+
+            <!-- USER POPOVER -->
+            @include('partials.user-popover')
         </div>
     </div>
 
@@ -71,6 +74,7 @@
         <script src="{{ asset('js/post-interactions.js') }}"></script>
         <script src="{{ asset('js/chat-thread.js') }}"></script>
         <script src="{{ asset('js/report-modal.js') }}"></script>
+        <script src="{{ asset('js/user-popover.js') }}"></script>
     <script>
         let currentMode = 'aether';
         let currentView = 'feed';

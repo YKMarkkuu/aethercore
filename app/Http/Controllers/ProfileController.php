@@ -76,6 +76,52 @@ class ProfileController extends Controller
     }
 
     /**
+     * JSON payload for the Discord-style mini profile popover — used by
+     * user-popover.js wherever a name/avatar is clicked instead of
+     * navigating straight to the full profile.
+     */
+    public function popover(User $user)
+    {
+        $user->load('profile');
+        $authUser = Auth::user();
+        $isSelf = $authUser->id === $user->id;
+
+        $isFriend = false;
+        $requestSent = false;
+        $requestReceived = false;
+        $isBlocking = false;
+
+        if (!$isSelf) {
+            $isFriend = $authUser->isFriendWith($user->id);
+            $requestSent = DB::table('friendships')
+                ->where('user_id', $authUser->id)->where('friend_id', $user->id)
+                ->where('status', 'pending')->exists();
+            $requestReceived = DB::table('friendships')
+                ->where('user_id', $user->id)->where('friend_id', $authUser->id)
+                ->where('status', 'pending')->exists();
+            $isBlocking = $authUser->isBlocking($user->id);
+        }
+
+        return response()->json([
+            'id' => $user->id,
+            'display_name' => $user->display_name,
+            'username' => $user->username ?? $user->name,
+            'avatar_url' => $user->getAvatarUrl(),
+            'banner_url' => $user->getBannerUrl(),
+            'bio' => $user->profile->bio ?? null,
+            'status' => $user->getEffectiveStatus(),
+            'status_label' => $user->getStatusLabel(),
+            'status_message' => $user->profile->status_message ?? null,
+            'is_self' => $isSelf,
+            'is_friend' => $isFriend,
+            'request_sent' => $requestSent,
+            'request_received' => $requestReceived,
+            'is_blocking' => $isBlocking,
+            'profile_url' => route('profile.show', $user),
+        ]);
+    }
+
+    /**
      * Display any user's profile by ID.
      */
     public function show(User $user)

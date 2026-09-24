@@ -7,7 +7,7 @@
              include, so this "just works" without any extra wiring. -->
         <div class="space-members-header">Members — {{ $space->members->count() }}</div>
         @foreach($space->members as $member)
-            <a href="{{ route('profile.show', $member->user) }}" class="space-member-item">
+            <a href="{{ route('profile.show', $member->user) }}" class="space-member-item" data-user-popover="{{ $member->user->id }}">
                 <div class="space-member-avatar">
                     @if($member->user->getAvatarUrl())
                         <img src="{{ $member->user->getAvatarUrl() }}" alt="Avatar" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;">

@@ -84,7 +84,7 @@
                                 <span class="msg-hover-time">{{ $message->created_at->format('g:i A') }}</span>
                             </div>
                         @else
-                            <div class="msg-avatar-xp">
+                            <div class="msg-avatar-xp" data-user-popover="{{ $message->user_id }}">
                                 @if($message->user->getAvatarUrl())
                                     <img src="{{ $message->user->getAvatarUrl() }}" alt="Avatar" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover;">
                                 @else
@@ -95,7 +95,7 @@
                         <div class="msg-bubble-xp">
                             @unless($isGrouped)
                                 <div class="msg-header-xp">
-                                    <a href="{{ route('profile.show', $message->user) }}" class="msg-username-xp" style="text-decoration: none;">{{ $message->user->display_name }}</a>
+                                    <a href="{{ route('profile.show', $message->user) }}" class="msg-username-xp" data-user-popover="{{ $message->user_id }}" style="text-decoration: none;">{{ $message->user->display_name }}</a>
                                     <span class="msg-time-xp">{{ $message->created_at->format('g:i A') }}</span>
                                 </div>
                             @endunless

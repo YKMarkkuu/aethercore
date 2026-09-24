@@ -108,7 +108,7 @@
                 @endif
             </div>
             <div class="xp-profile-username" style="font-size: 0.85rem; color: #6a6a6a; margin-top: -0.1rem;">@ {{ $user->username ?? $user->name }}</div>
-            <div class="xp-profile-status" style="color: {{ $user->getStatusColor() }};">
+            <div class="xp-profile-status" id="xpProfileStatus" style="color: {{ $user->getStatusColor() }};">
                 {{ $user->getStatusLabel() }}
             </div>
             @if($user->profile->status_message ?? null)
@@ -865,6 +865,37 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         window.PresenceFriends.init('topFriendsList', { reorder: false, intervalMs: 20000 });
+
+        // ===== LIVE STATUS ON PROFILE HEADER =====
+        const statusEl = document.getElementById('xpProfileStatus');
+        if (!statusEl) return;
+
+        const profileUserId = '{{ $user->id }}';
+        const cached = window.PresenceCache.get('friend:' + profileUserId);
+        if (cached && cached.label) {
+            statusEl.textContent = cached.label;
+            statusEl.style.color = cached.color;
+        }
+
+        function pollProfileStatus() {
+            fetch('{{ route('now-playing', $user) }}', { headers: { 'Accept': 'application/json' } })
+                .then(r => r.ok ? r.json() : Promise.reject())
+                .then(data => {
+                    if (data.status_label) {
+                        statusEl.textContent = data.status_label;
+                        statusEl.style.color = data.status_color;
+                        window.PresenceCache.set('friend:' + profileUserId, {
+                            status: data.status,
+                            label: data.status_label,
+                            color: data.status_color,
+                        });
+                    }
+                })
+                .catch(() => {});
+        }
+
+        pollProfileStatus();
+        setInterval(pollProfileStatus, 15000);
     });
 </script>
 

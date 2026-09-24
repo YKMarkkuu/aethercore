@@ -59,6 +59,8 @@ Route::middleware(['auth'])->group(function () {
     })->name('profile.edit');
 
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+    Route::get('/profile/{user}/popover', [ProfileController::class, 'popover'])->name('profile.popover');
+    Route::get('/users/{user}/popover', [ProfileController::class, 'popover'])->name('users.popover');
     Route::get('/profile/{user}', [ProfileController::class, 'show'])->name('profile.show');
     Route::post('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
     Route::post('/profile/stats-period', [ProfileController::class, 'updateStatsPeriod'])->name('profile.stats-period');
