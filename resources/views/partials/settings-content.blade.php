@@ -1,5 +1,9 @@
 @php
-    $user = $user ?? Auth::user();
+    // Settings modal ALWAYS operates on the logged-in user, regardless
+    // of which page it's included on. Previously this used `$user ?? Auth::user()`
+    // which leaked another user's settings when the modal was opened
+    // from a profile page (where $user = the profile owner).
+    $user = Auth::user();
 
     $categories = [
         'account' => [
