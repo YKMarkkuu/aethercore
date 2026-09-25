@@ -6,6 +6,41 @@
     display: none !important;
 }
 
+/* ===== ACCORDION SETTINGS NAV ===== */
+.settings-nav-category-btn {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 0.4rem 0.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #1e1e1e;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    font-family: inherit;
+    border-radius: 4px;
+}
+.settings-nav-category-btn:hover { background: #d4d0c8; }
+.settings-accordion-group.active .settings-accordion-arrow { transform: rotate(180deg); }
+.settings-accordion-arrow { transition: transform 0.15s ease; font-size: 0.6rem; }
+.settings-subnav { padding-left: 0.4rem; margin-bottom: 0.3rem; }
+.settings-subnav.hidden { display: none; }
+.settings-nav-item.active { background: #3a7bd5; color: #fff; }
+
+/* ===== FULL-PAGE SETTINGS (reuses modal's nav/content classes) ===== */
+.settings-page-body {
+    display: flex;
+    min-height: 70vh;
+    overflow: hidden;
+    padding: 0;
+}
+.settings-page-body .settings-nav { width: 200px; }
+.settings-page-body .settings-content { flex: 1; }
+
 /* ===== MINI PROFILE POPUP ===== */
 .profile-popup {
     position: fixed;

@@ -67,8 +67,13 @@ class ConversationController extends Controller
         }
 
         $other = $conversation->getOtherParticipant(Auth::id());
-        if ($other && (Auth::user()->isBlocking($other->id) || Auth::user()->isBlockedBy($other->id))) {
-            abort(403, 'You cannot message this user.');
+        if ($other) {
+            if (Auth::user()->isBlocking($other->id) || Auth::user()->isBlockedBy($other->id)) {
+                abort(403, 'You cannot message this user.');
+            }
+            if (! $other->canBeMessagedBy(Auth::user())) {
+                abort(403, 'This user has restricted who can message them.');
+            }
         }
 
         $request->validate([

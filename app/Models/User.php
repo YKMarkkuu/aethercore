@@ -312,4 +312,51 @@ class User extends Authenticatable
             ->where('blocked_id', $this->id)
             ->exists();
     }
+
+    // ===== PRIVACY =====
+
+    public function canBeMessagedBy(User $sender): bool
+    {
+        $permission = $this->profile->dm_permission ?? 'everyone';
+
+        if ($permission === 'nobody') {
+            return $sender->id === $this->id;
+        }
+
+        if ($permission === 'friends') {
+            return $sender->id === $this->id || $sender->isFriendWith($this->id);
+        }
+
+        return true; // 'everyone'
+    }
+
+    public function canSeeStatusOf(User $target): bool
+    {
+        $permission = $target->profile->show_status_to ?? 'everyone';
+
+        if ($permission === 'nobody') {
+            return $this->id === $target->id;
+        }
+
+        if ($permission === 'friends') {
+            return $this->id === $target->id || $this->isFriendWith($target->id);
+        }
+
+        return true; // 'everyone'
+    }
+
+    public function canViewProfileOf(User $target): bool
+    {
+        $visibility = $target->profile->visibility ?? 'public';
+
+        if ($this->id === $target->id) {
+            return true;
+        }
+
+        if ($visibility === 'friends') {
+            return $this->isFriendWith($target->id);
+        }
+
+        return $visibility !== 'private';
+    }
 }

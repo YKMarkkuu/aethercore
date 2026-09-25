@@ -130,6 +130,10 @@ class ProfileController extends Controller
         // below (likes/comments/repost data) — without this it silently
         // falls back to broken/empty state.
         $user->load(['profile', 'posts.likes', 'posts.comments.user', 'posts.sharedPost.user', 'posts.sharedSpace.members']);
+
+        if (! Auth::user()->canViewProfileOf($user)) {
+            return view('profile.private', compact('user'));
+        }
         
         // Get the viewed user's friend IDs (NOT the logged-in user's) —
         // used for their Activity Feed panel below.
@@ -477,6 +481,15 @@ class ProfileController extends Controller
      */
     public function nowPlaying(User $user)
     {
+        if (! Auth::user()->canSeeStatusOf($user)) {
+            return response()->json([
+                'status' => 'offline',
+                'status_label' => 'Offline',
+                'status_color' => '#6b7280',
+                'now_playing' => null,
+            ]);
+        }
+
         $payload = [
             'status' => $user->getEffectiveStatus(),
             'status_label' => $user->getStatusLabel(),
@@ -526,6 +539,11 @@ class ProfileController extends Controller
         $statusResult = [];
 
         foreach ($users as $user) {
+            if (! Auth::user()->canSeeStatusOf($user)) {
+                $statusResult[$user->id] = ['status' => 'offline', 'label' => 'Offline', 'color' => '#6b7280'];
+                continue;
+            }
+
             $effective = $user->getEffectiveStatus();
             $statusResult[$user->id] = [
                 'status' => $effective,

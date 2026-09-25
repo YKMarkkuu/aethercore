@@ -33,6 +33,22 @@ class AppServiceProvider extends ServiceProvider
                 : collect());
         });
 
+        View::composer('partials.settings-content', function ($view) {
+            $sessions = collect();
+            if (Auth::check() && config('session.driver') === 'database') {
+                $sessions = \Illuminate\Support\Facades\DB::table('sessions')
+                    ->where('user_id', Auth::id())
+                    ->orderByDesc('last_activity')
+                    ->get();
+            }
+
+            $view->with([
+                'sessionDriverSupported' => config('session.driver') === 'database',
+                'settingsSessions' => $sessions,
+                'currentSessionId' => session()->getId(),
+            ]);
+        });
+
         View::composer('layouts.admin', function ($view) {
             $view->with('pendingReportsCount', Auth::check() && Auth::user()->isAdmin()
                 ? \App\Models\Report::where('status', 'pending')->count()

@@ -76,6 +76,7 @@
         <script src="{{ asset('js/post-interactions.js') }}"></script>
         <script src="{{ asset('js/chat-thread.js') }}"></script>
         <script src="{{ asset('js/realtime-posts.js') }}"></script>
+        <script src="{{ asset('js/settings-accordion.js') }}"></script>
         <script src="{{ asset('js/report-modal.js') }}"></script>
         <script src="{{ asset('js/user-popover.js') }}"></script>
     <script>

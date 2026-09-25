@@ -77,13 +77,18 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/now-playing-batch', [ProfileController::class, 'nowPlayingBatch'])->name('now-playing.batch');
 
     // ---------- SETTINGS ----------
-    Route::middleware(['auth'])->group(function () {
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
-    Route::post('/settings/account', [SettingsController::class, 'updateAccount'])->name('settings.account');
-    Route::post('/settings/theme', [SettingsController::class, 'updateTheme'])->name('settings.theme');
-    Route::post('/settings/lastfm', [SettingsController::class, 'connectLastfm'])->name('settings.lastfm');
-    Route::delete('/settings/delete', [SettingsController::class, 'deleteAccount'])->name('settings.delete');
-});
+    Route::get('/settings/export', [SettingsController::class, 'exportData'])->name('settings.export');
+    Route::get('/settings/sessions', [SettingsController::class, 'sessionsPartial'])->name('settings.sessions.index');
+
+    Route::middleware(['throttle:actions'])->group(function () {
+        Route::post('/settings/account', [SettingsController::class, 'updateAccount'])->name('settings.account');
+        Route::post('/settings/theme', [SettingsController::class, 'updateTheme'])->name('settings.theme');
+        Route::post('/settings/lastfm', [SettingsController::class, 'connectLastfm'])->name('settings.lastfm');
+        Route::post('/settings/privacy', [SettingsController::class, 'updatePrivacy'])->name('settings.privacy');
+        Route::delete('/settings/sessions/{id}', [SettingsController::class, 'destroySession'])->name('settings.sessions.destroy');
+        Route::delete('/settings/delete', [SettingsController::class, 'deleteAccount'])->name('settings.delete');
+    });
 
     // ---------- FEED ----------
     Route::get('/feed', [FeedController::class, 'index'])->name('feed');
@@ -127,11 +132,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/music', function () {
         return view('music');
     })->name('music');
-
-    // ---------- SETTINGS ----------
-    Route::get('/settings', function () {
-        return view('settings.index');
-    })->name('settings.index');
 
     //---------- CONVERSATIONS ----------
     Route::middleware(['auth'])->group(function () {

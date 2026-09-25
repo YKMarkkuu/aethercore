@@ -21,6 +21,9 @@ class Profile extends Model
         'top_albums',
         'top_friends',
         'is_public',
+        'visibility',
+        'dm_permission',
+        'show_status_to',
     ];
 
     protected $casts = [
