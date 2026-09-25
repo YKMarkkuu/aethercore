@@ -71,8 +71,11 @@
          same partials.post-card. Event listeners are delegated on
          document.body and only do anything if .post-item elements are
          actually present, so this is a no-op on pages with no posts. -->
+        <script src="{{ asset('js/toast.js') }}"></script>
+        <script src="{{ asset('js/ajax-forms.js') }}"></script>
         <script src="{{ asset('js/post-interactions.js') }}"></script>
         <script src="{{ asset('js/chat-thread.js') }}"></script>
+        <script src="{{ asset('js/realtime-posts.js') }}"></script>
         <script src="{{ asset('js/report-modal.js') }}"></script>
         <script src="{{ asset('js/user-popover.js') }}"></script>
     <script>

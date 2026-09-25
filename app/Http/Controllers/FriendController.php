@@ -27,7 +27,7 @@ class FriendController extends Controller
     }
 
     // Send friend request
-    public function sendRequest($userId)
+    public function sendRequest(Request $request, $userId)
     {
         $friend = User::findOrFail($userId);
         $user = Auth::user();
@@ -75,11 +75,14 @@ class FriendController extends Controller
             'updated_at' => now(),
         ]);
         
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'Friend request sent!']);
+        }
         return back()->with('success', 'Friend request sent!');
     }
 
     // Accept friend request
-    public function acceptRequest($userId)
+    public function acceptRequest(Request $request, $userId)
     {
         $user = Auth::user();
         
@@ -102,11 +105,14 @@ class FriendController extends Controller
                 'updated_at' => now(),
             ]);
         
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'Friend request accepted!']);
+        }
         return back()->with('success', 'Friend request accepted!');
     }
 
     // Reject or unfriend
-    public function rejectRequest($userId)
+    public function rejectRequest(Request $request, $userId)
     {
         $user = Auth::user();
         
@@ -121,6 +127,9 @@ class FriendController extends Controller
                 ->where('user_id', $userId)
                 ->where('friend_id', $user->id)
                 ->delete();
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'Friend request declined.']);
+            }
             return back()->with('success', 'Friend request declined.');
         }
         
@@ -135,6 +144,9 @@ class FriendController extends Controller
                 ->where('user_id', $user->id)
                 ->where('friend_id', $userId)
                 ->delete();
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'Friend request cancelled.']);
+            }
             return back()->with('success', 'Friend request cancelled.');
         }
         
@@ -163,6 +175,9 @@ class FriendController extends Controller
                         ->where('friend_id', $user->id);
                 })
                 ->delete();
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'Friend removed.']);
+            }
             return back()->with('success', 'Friend removed.');
         }
         

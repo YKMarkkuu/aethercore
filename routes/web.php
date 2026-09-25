@@ -49,9 +49,11 @@ Route::middleware(['auth'])->group(function () {
 
     // ---------- FRIENDS (MUST BE FIRST!) ----------
     Route::get('/friends', [FriendController::class, 'index'])->name('friends.index');
-    Route::post('/friends/request/{user}', [FriendController::class, 'sendRequest'])->name('friends.request');
-    Route::post('/friends/accept/{user}', [FriendController::class, 'acceptRequest'])->name('friends.accept');
-    Route::post('/friends/reject/{user}', [FriendController::class, 'rejectRequest'])->name('friends.reject');
+    Route::middleware(['throttle:actions'])->group(function () {
+        Route::post('/friends/request/{user}', [FriendController::class, 'sendRequest'])->name('friends.request');
+        Route::post('/friends/accept/{user}', [FriendController::class, 'acceptRequest'])->name('friends.accept');
+        Route::post('/friends/reject/{user}', [FriendController::class, 'rejectRequest'])->name('friends.reject');
+    });
 
     // ---------- PROFILE ----------
     Route::get('/profile/edit', function () {
@@ -87,35 +89,39 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/feed', [FeedController::class, 'index'])->name('feed');
 
     // ---------- POSTS ----------
-    Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
-    Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
-    Route::post('/posts/{post}/like', [PostController::class, 'toggleLike'])->name('posts.like');
-    Route::post('/posts/{post}/repost', [PostController::class, 'repost'])->name('posts.repost');
-    Route::post('/posts/{post}/share-to-chat', [PostController::class, 'shareToChat'])->name('posts.share-to-chat');
-    Route::post('/posts/{post}/comments', [CommentController::class, 'store'])->name('comments.store');
-    Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
-    Route::post('/posts/updates', [PostController::class, 'updates'])->name('posts.updates');
-    Route::post('/reports', [ReportController::class, 'store'])->name('reports.store');
+    Route::middleware(['throttle:actions'])->group(function () {
+        Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
+        Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
+        Route::post('/posts/{post}/like', [PostController::class, 'toggleLike'])->name('posts.like');
+        Route::post('/posts/{post}/repost', [PostController::class, 'repost'])->name('posts.repost');
+        Route::post('/posts/{post}/share-to-chat', [PostController::class, 'shareToChat'])->name('posts.share-to-chat');
+        Route::post('/posts/{post}/comments', [CommentController::class, 'store'])->name('comments.store');
+        Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
+        Route::post('/posts/updates', [PostController::class, 'updates'])->name('posts.updates');
+        Route::post('/reports', [ReportController::class, 'store'])->name('reports.store');
+    });
 
     // ---------- SPACES ----------
     Route::get('/spaces', [SpaceController::class, 'index'])->name('spaces');
-    Route::post('/spaces', [SpaceController::class, 'store'])->name('spaces.store');
     Route::get('/spaces/{space}', [SpaceController::class, 'show'])->name('spaces.show');
     Route::get('/spaces/{space}/channels/{channel}', [SpaceController::class, 'show'])->name('spaces.channel');
-    Route::post('/spaces/{space}/join', [SpaceController::class, 'join'])->name('spaces.join');
-    Route::post('/spaces/{space}/leave', [SpaceController::class, 'leave'])->name('spaces.leave');
-    Route::delete('/spaces/{space}', [SpaceController::class, 'destroy'])->name('spaces.destroy');
-    Route::post('/spaces/{space}/share', [SpaceController::class, 'shareToFeed'])->name('spaces.share');
-
-    Route::post('/spaces/{space}/channels', [SpaceChannelController::class, 'store'])->name('space-channels.store');
-    Route::delete('/space-channels/{channel}', [SpaceChannelController::class, 'destroy'])->name('space-channels.destroy');
-
-    Route::post('/space-channels/{channel}/messages', [SpaceMessageController::class, 'store'])->name('space-messages.store');
     Route::get('/space-channels/{channel}/messages/latest', [SpaceMessageController::class, 'latestMessages'])->name('space-messages.latest');
 
-    Route::patch('/space-messages/{message}', [SpaceMessageController::class, 'updateMessage'])->name('space-messages.update');
-    Route::delete('/space-messages/{message}', [SpaceMessageController::class, 'destroyMessage'])->name('space-messages.destroy');
-    Route::post('/space-messages/{message}/react', [SpaceMessageController::class, 'reactToMessage'])->name('space-messages.react');
+    Route::middleware(['throttle:actions'])->group(function () {
+        Route::post('/spaces', [SpaceController::class, 'store'])->name('spaces.store');
+        Route::post('/spaces/{space}/join', [SpaceController::class, 'join'])->name('spaces.join');
+        Route::post('/spaces/{space}/leave', [SpaceController::class, 'leave'])->name('spaces.leave');
+        Route::delete('/spaces/{space}', [SpaceController::class, 'destroy'])->name('spaces.destroy');
+        Route::post('/spaces/{space}/share', [SpaceController::class, 'shareToFeed'])->name('spaces.share');
+
+        Route::post('/spaces/{space}/channels', [SpaceChannelController::class, 'store'])->name('space-channels.store');
+        Route::delete('/space-channels/{channel}', [SpaceChannelController::class, 'destroy'])->name('space-channels.destroy');
+
+        Route::post('/space-channels/{channel}/messages', [SpaceMessageController::class, 'store'])->name('space-messages.store');
+        Route::patch('/space-messages/{message}', [SpaceMessageController::class, 'updateMessage'])->name('space-messages.update');
+        Route::delete('/space-messages/{message}', [SpaceMessageController::class, 'destroyMessage'])->name('space-messages.destroy');
+        Route::post('/space-messages/{message}/react', [SpaceMessageController::class, 'reactToMessage'])->name('space-messages.react');
+    });
 
     // ---------- MUSIC ----------
     Route::get('/music', function () {
@@ -140,8 +146,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/messages/{message}/react', [ConversationController::class, 'reactToMessage'])->name('messages.react');
 });
     //---------- BLOCKING ----------
-    Route::post('/users/{user}/block', [BlockController::class, 'store'])->name('users.block');
-    Route::delete('/users/{user}/block', [BlockController::class, 'destroy'])->name('users.unblock');
+    Route::middleware(['throttle:actions'])->group(function () {
+        Route::post('/users/{user}/block', [BlockController::class, 'store'])->name('users.block');
+        Route::delete('/users/{user}/block', [BlockController::class, 'destroy'])->name('users.unblock');
+    });
     Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
         Route::get('/reports', [AdminReportController::class, 'index'])->name('reports.index');

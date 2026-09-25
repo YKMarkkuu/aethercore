@@ -56,10 +56,15 @@ class PostController extends Controller
             $liked = true;
         }
 
-        return response()->json([
-            'liked' => $liked,
-            'count' => $post->likes()->count(),
-        ]);
+        $count = $post->likes()->count();
+
+        try {
+            broadcast(new \App\Events\PostLikeToggled($post->id, $count));
+        } catch (\Throwable $e) {
+            \Log::warning('Broadcast failed for post like ' . $post->id . ': ' . $e->getMessage());
+        }
+
+        return response()->json(['liked' => $liked, 'count' => $count]);
     }
 
     /**
