@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="{{ asset('css/base.css') }}">
     <link rel="stylesheet" href="{{ asset('css/components.css') }}">
     <link rel="stylesheet" href="{{ asset('css/utilities.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/settings-v2.css') }}">
 
     @if(Auth::check() && Auth::user()->theme && Auth::user()->theme !== 'aethercore')
         <link rel="stylesheet" href="{{ asset('css/themes/' . Auth::user()->theme . '.css') }}">
@@ -76,7 +77,7 @@
         <script src="{{ asset('js/post-interactions.js') }}"></script>
         <script src="{{ asset('js/chat-thread.js') }}"></script>
         <script src="{{ asset('js/realtime-posts.js') }}"></script>
-        <script src="{{ asset('js/settings-accordion.js') }}"></script>
+        <script src="{{ asset('js/settings-modal.js') }}"></script>
         <script src="{{ asset('js/report-modal.js') }}"></script>
         <script src="{{ asset('js/user-popover.js') }}"></script>
     <script>
