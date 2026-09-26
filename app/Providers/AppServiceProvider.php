@@ -3,7 +3,10 @@
 namespace App\Providers;
 
 use App\Models\Space;
+use Illuminate\Console\Events\CommandStarting;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -22,6 +25,19 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Event::listen(CommandStarting::class, function (CommandStarting $event): void {
+            $destructiveCommands = [
+                'migrate:fresh',
+                'migrate:refresh',
+                'migrate:reset',
+                'db:wipe',
+            ];
+
+            if (App::environment('production') && in_array($event->command, $destructiveCommands, true)) {
+                throw new \RuntimeException("Artisan command [{$event->command}] is disabled in production.");
+            }
+        });
+
         // partials.sidebar-left renders on every page (see layouts/app.blade.php),
         // so its "Your Spaces" list needs $mySpaces available regardless
         // of which controller/route actually handled the request.

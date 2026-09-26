@@ -203,30 +203,32 @@
                 @endif
             </div>
 
-            <!-- Edit Mode Fields -->
+            @if(auth()->id() === $user->id)
+            {{-- Account-edit values belong to the signed-in user, never another profile owner. --}}
             <div id="editMode" style="display: none; margin-top: 0.5rem; border-top: 1px solid #d0c8c0; padding-top: 0.5rem;">
                 <form action="{{ route('profile.update') }}" method="POST" id="editProfileForm">
                     @csrf
                     <div style="margin-bottom: 0.5rem;">
                         <label style="font-size: 0.65rem; color: #6a6a6a; display: block;">Display Name</label>
-                        <input type="text" name="display_name" value="{{ $user->profile->display_name ?? $user->name }}" class="settings-input" style="width: 100%;">
+                        <input type="text" name="display_name" value="{{ auth()->user()->profile->display_name ?? auth()->user()->name }}" class="settings-input" style="width: 100%;">
                     </div>
                     <div style="margin-bottom: 0.5rem;">
                         <label style="font-size: 0.65rem; color: #6a6a6a; display: block;">Status Note <span style="font-weight: 400; text-transform: none; letter-spacing: 0;">(shows under your online status, like an away message)</span></label>
-                        <input type="text" name="status_message" value="{{ $user->profile->status_message ?? '' }}" maxlength="100" placeholder="What's on your mind?" class="settings-input" style="width: 100%;">
+                        <input type="text" name="status_message" value="{{ auth()->user()->profile->status_message ?? '' }}" maxlength="100" placeholder="What's on your mind?" class="settings-input" style="width: 100%;">
                     </div>
                     <div style="margin-bottom: 0.5rem;">
                         <label style="font-size: 0.65rem; color: #6a6a6a; display: block;">Bio</label>
-                        <textarea name="bio" class="settings-input" rows="2" style="width: 100%;">{{ $user->profile->bio ?? '' }}</textarea>
+                        <textarea name="bio" class="settings-input" rows="2" style="width: 100%;">{{ auth()->user()->profile->bio ?? '' }}</textarea>
                     </div>
                     <div style="margin-bottom: 0.5rem;">
                         <label style="font-size: 0.65rem; color: #6a6a6a; display: block;">Location</label>
-                        <input type="text" name="location" value="{{ $user->profile->location ?? '' }}" class="settings-input" style="width: 100%;">
+                        <input type="text" name="location" value="{{ auth()->user()->profile->location ?? '' }}" class="settings-input" style="width: 100%;">
                     </div>
                     <button type="submit" class="settings-btn">Save Changes</button>
                     <button type="button" class="settings-btn" style="margin-left: 0.3rem; background: #d4d0c8;" onclick="toggleEditMode()">Cancel</button>
                 </form>
             </div>
+            @endif
         </div>
     </div>
 

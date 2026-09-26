@@ -23,6 +23,26 @@ class ProfileTest extends TestCase
         $response->assertOk()->assertDontSee('Welcome to AetherCore!');
     }
 
+    public function test_viewing_another_profile_keeps_account_ui_bound_to_the_authenticated_user(): void
+    {
+        $viewer = User::factory()->create(['email' => 'viewer@example.com']);
+        $profileOwner = User::factory()->create(['email' => 'owner@example.com']);
+        Profile::create([
+            'user_id' => $profileOwner->id,
+            'display_name' => 'Profile Owner',
+            'visibility' => 'public',
+        ]);
+
+        $response = $this
+            ->actingAs($viewer)
+            ->get(route('profile.show', $profileOwner));
+
+        $response->assertOk()
+            ->assertSee('name="email" value="viewer@example.com"', false)
+            ->assertDontSee('name="email" value="owner@example.com"', false)
+            ->assertDontSee('id="editProfileForm"', false);
+    }
+
     public function test_profile_bio_can_be_updated_without_a_page_reload(): void
     {
         $user = User::factory()->create();
