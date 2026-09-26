@@ -38,6 +38,40 @@ class SpacePermissionsTest extends TestCase
         ]);
 
         $this->assertTrue($space->userHasPermission($owner->id, SpacePermission::MANAGE_ROLES));
+        $this->assertSame(999, $space->getHighestRolePosition($owner->id));
+    }
+
+    public function test_highest_role_position_uses_assigned_and_default_roles(): void
+    {
+        $owner = User::factory()->create();
+        $member = User::factory()->create();
+        $space = Space::create([
+            'owner_id' => $owner->id,
+            'name' => 'Hierarchy Test Space',
+        ]);
+        $role = SpaceRole::create([
+            'space_id' => $space->id,
+            'name' => 'Moderator',
+            'position' => 60,
+        ]);
+        SpaceRole::create([
+            'space_id' => $space->id,
+            'name' => 'Member',
+            'position' => 0,
+            'is_default' => true,
+        ]);
+        $membership = SpaceMember::create([
+            'space_id' => $space->id,
+            'user_id' => $member->id,
+            'role' => 'member',
+        ]);
+
+        DB::table('space_members')->where('id', $membership->id)->update(['role_id' => $role->id]);
+        $this->assertSame(60, $space->getHighestRolePosition($member->id));
+
+        DB::table('space_members')->where('id', $membership->id)->update(['role_id' => null]);
+        $space->unsetRelation('members');
+        $this->assertSame(0, $space->getHighestRolePosition($member->id));
     }
 
     public function test_member_permissions_use_assigned_or_default_role(): void

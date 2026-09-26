@@ -13,13 +13,14 @@ class SpaceMemberController extends Controller
 {
     /**
      * KICK_MEMBERS is enforced by the space.permission middleware on
-     * the route (Response 6) — this method only handles the
-     * owner-protection rule, which is a business rule rather than a
-     * permission (no permission should ever be able to override it).
+      * the route (Response 6) — this method only handles the
+      * owner-protection and hierarchy rules, which are business rules
+      * rather than permissions (no permission should ever override them).
      */
     public function kick(Space $space, User $user)
     {
         $this->guardAgainstOwner($space, $user);
+          $this->guardAgainstHierarchy($space, $user);
 
         $space->removeMember($user->id);
 
@@ -31,13 +32,13 @@ class SpaceMemberController extends Controller
     }
 
     /**
-     * BAN_MEMBERS is enforced by middleware. Records the ban (see the
-     * flag above re: join() not yet checking this table) and removes
-     * the member the same way kick() does.
+    * BAN_MEMBERS is enforced by middleware. Records the ban and
+    * removes the member the same way kick() does.
      */
     public function ban(Request $request, Space $space, User $user)
     {
         $this->guardAgainstOwner($space, $user);
+        $this->guardAgainstHierarchy($space, $user);
 
         $request->validate([
             'reason' => 'nullable|string|max:300',
@@ -59,9 +60,9 @@ class SpaceMemberController extends Controller
 
     /**
      * MANAGE_ROLES is enforced by middleware. The owner's role can
-     * never be reassigned away from them through this endpoint — same
-     * "cannot be demoted" rule as the kick/ban owner guard, just phrased
-     * for role assignment instead of removal.
+    * never be reassigned away from them through this endpoint, and
+    * hierarchy still applies — an Admin cannot reassign another
+    * Admin's (or higher's) role, only someone strictly below them.
      */
     public function assignRole(Request $request, Space $space, User $user)
     {
@@ -72,6 +73,8 @@ class SpaceMemberController extends Controller
         if (!$space->isMember($user->id)) {
             abort(404, 'That user is not a member of this Space.');
         }
+
+        $this->guardAgainstHierarchy($space, $user);
 
         $request->validate([
             'role_id' => 'required|integer|exists:space_roles,id',
@@ -105,6 +108,22 @@ class SpaceMemberController extends Controller
 
         if (!$space->isMember($user->id)) {
             abort(404, 'That user is not a member of this Space.');
+        }
+    }
+
+    /**
+     * Discord-style hierarchy: the actor can only act on a target whose
+     * highest role position is strictly lower than their own. Owner
+     * immunity is already handled separately (guardAgainstOwner /
+     * assignRole's inline owner check) before this runs.
+     */
+    protected function guardAgainstHierarchy(Space $space, User $target): void
+    {
+        $actorPosition = $space->getHighestRolePosition(Auth::id());
+        $targetPosition = $space->getHighestRolePosition($target->id);
+
+        if ($targetPosition >= $actorPosition) {
+            abort(403, 'You cannot act on someone with equal or higher role position.');
         }
     }
 }
