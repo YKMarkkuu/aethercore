@@ -35,7 +35,7 @@
         <div class="right-profile-status" style="color: {{ Auth::user()->getStatusColor() }};">
             {{ Auth::user()->getStatusLabel() }}
         </div>
-        <div class="right-profile-bio">{{ Auth::user()->profile->bio ?? 'Welcome to AetherCore!' }}</div>
+        <div class="right-profile-bio" id="rightProfileBio">{{ Auth::user()->profile->bio ?? '' }}</div>
 
         <hr class="right-profile-divider">
 

@@ -114,7 +114,7 @@
             @if($user->profile->status_message ?? null)
                 <div class="xp-profile-note" id="statusNoteDisplay">“{{ $user->profile->status_message }}”</div>
             @endif
-            <div class="xp-profile-bio" id="bioDisplay" style="font-size: 0.9rem; color: #1e1e1e; margin-top: 0.4rem; line-height: 1.5;">{{ $user->profile->bio ?? 'Welcome to AetherCore!' }}</div>
+            <div class="xp-profile-bio" id="bioDisplay" style="font-size: 0.9rem; color: #1e1e1e; margin-top: 0.4rem; line-height: 1.5;">{{ $user->profile->bio ?? '' }}</div>
 
             <!-- Location -->
             <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.3rem; font-size: 0.75rem; color: #6a6a6a;">
@@ -217,7 +217,7 @@
                     </div>
                     <div style="margin-bottom: 0.5rem;">
                         <label style="font-size: 0.65rem; color: #6a6a6a; display: block;">Bio</label>
-                        <textarea name="bio" class="settings-input" rows="2" style="width: 100%;">{{ $user->profile->bio ?? 'Welcome to AetherCore!' }}</textarea>
+                        <textarea name="bio" class="settings-input" rows="2" style="width: 100%;">{{ $user->profile->bio ?? '' }}</textarea>
                     </div>
                     <div style="margin-bottom: 0.5rem;">
                         <label style="font-size: 0.65rem; color: #6a6a6a; display: block;">Location</label>
@@ -460,10 +460,9 @@
                             }
                         }
                     @endphp
-                    @if($friendUsers->count() > 0)
-                        <div style="display: flex; flex-direction: column; gap: 0.2rem;" id="topFriendsList">
-                            @foreach($friendUsers as $index => $friend)
-                                <div style="display: flex; align-items: center; gap: 0.4rem; padding: 0.15rem 0.3rem; background: #f8f5ec; border: 1px solid #d0c8c0; border-radius: 4px;" data-friend-id="{{ $friend->id }}">
+                    <div style="display: flex; flex-direction: column; gap: 0.2rem;" id="topFriendsList">
+                        @foreach($friendUsers as $index => $friend)
+                            <div style="display: flex; align-items: center; gap: 0.4rem; padding: 0.15rem 0.3rem; background: #f8f5ec; border: 1px solid #d0c8c0; border-radius: 4px;" data-friend-id="{{ $friend->id }}">
                                     <span style="font-size: 0.55rem; font-weight: 700; color: #1a4a9e; min-width: 16px;">#{{ $index + 1 }}</span>
                                     <div class="xp-friend-avatar" style="width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, #3a7bd5, #1a4a9e); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.55rem; color: #ffffff; flex-shrink: 0; overflow: hidden;">
                                         @if($friend->profile && $friend->profile->avatar)
@@ -485,12 +484,10 @@
                                             <span class="friend-now-playing-text"></span>
                                         </div>
                                     </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    @else
-                        <span style="font-size: 0.6rem; color: #6a6a6a;">No top friends set yet</span>
-                    @endif
+                            </div>
+                        @endforeach
+                    </div>
+                    <span id="topFriendsEmpty" style="font-size: 0.6rem; color: #6a6a6a; {{ $friendUsers->count() ? 'display: none;' : '' }}">No top friends set yet</span>
                 </div>
             </div>
 
@@ -529,32 +526,54 @@
     <!-- ===== EDIT TOP 8 FRIENDS MODAL ===== -->
     @if(auth()->id() === $user->id)
         <div class="settings-modal hidden" id="topFriendsModal">
-            <div class="settings-modal-content" style="max-width: 380px; height: auto; max-height: 70vh;">
+            <div class="settings-modal-content" style="max-width: 640px; width: 94%; height: auto; max-height: 86vh;">
                 <div class="settings-modal-header">
                     <h2>Edit Top 8 Friends</h2>
                     <button class="settings-modal-close" onclick="toggleTopFriendsModal()">✕</button>
                 </div>
-                <form action="{{ route('profile.top-friends') }}" method="POST">
+                <form action="{{ route('profile.top-friends') }}" method="POST" id="topFriendsForm" data-selected-ids="{{ json_encode($user->profile->top_friends ?? []) }}">
                     @csrf
-                    <div style="padding: 0.75rem 1rem; overflow-y: auto; max-height: 50vh;">
-                        <p class="settings-subtitle" style="margin-top: 0;">Pick up to 8 friends, in the order you want them shown.</p>
-                        @php
-                            $selectedIds = $user->profile->top_friends ?? [];
-                        @endphp
-                        @forelse($availableFriends as $friend)
-                            <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.2rem; border-bottom: 1px solid #e0dcd0; font-size: 0.8rem; cursor: pointer;">
-                                <input type="checkbox" name="friends[]" value="{{ $friend->id }}"
-                                    class="top-friend-checkbox"
-                                    @checked(in_array($friend->id, $selectedIds))>
-                                {{ $friend->name }}
-                            </label>
-                        @empty
-                            <p style="font-size: 0.75rem; color: #6a6a6a;">You don't have any friends yet to add here.</p>
-                        @endforelse
+                    <div style="padding: 0.75rem 1rem; overflow-y: auto; max-height: 68vh;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: 1rem;">
+                            <section aria-labelledby="topFriendsBrowseHeading">
+                                <div id="topFriendsBrowseHeading" style="font-weight: 700; font-size: 0.8rem; margin-bottom: 0.35rem;">Your friends</div>
+                                <input type="search" id="topFriendsSearch" class="settings-input" placeholder="Search by name or username" aria-label="Search friends" style="width: 100%; margin-bottom: 0.4rem;">
+                                <div id="topFriendsChoices" style="max-height: 290px; overflow-y: auto; border: 1px solid #b0a8a0; background: #fffdf5; padding: 0.2rem 0.4rem;">
+                                    @forelse($availableFriends as $friend)
+                                        <label class="top-friend-option" data-display-name="{{ $friend->display_name }}" data-username="{{ $friend->username ?? $friend->name }}" data-search="{{ strtolower($friend->display_name . ' ' . ($friend->username ?? $friend->name)) }}" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.2rem; border-bottom: 1px solid #e0dcd0; font-size: 0.75rem; cursor: pointer;">
+                                            <input type="checkbox" value="{{ $friend->id }}" class="top-friend-checkbox" @checked(in_array($friend->id, $user->profile->top_friends ?? []))>
+                                            <span style="width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #3a7bd5, #1a4a9e); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; flex-shrink: 0; overflow: hidden;">
+                                                @if($friend->profile?->avatar)
+                                                    <img src="{{ asset('storage/' . $friend->profile->avatar) }}" alt="" style="width: 100%; height: 100%; object-fit: cover;">
+                                                @else
+                                                    {{ strtoupper(substr($friend->display_name, 0, 1)) }}
+                                                @endif
+                                            </span>
+                                            <span style="min-width: 0;">
+                                                <span style="display: block; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ $friend->display_name }}</span>
+                                                <span style="display: block; color: #6a6a6a; font-size: 0.65rem;">{{ '@' . ($friend->username ?? $friend->name) }}</span>
+                                            </span>
+                                        </label>
+                                    @empty
+                                        <p style="font-size: 0.75rem; color: #6a6a6a;">You don't have any friends yet to add here.</p>
+                                    @endforelse
+                                    <p id="topFriendsNoMatches" style="display: none; font-size: 0.75rem; color: #6a6a6a;">No matching friends.</p>
+                                </div>
+                            </section>
+                            <section aria-labelledby="topFriendsSelectedHeading">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                                    <div id="topFriendsSelectedHeading" style="font-weight: 700; font-size: 0.8rem;">Selected</div>
+                                    <span id="topFriendsCount" style="font-size: 0.7rem; color: #6a6a6a;">0 / 8</span>
+                                </div>
+                                <p style="font-size: 0.68rem; color: #6a6a6a; margin: 0 0 0.4rem;">Use the arrows to set the order shown on your profile.</p>
+                                <ol id="topFriendsSelectedList" style="list-style: none; margin: 0; padding: 0; max-height: 290px; overflow-y: auto;"></ol>
+                                <div id="topFriendsSelectedInputs"></div>
+                            </section>
+                        </div>
                     </div>
                     <div style="padding: 0.6rem 1rem; border-top: 1px solid #b0a8a0; display: flex; justify-content: flex-end; gap: 0.5rem;">
                         <button type="button" class="settings-btn" onclick="toggleTopFriendsModal()">Cancel</button>
-                        <button type="submit" class="settings-btn">Save</button>
+                        <button type="submit" class="settings-btn">Save Changes</button>
                     </div>
                 </form>
             </div>
@@ -597,26 +616,6 @@
         </div>
     @endif
 </div>
-
-<script>
-    function toggleTopFriendsModal() {
-        document.getElementById('topFriendsModal').classList.toggle('hidden');
-    }
-
-    // Cap selection at 8 friends
-    document.addEventListener('DOMContentLoaded', function() {
-        const boxes = document.querySelectorAll('.top-friend-checkbox');
-        boxes.forEach(box => {
-            box.addEventListener('change', function() {
-                const checked = document.querySelectorAll('.top-friend-checkbox:checked');
-                if (checked.length > 8) {
-                    this.checked = false;
-                    alert('You can only select up to 8 friends.');
-                }
-            });
-        });
-    });
-</script>
 
 <script>
     // ===== IMAGE ADJUST MODAL (avatar/banner) =====
@@ -899,25 +898,9 @@
     });
 </script>
 
-<script>
-    function toggleEditMode() {
-        const editMode = document.getElementById('editMode');
-        const editBtn = document.getElementById('editProfileBtn');
-        const displayName = document.getElementById('displayNameDisplay');
-        const bioDisplay = document.getElementById('bioDisplay');
-        
-        if (editMode.style.display === 'none') {
-            editMode.style.display = 'block';
-            editBtn.textContent = 'Cancel Edit';
-            displayName.style.display = 'none';
-            bioDisplay.style.display = 'block';
-        } else {
-            editMode.style.display = 'none';
-            editBtn.textContent = 'Edit Profile';
-            displayName.style.display = 'block';
-            bioDisplay.style.display = 'block';
-        }
-    }
-</script>
+@push('scripts')
+    <script src="{{ asset('js/profile-editor.js') }}"></script>
+    <script src="{{ asset('js/top-friends-editor.js') }}"></script>
+@endpush
 
 @endsection

@@ -64,7 +64,9 @@ class ProfileController extends Controller
         // always the owner viewing their own profile, so $friendIds here
         // is already the right list. Also reused as $friends for the
         // Posts panel's Share modal (see partials.share-modal).
-        $availableFriends = User::whereIn('id', $friendIds)->get(['id', 'name']);
+        $availableFriends = User::whereIn('id', $friendIds)
+            ->with('profile')
+            ->get(['id', 'name', 'username']);
         $friends = $availableFriends;
 
         // Needed by partials.post-card for the Posts panel below —
@@ -256,7 +258,7 @@ class ProfileController extends Controller
         $friendIds = array_unique(array_merge($sentIds, $receivedIds));
 
         $validSelected = array_values(array_intersect(
-            array_map('intval', $selected),
+            array_unique(array_map('intval', $selected)),
             $friendIds
         ));
 
@@ -268,6 +270,31 @@ class ProfileController extends Controller
 
         $profile->top_friends = $validSelected;
         $profile->save();
+
+        if ($request->wantsJson()) {
+            $selectedUsers = User::whereIn('id', $validSelected)
+                ->with('profile')
+                ->get()
+                ->keyBy('id');
+
+            $friends = collect($validSelected)
+                ->map(fn ($friendId) => $selectedUsers->get($friendId))
+                ->filter()
+                ->map(fn (User $friend) => [
+                    'id' => $friend->id,
+                    'display_name' => $friend->display_name,
+                    'username' => $friend->username ?? $friend->name,
+                    'avatar_url' => $friend->getAvatarUrl(),
+                    'profile_url' => route('profile.show', $friend),
+                ])
+                ->values();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Top 8 Friends updated!',
+                'friends' => $friends,
+            ]);
+        }
 
         return redirect()->back()->with('success', 'Top 8 Friends updated!');
     }
@@ -447,6 +474,8 @@ class ProfileController extends Controller
                 'success' => true,
                 'avatar_url' => $user->fresh()->getAvatarUrl(),
                 'banner_url' => $user->fresh()->getBannerUrl(),
+                'display_name' => $profile->display_name ?? $user->name,
+                'bio' => $profile->bio,
             ]);
         }
         
