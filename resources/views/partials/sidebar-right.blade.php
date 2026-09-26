@@ -46,7 +46,9 @@
                                 @csrf
                                 <select name="role_id" class="settings-input" style="width: auto; font-size: 0.6rem; padding: 0.1rem 0.3rem;" onchange="this.form.requestSubmit()">
                                     @foreach($space->roles as $role)
-                                        <option value="{{ $role->id }}" @selected($memberRole && $memberRole->id === $role->id)>{{ $role->name }}</option>
+                                        @if($role->position < $actorPosition)
+                                            <option value="{{ $role->id }}" @selected($memberRole && $memberRole->id === $role->id)>{{ $role->name }}</option>
+                                        @endif
                                     @endforeach
                                 </select>
                             </form>

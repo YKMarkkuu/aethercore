@@ -60,9 +60,14 @@ class SpaceMemberController extends Controller
 
     /**
      * MANAGE_ROLES is enforced by middleware. The owner's role can
-    * never be reassigned away from them through this endpoint, and
-    * hierarchy still applies — an Admin cannot reassign another
-    * Admin's (or higher's) role, only someone strictly below them.
+     * never be reassigned away from them through this endpoint, and
+     * hierarchy still applies — an Admin cannot reassign another
+     * Admin's (or higher's) role, only someone strictly below them.
+     * The role being ASSIGNED is also hierarchy-checked (not just the
+     * target member) — without this, an Admin could grant someone an
+     * Owner-level or equal-to-Admin-level role despite not being able
+     * to touch a member who already holds that role, which is a
+     * privilege escalation path around the whole hierarchy system.
      */
     public function assignRole(Request $request, Space $space, User $user)
     {
@@ -89,6 +94,12 @@ class SpaceMemberController extends Controller
 
         if (!$role) {
             abort(422, 'That role does not belong to this Space.');
+        }
+
+        $actorPosition = $space->getHighestRolePosition(Auth::id());
+
+        if ($role->position >= $actorPosition) {
+            abort(403, 'You cannot assign a role at or above your own level.');
         }
 
         $space->assignRole($user->id, $role->id);
