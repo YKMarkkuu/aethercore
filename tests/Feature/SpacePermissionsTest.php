@@ -76,4 +76,20 @@ class SpacePermissionsTest extends TestCase
         $this->assertSame($defaultRole->id, $space->getUserRole($member->id)?->id);
         $this->assertTrue($space->userHasPermission($member->id, SpacePermission::MANAGE_MESSAGES));
     }
+
+    public function test_space_creation_seeds_default_roles_and_assigns_owner_role(): void
+    {
+        $owner = User::factory()->create();
+
+        $response = $this->actingAs($owner)->postJson(route('spaces.store'), [
+            'name' => 'New Space',
+            'description' => 'A space with roles',
+        ]);
+
+        $response->assertOk()->assertJsonPath('success', true);
+        $space = Space::findOrFail($response->json('space_id'));
+        $this->assertSame(['Owner', 'Admin', 'Moderator', 'Member'], $space->roles()->pluck('name')->all());
+        $this->assertSame('Owner', $space->getUserRole($owner->id)?->name);
+        $this->assertSame('owner', $space->members()->where('user_id', $owner->id)->value('role'));
+    }
 }

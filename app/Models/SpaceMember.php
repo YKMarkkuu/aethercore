@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class SpaceMember extends Model
 {
-    protected $fillable = ['space_id', 'user_id', 'role'];
+    protected $fillable = ['space_id', 'user_id', 'role', 'role_id'];
 
     public function space()
     {

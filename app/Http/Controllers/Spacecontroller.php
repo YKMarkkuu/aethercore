@@ -6,6 +6,7 @@ use App\Models\Post;
 use App\Models\Space;
 use App\Models\SpaceChannel;
 use App\Models\SpaceMember;
+use App\Services\SpaceRoleSeeder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -51,10 +52,13 @@ class SpaceController extends Controller
             'position' => 0,
         ]);
 
+        $ownerRole = SpaceRoleSeeder::seedDefaultRoles($space);
+
         SpaceMember::create([
             'space_id' => $space->id,
             'user_id' => Auth::id(),
             'role' => 'owner',
+            'role_id' => $ownerRole->id,
         ]);
 
         if ($request->wantsJson()) {
