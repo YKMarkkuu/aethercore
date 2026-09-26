@@ -16,6 +16,14 @@
                 'privacy-visibility' => 'Profile Visibility',
                 'privacy-messages' => 'Direct Messages',
                 'privacy-status' => 'Activity Status',
+                'blocked-users' => 'Blocked Users',
+            ],
+        ],
+        'notifications' => [
+            'label' => 'Notifications',
+            'icon' => 'chat',
+            'subs' => [
+                'notifications' => 'Notification Preferences',
             ],
         ],
         'data' => [
@@ -23,6 +31,7 @@
             'icon' => 'lock',
             'subs' => [
                 'data-export' => 'Download Your Data',
+                'legal' => 'Terms & Privacy Policy',
             ],
         ],
         'appearance' => [

@@ -42,10 +42,15 @@ class AppServiceProvider extends ServiceProvider
                     ->get();
             }
 
+            $blockedUsers = Auth::check()
+                ? Auth::user()->blockedUsers()->get(['users.id', 'users.name', 'users.username'])
+                : collect();
+
             $view->with([
                 'sessionDriverSupported' => config('session.driver') === 'database',
                 'settingsSessions' => $sessions,
                 'currentSessionId' => session()->getId(),
+                'settingsBlockedUsers' => $blockedUsers,
             ]);
         });
 

@@ -24,6 +24,10 @@ class Profile extends Model
         'visibility',
         'dm_permission',
         'show_status_to',
+        'notify_email',
+        'notify_friend_requests',
+        'notify_messages',
+        'notify_likes_comments',
     ];
 
     protected $casts = [
@@ -32,7 +36,10 @@ class Profile extends Model
         'top_albums' => 'array',
         'top_friends' => 'array',
         'is_public' => 'boolean',
-        'top_friends' => 'array',
+        'notify_email' => 'boolean',
+        'notify_friend_requests' => 'boolean',
+        'notify_messages' => 'boolean',
+        'notify_likes_comments' => 'boolean',
     ];
 
     public function user()

@@ -148,6 +148,72 @@
     margin-bottom: 0.6rem;
 }
 
+/* ===== WIDER SETTINGS SCROLL AREA ===== */
+.settings-v2-scrollarea {
+    max-width: none;
+}
+
+/* ===== TOGGLE SWITCHES (used by Notification Preferences) ===== */
+.settings-toggle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border-light);
+}
+.settings-toggle-row:last-child { border-bottom: none; }
+
+.settings-toggle-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+.settings-toggle-sub {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    margin-top: 0.15rem;
+}
+
+.settings-switch {
+    position: relative;
+    display: inline-block;
+    width: 38px;
+    height: 20px;
+    flex-shrink: 0;
+}
+.settings-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.settings-switch-slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background: var(--border-default);
+    border-radius: 20px;
+    transition: 0.15s;
+}
+.settings-switch-slider::before {
+    content: '';
+    position: absolute;
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    bottom: 3px;
+    background: #ffffff;
+    border-radius: 50%;
+    transition: 0.15s;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+.settings-switch input:checked + .settings-switch-slider {
+    background: var(--accent);
+}
+.settings-switch input:checked + .settings-switch-slider::before {
+    transform: translateX(18px);
+}
+
 @media (max-width: 768px) {
     .settings-v2 { flex-direction: column; }
     .settings-v2-sidebar { width: 100%; max-height: 160px; }

@@ -305,7 +305,7 @@
 .settings-modal-content {
     background: #f0edd8;
     border-radius: 6px;
-    max-width: 800px;
+    max-width: 960px;
     width: 90%;
     height: 80vh;  /* 👈 FIXED HEIGHT instead of max-height */
     max-height: 600px;  /* 👈 CAP THE MAX */

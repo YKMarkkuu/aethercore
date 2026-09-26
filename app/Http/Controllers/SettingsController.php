@@ -133,6 +133,33 @@ class SettingsController extends Controller
     }
 
     /**
+     * Notification Preferences. Same one-endpoint-per-toggle pattern as
+     * updatePrivacy() — each checkbox posts independently, so unrelated
+     * preferences never get clobbered. Unchecked checkboxes simply
+     * don't appear in the request, so we always write an explicit
+     * true/false rather than relying on `has()`.
+     */
+    public function updateNotifications(Request $request)
+    {
+        $request->validate([
+            'notify_email' => 'sometimes|boolean',
+            'notify_friend_requests' => 'sometimes|boolean',
+            'notify_messages' => 'sometimes|boolean',
+            'notify_likes_comments' => 'sometimes|boolean',
+        ]);
+
+        $profile = $this->profileFor(Auth::user());
+
+        foreach (['notify_email', 'notify_friend_requests', 'notify_messages', 'notify_likes_comments'] as $field) {
+            $profile->$field = $request->boolean($field);
+        }
+
+        $profile->save();
+
+        return $this->respond($request, 'Notification preferences updated!');
+    }
+
+    /**
      * Data Export (updates.txt Tier 2, #9 — DPA right of access).
      * Streams a JSON download; deliberately a GET link rather than a
      * form, so it behaves like a normal file download instead of
