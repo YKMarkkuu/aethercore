@@ -7,19 +7,65 @@
              include, so this "just works" without any extra wiring. -->
         <div class="space-members-header">Members — {{ $space->members->count() }}</div>
         @foreach($space->members as $member)
-            <a href="{{ route('profile.show', $member->user) }}" class="space-member-item" data-user-popover="{{ $member->user->id }}">
-                <div class="space-member-avatar">
-                    @if($member->user->getAvatarUrl())
-                        <img src="{{ $member->user->getAvatarUrl() }}" alt="Avatar" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;">
-                    @else
-                        {{ $member->user->name[0] }}
+            @php
+                $memberRole = $space->getUserRole($member->user_id);
+                $isTargetOwner = $space->isOwner($member->user_id);
+                $actorPosition = $space->getHighestRolePosition(auth()->id());
+                $targetPosition = $space->getHighestRolePosition($member->user_id);
+                $canActOn = !$isTargetOwner && $targetPosition < $actorPosition;
+                $canKick = $canActOn && $space->userHasPermission(auth()->id(), \App\Enums\SpacePermission::KICK_MEMBERS);
+                $canBan = $canActOn && $space->userHasPermission(auth()->id(), \App\Enums\SpacePermission::BAN_MEMBERS);
+                $canAssignRole = $canActOn && $space->userHasPermission(auth()->id(), \App\Enums\SpacePermission::MANAGE_ROLES);
+            @endphp
+            <div class="space-member-item" style="flex-direction: column; align-items: stretch; gap: 0.2rem;">
+                <a href="{{ route('profile.show', $member->user) }}" data-user-popover="{{ $member->user->id }}" style="display: flex; align-items: center; gap: 0.4rem; text-decoration: none; color: inherit;">
+                    <div class="space-member-avatar">
+                        @if($member->user->getAvatarUrl())
+                            <img src="{{ $member->user->getAvatarUrl() }}" alt="Avatar" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;">
+                        @else
+                            {{ $member->user->name[0] }}
+                        @endif
+                    </div>
+                    <span class="space-member-name">{{ $member->user->display_name }}</span>
+                    @if($member->role === 'owner')
+                        <span class="space-member-owner-badge">Owner</span>
                     @endif
-                </div>
-                <span class="space-member-name">{{ $member->user->display_name }}</span>
-                @if($member->role === 'owner')
-                    <span class="space-member-owner-badge">Owner</span>
+                </a>
+
+                @if($memberRole)
+                    <span style="display: flex; align-items: center; gap: 0.3rem; font-size: 0.6rem; color: #6a6a6a; padding-left: 32px;">
+                        <span style="width: 8px; height: 8px; border-radius: 50%; background: {{ $memberRole->color }}; flex-shrink: 0;"></span>
+                        {{ $memberRole->name }}
+                    </span>
                 @endif
-            </a>
+
+                @if($canKick || $canBan || $canAssignRole)
+                    <div style="display: flex; gap: 0.3rem; flex-wrap: wrap; padding-left: 32px;">
+                        @if($canAssignRole)
+                            <form action="{{ route('space-members.assign-role', [$space, $member->user]) }}" method="POST" style="display: flex; gap: 0.2rem; align-items: center;">
+                                @csrf
+                                <select name="role_id" class="settings-input" style="width: auto; font-size: 0.6rem; padding: 0.1rem 0.3rem;" onchange="this.form.requestSubmit()">
+                                    @foreach($space->roles as $role)
+                                        <option value="{{ $role->id }}" @selected($memberRole && $memberRole->id === $role->id)>{{ $role->name }}</option>
+                                    @endforeach
+                                </select>
+                            </form>
+                        @endif
+                        @if($canKick)
+                            <form action="{{ route('space-members.kick', [$space, $member->user]) }}" method="POST" onsubmit="return confirm('Kick {{ $member->user->display_name }} from this Space?')">
+                                @csrf
+                                <button type="submit" class="xp-action-btn xp-action-btn-danger" style="font-size: 0.6rem; padding: 0.05rem 0.4rem;">Kick</button>
+                            </form>
+                        @endif
+                        @if($canBan)
+                            <form action="{{ route('space-members.ban', [$space, $member->user]) }}" method="POST" onsubmit="return confirm('Ban {{ $member->user->display_name }} from this Space?')">
+                                @csrf
+                                <button type="submit" class="xp-action-btn xp-action-btn-danger" style="font-size: 0.6rem; padding: 0.05rem 0.4rem;">Ban</button>
+                            </form>
+                        @endif
+                    </div>
+                @endif
+            </div>
         @endforeach
     @else
         <!-- ===== DEFAULT: YOUR PROFILE CARD ===== -->

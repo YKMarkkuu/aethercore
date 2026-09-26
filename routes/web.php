@@ -11,6 +11,7 @@ use App\Http\Controllers\StatusController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SpaceController;
 use App\Http\Controllers\SpaceChannelController;
+use App\Http\Controllers\SpaceMemberController;
 use App\Http\Controllers\SpaceMessageController;
 use App\Http\Controllers\PresenceController;
 use App\Http\Controllers\BlockController;
@@ -122,6 +123,18 @@ Route::middleware(['auth'])->group(function () {
 
         Route::post('/spaces/{space}/channels', [SpaceChannelController::class, 'store'])->name('space-channels.store');
         Route::delete('/space-channels/{channel}', [SpaceChannelController::class, 'destroy'])->name('space-channels.destroy');
+
+        Route::middleware(['auth', 'space.permission:kick_members'])->group(function () {
+            Route::post('/spaces/{space}/members/{user}/kick', [SpaceMemberController::class, 'kick'])->name('space-members.kick');
+        });
+
+        Route::middleware(['auth', 'space.permission:ban_members'])->group(function () {
+            Route::post('/spaces/{space}/members/{user}/ban', [SpaceMemberController::class, 'ban'])->name('space-members.ban');
+        });
+
+        Route::middleware(['auth', 'space.permission:manage_roles'])->group(function () {
+            Route::post('/spaces/{space}/members/{user}/role', [SpaceMemberController::class, 'assignRole'])->name('space-members.assign-role');
+        });
 
         Route::post('/space-channels/{channel}/messages', [SpaceMessageController::class, 'store'])->name('space-messages.store');
         Route::patch('/space-messages/{message}', [SpaceMessageController::class, 'updateMessage'])->name('space-messages.update');
