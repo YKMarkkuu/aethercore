@@ -17,11 +17,19 @@ return new class extends Migration
             // "Markkuu" by name) anywhere in controllers or middleware.
             // The accounts are special because their `role` column says
             // so, not because the code recognizes their name.
-            $table->string('role')->default('user')->after('status');
+            if (!Schema::hasColumn('users', 'role')) {
+                $table->string('role')->default('user')->after('status');
+            }
 
-            $table->timestamp('suspended_until')->nullable()->after('role');
-            $table->timestamp('banned_at')->nullable()->after('suspended_until');
-            $table->text('moderation_note')->nullable()->after('banned_at');
+            if (!Schema::hasColumn('users', 'suspended_until')) {
+                $table->timestamp('suspended_until')->nullable()->after('role');
+            }
+            if (!Schema::hasColumn('users', 'banned_at')) {
+                $table->timestamp('banned_at')->nullable()->after('suspended_until');
+            }
+            if (!Schema::hasColumn('users', 'moderation_note')) {
+                $table->text('moderation_note')->nullable()->after('banned_at');
+            }
         });
     }
 

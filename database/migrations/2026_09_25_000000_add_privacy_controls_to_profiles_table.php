@@ -15,9 +15,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('profiles', function (Blueprint $table) {
-            $table->string('visibility')->default('public')->after('is_public'); // public | friends | private
-            $table->string('dm_permission')->default('everyone')->after('visibility'); // everyone | friends | nobody
-            $table->string('show_status_to')->default('everyone')->after('dm_permission'); // everyone | friends | nobody
+            if (!Schema::hasColumn('profiles', 'visibility')) {
+                $table->string('visibility')->default('public')->after('is_public'); // public | friends | private
+            }
+            if (!Schema::hasColumn('profiles', 'dm_permission')) {
+                $table->string('dm_permission')->default('everyone')->after('visibility'); // everyone | friends | nobody
+            }
+            if (!Schema::hasColumn('profiles', 'show_status_to')) {
+                $table->string('show_status_to')->default('everyone')->after('dm_permission'); // everyone | friends | nobody
+            }
         });
     }
 

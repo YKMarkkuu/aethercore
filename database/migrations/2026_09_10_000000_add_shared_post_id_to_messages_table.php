@@ -12,7 +12,9 @@ return new class extends Migration
             // Nullable, nullOnDelete: if the shared post is later
             // deleted, the message survives with a "no longer available"
             // card instead of breaking.
-            $table->foreignId('shared_post_id')->nullable()->constrained('posts')->nullOnDelete();
+            if (!Schema::hasColumn('messages', 'shared_post_id')) {
+                $table->foreignId('shared_post_id')->nullable()->constrained('posts')->nullOnDelete();
+            }
         });
     }
 

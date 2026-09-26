@@ -14,9 +14,9 @@
         <label>Email</label>
         <input type="email" name="email" value="{{ $user->email }}" class="settings-input">
         @if(!$user->hasVerifiedEmail())
-            <span class="settings-hint" style="color:#faa61a;">⚠️ Email not verified.</span>
+            <span class="settings-hint" style="color:#c9a840;">⚠️ Email not verified.</span>
         @endif
         @error('email')<div class="settings-error">{{ $message }}</div>@enderror
     </div>
-    <button type="submit" class="settings-v2-btn">Save Changes</button>
+    <button type="submit" class="settings-btn">Save Changes</button>
 </form>

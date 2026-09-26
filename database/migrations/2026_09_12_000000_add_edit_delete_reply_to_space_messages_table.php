@@ -9,12 +9,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('space_messages', function (Blueprint $table) {
-            $table->timestamp('edited_at')->nullable();
-            $table->boolean('is_deleted')->default(false);
+            if (!Schema::hasColumn('space_messages', 'edited_at')) {
+                $table->timestamp('edited_at')->nullable();
+            }
+            if (!Schema::hasColumn('space_messages', 'is_deleted')) {
+                $table->boolean('is_deleted')->default(false);
+            }
             // Nullable self-reference for reply/quote threading. Deletes here
             // are normally soft (is_deleted tombstone), so this FK rarely
             // actually fires — nullOnDelete just guards the edge case.
-            $table->foreignId('reply_to_id')->nullable()->constrained('space_messages')->nullOnDelete();
+            if (!Schema::hasColumn('space_messages', 'reply_to_id')) {
+                $table->foreignId('reply_to_id')->nullable()->constrained('space_messages')->nullOnDelete();
+            }
         });
     }
 

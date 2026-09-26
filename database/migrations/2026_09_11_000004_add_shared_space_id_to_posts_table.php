@@ -11,7 +11,9 @@ return new class extends Migration
         Schema::table('posts', function (Blueprint $table) {
             // Nullable, nullOnDelete: if the Space is later deleted, the
             // post survives with a "no longer available" card.
-            $table->foreignId('shared_space_id')->nullable()->constrained('spaces')->nullOnDelete();
+            if (!Schema::hasColumn('posts', 'shared_space_id')) {
+                $table->foreignId('shared_space_id')->nullable()->constrained('spaces')->nullOnDelete();
+            }
         });
     }
 

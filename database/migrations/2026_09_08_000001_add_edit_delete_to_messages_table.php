@@ -9,8 +9,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('messages', function (Blueprint $table) {
-            $table->timestamp('edited_at')->nullable();
-            $table->boolean('is_deleted')->default(false);
+            if (!Schema::hasColumn('messages', 'edited_at')) {
+                $table->timestamp('edited_at')->nullable();
+            }
+            if (!Schema::hasColumn('messages', 'is_deleted')) {
+                $table->boolean('is_deleted')->default(false);
+            }
         });
     }
 

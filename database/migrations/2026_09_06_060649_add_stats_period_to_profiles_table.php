@@ -9,7 +9,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('profiles', function (Blueprint $table) {
-            $table->string('stats_period')->default('overall')->after('location');
+            if (!Schema::hasColumn('profiles', 'stats_period')) {
+                $table->string('stats_period')->default('overall')->after('location');
+            }
         });
     }
 

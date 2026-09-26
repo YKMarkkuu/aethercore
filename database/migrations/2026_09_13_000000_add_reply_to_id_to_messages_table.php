@@ -11,7 +11,9 @@ return new class extends Migration
         Schema::table('messages', function (Blueprint $table) {
             // Nullable self-reference for reply/quote threading, mirroring
             // space_messages.reply_to_id — gives DMs reply parity with Spaces.
-            $table->foreignId('reply_to_id')->nullable()->constrained('messages')->nullOnDelete();
+            if (!Schema::hasColumn('messages', 'reply_to_id')) {
+                $table->foreignId('reply_to_id')->nullable()->constrained('messages')->nullOnDelete();
+            }
         });
     }
 

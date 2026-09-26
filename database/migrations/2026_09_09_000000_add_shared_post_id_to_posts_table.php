@@ -14,7 +14,9 @@ return new class extends Migration
             // nullOnDelete so a repost survives with a "no longer
             // available" placeholder if the original post is deleted,
             // rather than the repost itself vanishing or erroring.
-            $table->foreignId('shared_post_id')->nullable()->constrained('posts')->nullOnDelete();
+            if (!Schema::hasColumn('posts', 'shared_post_id')) {
+                $table->foreignId('shared_post_id')->nullable()->constrained('posts')->nullOnDelete();
+            }
         });
     }
 

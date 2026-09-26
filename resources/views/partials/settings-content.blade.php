@@ -94,8 +94,6 @@
 
     {{-- ===== RIGHT: ONE SCROLLABLE PANE PER CATEGORY ===== --}}
     <div class="settings-v2-content-wrap">
-        <button type="button" class="settings-v2-close" onclick="closeSettings()">✕</button>
-
         @foreach($categories as $catKey => $cat)
             <div class="settings-v2-scrollarea {{ $catKey === $defaultCategory ? '' : 'hidden' }}"
                  data-category-content="{{ $catKey }}">
