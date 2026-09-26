@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use App\Models\Space;
+use App\Models\SpaceBan;
 use App\Models\SpaceChannel;
 use App\Models\SpaceMember;
 use App\Services\SpaceRoleSeeder;
@@ -127,6 +128,14 @@ class SpaceController extends Controller
 
     public function join(Space $space)
     {
+        $bannedFromSpace = SpaceBan::where('space_id', $space->id)
+            ->where('user_id', Auth::id())
+            ->exists();
+
+        if ($bannedFromSpace) {
+            abort(403, 'You are banned from this Space.');
+        }
+
         if (!$space->isMember(Auth::id())) {
             SpaceMember::create([
                 'space_id' => $space->id,
