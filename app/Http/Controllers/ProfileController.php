@@ -117,23 +117,43 @@ class ProfileController extends Controller
             $isBlocking = $authUser->isBlocking($user->id);
         }
 
-        return response()->json([
+        $visibility = $user->profile->visibility ?? 'public';
+        $canSeeFull = $isSelf || $isFriend || $visibility === 'public';
+        $statusPermission = $user->profile->show_status_to ?? 'everyone';
+        $showRealStatus = match ($statusPermission) {
+            'everyone' => true,
+            'friends' => $isSelf || $isFriend,
+            'nobody' => $isSelf,
+            default => true,
+        };
+
+        $payload = [
             'id' => $user->id,
             'display_name' => $user->display_name,
             'username' => $user->username ?? $user->name,
             'avatar_url' => $user->getAvatarUrl(),
             'banner_url' => $user->getBannerUrl(),
-            'bio' => $user->profile->bio ?? null,
-            'status' => $user->getEffectiveStatus(),
-            'status_label' => $user->getStatusLabel(),
-            'status_message' => $user->profile->status_message ?? null,
             'is_self' => $isSelf,
             'is_friend' => $isFriend,
             'request_sent' => $requestSent,
             'request_received' => $requestReceived,
             'is_blocking' => $isBlocking,
-            'profile_url' => route('profile.show', $user),
-        ]);
+            'is_limited' => !$canSeeFull,
+            'status' => $showRealStatus ? $user->getEffectiveStatus() : 'offline',
+            'status_label' => $showRealStatus ? $user->getStatusLabel() : 'Offline',
+        ];
+
+        if ($canSeeFull) {
+            $payload['bio'] = $user->profile->bio ?? null;
+            $payload['status_message'] = $user->profile->status_message ?? null;
+            $payload['profile_url'] = route('profile.show', $user);
+        } else {
+            $payload['bio'] = null;
+            $payload['status_message'] = null;
+            $payload['profile_url'] = null;
+        }
+
+        return response()->json($payload);
     }
 
     /**

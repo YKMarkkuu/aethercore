@@ -22,7 +22,18 @@
                     </div>
                     @foreach($roleMembers as $member)
                         @php
-                            $status = $member->user->getEffectiveStatus();
+                            $viewerIsSelf = auth()->id() === $member->user_id;
+                            $viewerIsFriend = auth()->user()->isFriendWith($member->user_id);
+                            $statusPermission = $member->user->profile->show_status_to ?? 'everyone';
+
+                            $showRealStatus = match ($statusPermission) {
+                                'everyone' => true,
+                                'friends' => $viewerIsSelf || $viewerIsFriend,
+                                'nobody' => $viewerIsSelf,
+                                default => true,
+                            };
+
+                            $displayStatus = $showRealStatus ? $member->user->getEffectiveStatus() : 'offline';
                         @endphp
                         <a href="{{ route('profile.show', $member->user) }}" class="space-member-item" data-space-member-row data-user-id="{{ $member->user->id }}" data-user-popover="{{ $member->user->id }}">
                             <div class="space-member-avatar" style="position: relative;">
@@ -31,7 +42,7 @@
                                 @else
                                     {{ $member->user->name[0] }}
                                 @endif
-                                <span class="status-dot {{ $status }}"></span>
+                                <span class="status-dot {{ $displayStatus }}"></span>
                             </div>
                             <span class="space-member-name">{{ $member->user->display_name }}</span>
                             @if($space->isOwner($member->user_id))

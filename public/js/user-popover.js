@@ -63,7 +63,9 @@
         } else {
             rows.push(`<button type="button" class="user-popover-btn user-popover-btn-primary" data-action="add-friend" data-user="${data.id}">Add Friend</button>`);
         }
-        rows.push(`<a href="${data.profile_url}" class="user-popover-btn">View Full Profile</a>`);
+        if (!data.is_limited && data.profile_url) {
+            rows.push(`<a href="${data.profile_url}" class="user-popover-btn">View Full Profile</a>`);
+        }
         return rows.join('');
     }
 
@@ -71,7 +73,10 @@
         const card = el();
         const statusEl = card.querySelector('#userPopoverStatus');
         if (statusEl) {
-            statusEl.innerHTML = `<span class="status-dot-mini status-dot-${data.status}"></span>${escapeHtml(data.status_label)}`;
+            const status = data.status || 'offline';
+            const statusLabel = data.status_label || 'Offline';
+            statusEl.classList.remove('hidden');
+            statusEl.innerHTML = `<span class="status-dot-mini status-dot-${status}"></span>${escapeHtml(statusLabel)}`;
         }
     }
 
@@ -81,7 +86,17 @@
             data.banner_url ? `url('${data.banner_url}')` : 'none';
 
         const avatarLink = card.querySelector('#userPopoverAvatarLink');
-        avatarLink.href = data.profile_url;
+        if (data.is_limited || !data.profile_url) {
+            avatarLink.removeAttribute('href');
+            avatarLink.setAttribute('aria-disabled', 'true');
+            avatarLink.tabIndex = -1;
+            avatarLink.style.pointerEvents = 'none';
+        } else {
+            avatarLink.href = data.profile_url;
+            avatarLink.removeAttribute('aria-disabled');
+            avatarLink.removeAttribute('tabindex');
+            avatarLink.style.pointerEvents = '';
+        }
         card.querySelector('#userPopoverAvatar').innerHTML = data.avatar_url
             ? `<img src="${data.avatar_url}" alt="Avatar">`
             : `<span>${escapeHtml((data.display_name || '?')[0])}</span>`;
@@ -91,7 +106,9 @@
         renderStatusOnly(data);
 
         const note = card.querySelector('#userPopoverNote');
-        if (data.status_message) {
+        if (data.is_limited) {
+            note.classList.add('hidden');
+        } else if (data.status_message) {
             note.textContent = '"' + data.status_message + '"';
             note.classList.remove('hidden');
         } else {
@@ -100,7 +117,22 @@
 
         const bio = card.querySelector('#userPopoverBio');
         bio.textContent = data.bio || '';
-        bio.classList.toggle('hidden', !data.bio);
+        bio.classList.toggle('hidden', !!data.is_limited || !data.bio);
+
+        const body = card.querySelector('.user-popover-body');
+        let privateNotice = card.querySelector('#userPopoverPrivateNotice');
+        if (data.is_limited) {
+            if (!privateNotice) {
+                privateNotice = document.createElement('div');
+                privateNotice.id = 'userPopoverPrivateNotice';
+                privateNotice.className = 'user-popover-note';
+                body.insertBefore(privateNotice, card.querySelector('#userPopoverActions'));
+            }
+            privateNotice.textContent = "This user's profile is private. Add them as a friend to see more.";
+            privateNotice.classList.remove('hidden');
+        } else {
+            privateNotice?.classList.add('hidden');
+        }
 
         card.querySelector('#userPopoverActions').innerHTML = buildActions(data);
     }

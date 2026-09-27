@@ -3,6 +3,32 @@
 @section('title', 'Chat with ' . $otherUser->display_name)
 @section('content')
 
+@php
+    $viewerIsSelf = auth()->id() === $otherUser->id;
+    $viewerIsFriend = !$viewerIsSelf && auth()->user()->isFriendWith($otherUser->id);
+    $statusPermission = $otherUser->profile->show_status_to ?? 'everyone';
+
+    $showRealStatus = match ($statusPermission) {
+        'everyone' => true,
+        'friends' => $viewerIsSelf || $viewerIsFriend,
+        'nobody' => $viewerIsSelf,
+        default => true,
+    };
+    $displayStatus = $showRealStatus ? $otherUser->getEffectiveStatus() : 'offline';
+    $displayStatusLabel = match ($displayStatus) {
+        'online' => 'Online',
+        'idle' => 'Idle',
+        'dnd' => 'Do Not Disturb',
+        default => 'Offline',
+    };
+    $displayStatusColor = match ($displayStatus) {
+        'online' => '#4ade80',
+        'idle' => '#fbbf24',
+        'dnd' => '#ef4444',
+        default => '#6b7280',
+    };
+@endphp
+
 <div class="chat-container">
 
     <!-- ===== CHAT HEADER ===== -->
@@ -17,8 +43,8 @@
             </div>
             <div>
                 <div class="chat-name-xp">{{ $otherUser->display_name }}</div>
-                <div class="chat-status-xp" style="color: {{ $otherUser->getStatusColor() }};">
-                    {{ $otherUser->getStatusLabel() }}
+                <div class="chat-status-xp" style="color: {{ $displayStatusColor }};">
+                    {{ $displayStatusLabel }}
                 </div>
             </div>
         </div>

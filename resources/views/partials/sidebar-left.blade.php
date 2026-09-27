@@ -69,6 +69,31 @@
                 <div class="status-group-label">Direct Messages</div>
                 <div id="sidebarFriendsList">
                 @forelse(Auth::user()->getFriends() as $friend)
+                    @php
+                        $viewerIsSelf = Auth::id() === $friend->id;
+                        $viewerIsFriend = Auth::user()->isFriendWith($friend->id);
+                        $statusPermission = $friend->profile->show_status_to ?? 'everyone';
+
+                        $showRealStatus = match ($statusPermission) {
+                            'everyone' => true,
+                            'friends' => $viewerIsSelf || $viewerIsFriend,
+                            'nobody' => $viewerIsSelf,
+                            default => true,
+                        };
+                        $displayStatus = $showRealStatus ? $friend->getEffectiveStatus() : 'offline';
+                        $displayStatusLabel = match ($displayStatus) {
+                            'online' => 'Online',
+                            'idle' => 'Idle',
+                            'dnd' => 'Do Not Disturb',
+                            default => 'Offline',
+                        };
+                        $displayStatusColor = match ($displayStatus) {
+                            'online' => '#4ade80',
+                            'idle' => '#fbbf24',
+                            'dnd' => '#ef4444',
+                            default => '#6b7280',
+                        };
+                    @endphp
                     <a href="{{ route('conversations.start', $friend->id) }}" class="friend-item" data-friend-id="{{ $friend->id }}">
                         <div class="friend-avatar" style="position: relative;">
                             @if($friend->profile && $friend->profile->avatar)
@@ -76,13 +101,13 @@
                             @else
                                 {{ $friend->name[0] }}
                             @endif
-                            <span class="status-dot {{ $friend->getEffectiveStatus() }}"></span>
+                            <span class="status-dot {{ $displayStatus }}"></span>
                         </div>
                         <div class="friend-info">
                             <div class="friend-name">{{ $friend->display_name }}</div>
-                            <div class="friend-status" style="color: {{ $friend->getStatusColor() }};">
-                    {{ $friend->getStatusLabel() }}
-                </div>
+                            <div class="friend-status" style="color: {{ $displayStatusColor }};">
+                                {{ $displayStatusLabel }}
+                            </div>
                             <div class="friend-now-playing" style="display: none; font-size: 0.55rem; color: #3a7bd5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; align-items: center; gap: 0.2rem;">
                                 <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
                                     <path d="M9 18V5l12-2v13"/>
@@ -298,7 +323,9 @@
         const rows = Array.from(list.querySelectorAll('[data-friend-id]'));
         if (rows.length === 0) return;
 
-        const ids = rows.map(row => row.dataset.friendId);
+        const statusRows = rows.filter(row => row.querySelector('.status-dot'));
+        const ids = statusRows.map(row => row.dataset.friendId);
+        if (ids.length === 0) return;
         const rank = { online: 0, idle: 1, dnd: 2, offline: 3 };
 
         function pollFriendsPresence() {
@@ -339,9 +366,16 @@
                         }
                     });
 
-                    // Reorder in place — online/idle friends float up, offline sink down.
-                    rows.slice().sort((a, b) => (rank[a.dataset.status] ?? 0) - (rank[b.dataset.status] ?? 0))
-                        .forEach(row => list.appendChild(row));
+                    // Reorder only rows whose status is visible, preserving hidden rows' positions.
+                    const sortedStatusRows = statusRows.slice().sort((a, b) =>
+                        (rank[a.dataset.status] ?? 0) - (rank[b.dataset.status] ?? 0)
+                    );
+                    let nextStatusRow = 0;
+                    rows.forEach(row => {
+                        list.appendChild(row.querySelector('.status-dot')
+                            ? sortedStatusRows[nextStatusRow++]
+                            : row);
+                    });
                 })
                 .catch(() => { /* silent, try again next interval */ });
         }

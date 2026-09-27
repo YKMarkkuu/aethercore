@@ -100,6 +100,31 @@
         <div style="height: 40px;"></div>
 
         <!-- ===== PROFILE INFO ===== -->
+        @php
+            $viewerIsSelf = auth()->id() === $user->id;
+            $viewerIsFriend = !$viewerIsSelf && auth()->user()->isFriendWith($user->id);
+            $statusPermission = $user->profile->show_status_to ?? 'everyone';
+
+            $showRealStatus = match ($statusPermission) {
+                'everyone' => true,
+                'friends' => $viewerIsSelf || $viewerIsFriend,
+                'nobody' => $viewerIsSelf,
+                default => true,
+            };
+            $displayStatus = $showRealStatus ? $user->getEffectiveStatus() : 'offline';
+            $displayStatusLabel = match ($displayStatus) {
+                'online' => 'Online',
+                'idle' => 'Idle',
+                'dnd' => 'Do Not Disturb',
+                default => 'Offline',
+            };
+            $displayStatusColor = match ($displayStatus) {
+                'online' => '#4ade80',
+                'idle' => '#fbbf24',
+                'dnd' => '#ef4444',
+                default => '#6b7280',
+            };
+        @endphp
         <div class="xp-profile-info" style="padding: 0 1.5rem 0.5rem 1.5rem;">
             <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
                 <h1 class="xp-profile-name" id="displayNameDisplay" style="font-size: 1.5rem; font-weight: 700; margin: 0; color: #1e1e1e;">{{ $user->display_name }}</h1>
@@ -108,8 +133,8 @@
                 @endif
             </div>
             <div class="xp-profile-username" style="font-size: 0.85rem; color: #6a6a6a; margin-top: -0.1rem;">@ {{ $user->username ?? $user->name }}</div>
-            <div class="xp-profile-status" id="xpProfileStatus" style="color: {{ $user->getStatusColor() }};">
-                {{ $user->getStatusLabel() }}
+            <div class="xp-profile-status" id="xpProfileStatus" style="color: {{ $displayStatusColor }};">
+                {{ $displayStatusLabel }}
             </div>
             @if($user->profile->status_message ?? null)
                 <div class="xp-profile-note" id="statusNoteDisplay">“{{ $user->profile->status_message }}”</div>
