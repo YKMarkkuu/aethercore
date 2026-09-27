@@ -1,5 +1,5 @@
 <aside class="right-sidebar">
-    @if(isset($space))
+    @if(request()->routeIs('spaces.show') && isset($space))
         <!-- ===== SPACE MEMBERS ===== -->
         @php
             $membersByRole = $space->members->groupBy(function ($member) use ($space) {

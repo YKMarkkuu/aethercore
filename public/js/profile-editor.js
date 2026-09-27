@@ -16,15 +16,18 @@
         if (sidebarBio) sidebarBio.textContent = bio;
     }
 
-    window.toggleEditMode = function () {
+    window.toggleEditMode = function (enterOnly = false) {
         const isEditing = editMode.style.display === 'none';
+        if (!isEditing && enterOnly) return;
 
-        editMode.style.display = isEditing ? 'block' : 'none';
-        editButton.textContent = isEditing ? 'Cancel Edit' : 'Edit';
-        displayName.style.display = isEditing ? 'none' : 'block';
+        const shouldEdit = enterOnly || isEditing;
+
+        editMode.style.display = shouldEdit ? 'block' : 'none';
+        editButton.style.display = shouldEdit ? 'none' : '';
+        displayName.style.display = shouldEdit ? 'none' : 'block';
         bioDisplay.style.display = 'block';
 
-        if (!isEditing) {
+        if (!shouldEdit) {
             bioInput.value = form.dataset.savedBio;
             updateBioPreview(bioInput.value);
         }

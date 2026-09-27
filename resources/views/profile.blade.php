@@ -129,7 +129,7 @@
             <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
                 <h1 class="xp-profile-name" id="displayNameDisplay" style="font-size: 1.5rem; font-weight: 700; margin: 0; color: #1e1e1e;">{{ $user->display_name }}</h1>
                 @if(auth()->id() === $user->id)
-                    <button class="xp-edit-btn" id="editProfileBtn" onclick="toggleEditMode()" style="font-size: 0.6rem; padding: 0.1rem 0.8rem;">Edit</button>
+                    <button class="xp-edit-btn" id="editProfileBtn" onclick="toggleEditMode(true)" style="font-size: 0.6rem; padding: 0.1rem 0.8rem;">Edit</button>
                 @endif
             </div>
             <div class="xp-profile-username" style="font-size: 0.85rem; color: #6a6a6a; margin-top: -0.1rem;">@ {{ $user->username ?? $user->name }}</div>
