@@ -26,6 +26,7 @@ class SpaceRoleSeeder
             'position' => 100,
             'permissions' => SpacePermission::all(),
             'is_default' => false,
+            'is_owner' => true,
         ]);
 
         SpaceRole::create([

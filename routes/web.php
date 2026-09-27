@@ -13,6 +13,7 @@ use App\Http\Controllers\SpaceController;
 use App\Http\Controllers\SpaceChannelController;
 use App\Http\Controllers\SpaceMemberController;
 use App\Http\Controllers\SpaceMessageController;
+use App\Http\Controllers\SpaceRoleController;
 use App\Http\Controllers\PresenceController;
 use App\Http\Controllers\BlockController;
 use App\Http\Controllers\ReportController;
@@ -134,6 +135,9 @@ Route::middleware(['auth'])->group(function () {
 
         Route::middleware(['auth', 'space.permission:manage_roles'])->group(function () {
             Route::post('/spaces/{space}/members/{user}/role', [SpaceMemberController::class, 'assignRole'])->name('space-members.assign-role');
+            Route::post('/spaces/{space}/roles', [SpaceRoleController::class, 'store'])->name('space-roles.store');
+            Route::patch('/spaces/{space}/roles/{role}', [SpaceRoleController::class, 'update'])->name('space-roles.update');
+            Route::delete('/spaces/{space}/roles/{role}', [SpaceRoleController::class, 'destroy'])->name('space-roles.destroy');
         });
 
         Route::post('/space-channels/{channel}/messages', [SpaceMessageController::class, 'store'])->name('space-messages.store');

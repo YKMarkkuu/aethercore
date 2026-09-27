@@ -13,11 +13,13 @@ class SpaceRole extends Model
         'position',
         'permissions',
         'is_default',
+        'is_owner',
     ];
 
     protected $casts = [
         'permissions' => 'array',
         'is_default' => 'boolean',
+        'is_owner' => 'boolean',
         'position' => 'integer',
     ];
 

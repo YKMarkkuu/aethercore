@@ -1,8 +1,10 @@
 <!-- ===== SPACE MEMBERS MODAL ===== -->
-<!-- Included once from spaces/show.blade.php (space-specific, unlike the
-     site-wide modals in layouts.app, since it only makes sense inside a
-     Space). Opens via toggleMembersModal(). Members tab only for now —
-     Roles tab lands in a later response (see docs/member-modal-spec.md). -->
+<!-- Included once from spaces/show.blade.php. Two tabs: Members (existing)
+    and Roles (new in this response). Role CRUD reuses this same modal
+    shell — no separate modal. -->
+<style>
+    .members-tab-btn.active { background: var(--accent); color: #ffffff; border-color: var(--accent-dark); }
+</style>
 <div class="settings-modal hidden" id="membersModal">
     <div class="settings-modal-content" style="max-width: 560px; width: 92%; height: auto; max-height: 82vh; display: flex; flex-direction: column;">
         <div class="settings-modal-header">
@@ -17,8 +19,19 @@
             </h2>
             <button class="settings-modal-close" onclick="toggleMembersModal()">✕</button>
         </div>
+
+        <div style="display: flex; gap: 0.4rem; padding: 0.5rem 1rem 0;">
+            <button type="button" class="settings-btn members-tab-btn active" id="membersTabBtn" onclick="switchMembersTab('members')">Members</button>
+            <button type="button" class="settings-btn members-tab-btn" id="rolesTabBtn" onclick="switchMembersTab('roles')">Roles</button>
+        </div>
+
         <div style="padding: 0.75rem 1rem; overflow-y: auto;">
-            @include('partials.space-members.member-list', ['space' => $space])
+            <div id="membersTabPane">
+                @include('partials.space-members.member-list', ['space' => $space])
+            </div>
+            <div id="rolesTabPane" class="hidden">
+                @include('partials.space-members.roles-tab', ['space' => $space])
+            </div>
         </div>
     </div>
 </div>
@@ -28,10 +41,16 @@
         document.getElementById('membersModal').classList.toggle('hidden');
     }
 
+    function switchMembersTab(tab) {
+        document.getElementById('membersTabPane').classList.toggle('hidden', tab !== 'members');
+        document.getElementById('rolesTabPane').classList.toggle('hidden', tab !== 'roles');
+        document.getElementById('membersTabBtn').classList.toggle('active', tab === 'members');
+        document.getElementById('rolesTabBtn').classList.toggle('active', tab === 'roles');
+    }
+
     // Combines the search box and role dropdown into one filter pass over
     // the already-rendered rows — no fetch, since the full member list is
-    // server-rendered into the modal on page load (small-space assumption;
-    // see docs/member-modal-spec.md's note about fetch-on-open for large ones).
+    // server-rendered into the modal on page load.
     function filterMembersList() {
         const search = (document.getElementById('membersSearchInput')?.value || '').trim().toLowerCase();
         const roleId = document.getElementById('membersRoleFilter')?.value || '';
@@ -47,5 +66,11 @@
         });
 
         document.getElementById('membersNoMatches')?.classList.toggle('hidden', visibleCount !== 0);
+    }
+
+    // key is either a numeric SpaceRole id or the string 'new' (the
+    // create-role editor).
+    function toggleRoleEditor(key) {
+        document.getElementById('roleEditor-' + key)?.classList.toggle('hidden');
     }
 </script>
