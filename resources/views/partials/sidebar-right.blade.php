@@ -24,16 +24,14 @@
                         @php
                             $status = $member->user->getEffectiveStatus();
                         @endphp
-                        <a href="{{ route('profile.show', $member->user) }}" class="space-member-item" data-space-member-row data-member-id="{{ $member->user->id }}" data-user-popover="{{ $member->user->id }}">
+                        <a href="{{ route('profile.show', $member->user) }}" class="space-member-item" data-space-member-row data-user-id="{{ $member->user->id }}" data-user-popover="{{ $member->user->id }}">
                             <div class="space-member-avatar" style="position: relative;">
                                 @if($member->user->getAvatarUrl())
                                     <img src="{{ $member->user->getAvatarUrl() }}" alt="Avatar" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;">
                                 @else
                                     {{ $member->user->name[0] }}
                                 @endif
-                                <span class="space-member-status status-icon-{{ $status }}" style="position: absolute; right: -2px; bottom: -2px; box-sizing: content-box; width: 10px; height: 10px; border: 2px solid #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                                    <svg viewBox="0 0 24 24" width="10" height="10" aria-hidden="true"><circle cx="12" cy="12" r="7" fill="currentColor"/></svg>
-                                </span>
+                                <span class="status-dot {{ $status }}"></span>
                             </div>
                             <span class="space-member-name">{{ $member->user->display_name }}</span>
                             @if($space->isOwner($member->user_id))
@@ -94,34 +92,47 @@
     @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const rows = Array.from(document.querySelectorAll('[data-space-member-row]'));
+            const rows = Array.from(document.querySelectorAll('.space-member-item[data-user-id]'));
             if (rows.length === 0) return;
 
-            const statusClasses = ['status-icon-online', 'status-icon-idle', 'status-icon-dnd', 'status-icon-offline'];
+            const validStatuses = ['online', 'idle', 'dnd', 'offline'];
             const endpoint = @json(url('/now-playing'));
+            const visibleUserIds = new Set();
+            const rowsByUserId = new Map(rows.map(row => [row.dataset.userId, row]));
 
-            function pollSpaceMembersPresence() {
-                rows.forEach(row => {
-                    const statusIcon = row.querySelector('.space-member-status');
-                    if (!statusIcon) return;
+            function fetchMemberStatus(userId) {
+                const row = rowsByUserId.get(userId);
+                const statusDot = row?.querySelector('.status-dot');
+                if (!statusDot) return;
 
-                    fetch(endpoint + '/' + encodeURIComponent(row.dataset.memberId), {
-                        headers: { 'Accept': 'application/json' },
+                fetch(endpoint + '/' + encodeURIComponent(userId), {
+                    headers: { 'Accept': 'application/json' },
+                })
+                    .then(response => response.ok ? response.json() : Promise.reject())
+                    .then(data => {
+                        const status = validStatuses.includes(data.status) ? data.status : 'offline';
+                        statusDot.className = 'status-dot ' + status;
                     })
-                        .then(response => response.ok ? response.json() : Promise.reject())
-                        .then(data => {
-                            const status = statusClasses.some(className => className === 'status-icon-' + data.status)
-                                ? data.status
-                                : 'offline';
-                            statusIcon.classList.remove(...statusClasses);
-                            statusIcon.classList.add('status-icon-' + status);
-                        })
-                        .catch(() => { /* Try again on the next poll. */ });
-                });
+                    .catch(() => { /* Try again on the next poll. */ });
             }
 
-            pollSpaceMembersPresence();
-            setInterval(pollSpaceMembersPresence, 15000);
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    const userId = entry.target.dataset.userId;
+                    if (entry.isIntersecting) {
+                        visibleUserIds.add(userId);
+                        fetchMemberStatus(userId);
+                    } else {
+                        visibleUserIds.delete(userId);
+                    }
+                });
+            });
+
+            rows.forEach(row => observer.observe(row));
+
+            setInterval(() => {
+                visibleUserIds.forEach(fetchMemberStatus);
+            }, 15000);
         });
     </script>
     @endpush
