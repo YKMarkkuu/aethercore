@@ -6,7 +6,7 @@
     .members-tab-btn.active { background: var(--accent); color: #ffffff; border-color: var(--accent-dark); }
 </style>
 <div class="settings-modal hidden" id="membersModal">
-    <div class="settings-modal-content" style="max-width: 560px; width: 92%; height: auto; max-height: 82vh; display: flex; flex-direction: column;">
+    <div class="settings-modal-content" style="max-width: 800px; width: 90%; height: auto; max-height: 82vh; display: flex; flex-direction: column;">
         <div class="settings-modal-header">
             <h2 style="display: flex; align-items: center; gap: 6px;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
