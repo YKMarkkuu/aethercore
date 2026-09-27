@@ -11,6 +11,17 @@ use Illuminate\Validation\Rule;
 
 class SpaceRoleController extends Controller
 {
+    public function rolesTab(Space $space)
+    {
+        if (!$space->isMember(Auth::id())) {
+            abort(403);
+        }
+
+        $space->load('roles', 'members');
+
+        return view('partials.space-members.roles-tab', compact('space'));
+    }
+
     public function store(Request $request, Space $space)
     {
         $actorPosition = $space->getHighestRolePosition(Auth::id());
@@ -37,7 +48,15 @@ class SpaceRoleController extends Controller
         ]);
 
         if ($request->wantsJson()) {
-            return response()->json(['success' => true, 'message' => "Role \"{$role->name}\" created.", 'role_id' => $role->id]);
+            return response()->json([
+                'success' => true,
+                'message' => "Role \"{$role->name}\" created.",
+                'role_id' => $role->id,
+                'refresh' => [
+                    'rolesTabPane' => route('space-roles.tab', $space),
+                    'membersTabPane' => route('space-members.tab', $space),
+                ],
+            ]);
         }
 
         return back()->with('success', "Role \"{$role->name}\" created.");
@@ -79,7 +98,14 @@ class SpaceRoleController extends Controller
         ]);
 
         if ($request->wantsJson()) {
-            return response()->json(['success' => true, 'message' => "Role \"{$role->name}\" updated."]);
+            return response()->json([
+                'success' => true,
+                'message' => "Role \"{$role->name}\" updated.",
+                'refresh' => [
+                    'rolesTabPane' => route('space-roles.tab', $space),
+                    'membersTabPane' => route('space-members.tab', $space),
+                ],
+            ]);
         }
 
         return back()->with('success', "Role \"{$role->name}\" updated.");
@@ -111,7 +137,14 @@ class SpaceRoleController extends Controller
         $role->delete();
 
         if ($request->wantsJson()) {
-            return response()->json(['success' => true, 'message' => "Role \"{$roleName}\" deleted."]);
+            return response()->json([
+                'success' => true,
+                'message' => "Role \"{$roleName}\" deleted.",
+                'refresh' => [
+                    'rolesTabPane' => route('space-roles.tab', $space),
+                    'membersTabPane' => route('space-members.tab', $space),
+                ],
+            ]);
         }
 
         return back()->with('success', "Role \"{$roleName}\" deleted.");

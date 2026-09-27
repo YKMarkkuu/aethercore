@@ -126,6 +126,21 @@ class SpaceController extends Controller
         ]);
     }
 
+    /**
+     * Returns the Members tab's inner partial as HTML, for the generic
+     * ajax-forms.js refresh pattern (see partials.space-members-modal).
+     */
+    public function membersTab(Space $space)
+    {
+        if (!$space->isMember(Auth::id())) {
+            abort(403);
+        }
+
+        $space->load('members.user', 'roles');
+
+        return view('partials.space-members.member-list', compact('space'));
+    }
+
     public function join(Space $space)
     {
         $bannedFromSpace = SpaceBan::where('space_id', $space->id)

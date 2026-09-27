@@ -25,7 +25,14 @@ class SpaceMemberController extends Controller
         $space->removeMember($user->id);
 
         if (request()->wantsJson()) {
-            return response()->json(['success' => true, 'message' => "{$user->display_name} was removed from the Space."]);
+            return response()->json([
+                'success' => true,
+                'message' => "{$user->display_name} was removed from the Space.",
+                'refresh' => [
+                    'membersTabPane' => route('space-members.tab', $space),
+                    'rolesTabPane' => route('space-roles.tab', $space),
+                ],
+            ]);
         }
 
         return back()->with('success', "{$user->display_name} was removed from the Space.");
@@ -52,7 +59,14 @@ class SpaceMemberController extends Controller
         $space->removeMember($user->id);
 
         if ($request->wantsJson()) {
-            return response()->json(['success' => true, 'message' => "{$user->display_name} was banned from the Space."]);
+            return response()->json([
+                'success' => true,
+                'message' => "{$user->display_name} was banned from the Space.",
+                'refresh' => [
+                    'membersTabPane' => route('space-members.tab', $space),
+                    'rolesTabPane' => route('space-roles.tab', $space),
+                ],
+            ]);
         }
 
         return back()->with('success', "{$user->display_name} was banned from the Space.");
@@ -105,7 +119,14 @@ class SpaceMemberController extends Controller
         $space->assignRole($user->id, $role->id);
 
         if ($request->wantsJson()) {
-            return response()->json(['success' => true, 'message' => "{$user->display_name} is now {$role->name}."]);
+            return response()->json([
+                'success' => true,
+                'message' => "{$user->display_name} is now {$role->name}.",
+                'refresh' => [
+                    'membersTabPane' => route('space-members.tab', $space),
+                    'rolesTabPane' => route('space-roles.tab', $space),
+                ],
+            ]);
         }
 
         return back()->with('success', "{$user->display_name} is now {$role->name}.");

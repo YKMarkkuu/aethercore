@@ -113,6 +113,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/spaces', [SpaceController::class, 'index'])->name('spaces');
     Route::get('/spaces/{space}', [SpaceController::class, 'show'])->name('spaces.show');
     Route::get('/spaces/{space}/channels/{channel}', [SpaceController::class, 'show'])->name('spaces.channel');
+    Route::get('/spaces/{space}/members-tab', [SpaceController::class, 'membersTab'])->name('space-members.tab');
+    Route::get('/spaces/{space}/roles-tab', [SpaceRoleController::class, 'rolesTab'])->name('space-roles.tab');
     Route::get('/space-channels/{channel}/messages/latest', [SpaceMessageController::class, 'latestMessages'])->name('space-messages.latest');
 
     Route::middleware(['throttle:actions'])->group(function () {

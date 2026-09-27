@@ -32,6 +32,9 @@
 //                                            // ancestor, or the element
 //                                            // matching data-ajax-target
 //                                            // on the form itself
+//     "refresh": {                          // generic section-refresh:
+//       "someElementId": "/some/get/url"   // fetches HTML and swaps
+//     }                                      // the target element's innerHTML
 //   }
 //
 // Opt a specific form out entirely with data-no-ajax.
@@ -45,6 +48,23 @@
         const submitBtn = form.querySelector('[type="submit"]');
         if (submitBtn) submitBtn.disabled = busy;
         form.classList.toggle('ajax-busy', busy);
+    }
+
+    function applyRefresh(refreshMap) {
+        if (!refreshMap || typeof refreshMap !== 'object') return;
+
+        Object.entries(refreshMap).forEach(([targetId, url]) => {
+            const target = document.getElementById(targetId);
+            if (!target || !url) return;
+
+            fetch(url, { headers: { 'Accept': 'text/html' } })
+                .then(r => r.ok ? r.text() : Promise.reject())
+                .then(html => { target.innerHTML = html; })
+                .catch(() => {
+                    // The action already succeeded; a stale section is
+                    // preferable to showing an error for a failed refresh.
+                });
+        });
     }
 
     document.addEventListener('submit', function (e) {
@@ -109,12 +129,14 @@
                     if (target) target.innerHTML = data.html;
                 }
 
+                applyRefresh(data.refresh);
+
                 if (data.redirect) {
                     window.location.href = data.redirect;
                     return;
                 }
 
-                if (!data.remove && !data.html && form.dataset.ajaxReset !== 'false') {
+                if (!data.remove && !data.html && !data.refresh && form.dataset.ajaxReset !== 'false') {
                     form.reset();
                 }
             })
