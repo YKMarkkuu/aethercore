@@ -13,16 +13,37 @@ class FriendController extends Controller
     public function index(Request $request)
     {
         $search = $request->get('search');
-        
+        $authId = Auth::id();
+
         $friends = Auth::user()->getFriends();
         $requests = Auth::user()->friendRequests()->get();
-        
-        $users = User::where('id', '!=', Auth::id());
+
+        $friendIds = $friends->pluck('id')->toArray();
+
+        $blockedIds = DB::table('blocks')
+            ->where('blocker_id', $authId)
+            ->pluck('blocked_id')
+            ->merge(
+                DB::table('blocks')->where('blocked_id', $authId)->pluck('blocker_id')
+            )
+            ->unique()
+            ->toArray();
+
+        $users = User::where('id', '!=', $authId)
+            ->whereNotIn('id', $blockedIds)
+            ->where(function ($q) use ($friendIds) {
+                $q->whereHas('profile', function ($subQ) {
+                    $subQ->whereIn('visibility', ['public', 'friends']);
+                })
+                ->orWhereIn('id', $friendIds);
+            });
+
         if ($search) {
             $users->where('username', 'LIKE', '%' . $search . '%');
         }
+
         $users = $users->get();
-        
+
         return view('friends', compact('friends', 'requests', 'users'));
     }
 
@@ -30,6 +51,11 @@ class FriendController extends Controller
     public function sendRequest(Request $request, $userId)
     {
         $friend = User::findOrFail($userId);
+
+        if ($friend->profile && $friend->profile->visibility === 'private') {
+            return back()->with('error', 'This user is not accepting friend requests.');
+        }
+
         $user = Auth::user();
         
         // Can't befriend yourself
