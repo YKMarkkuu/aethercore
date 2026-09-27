@@ -1,73 +1,48 @@
 <aside class="right-sidebar">
     @if(isset($space))
         <!-- ===== SPACE MEMBERS ===== -->
-        <!-- $space is only set when this sidebar is rendered as part of
-             spaces/show.blade.php — see SpaceController::show(). Blade
-             shares data up through extends and back down through
-             include, so this "just works" without any extra wiring. -->
+        @php
+            $membersByRole = $space->members->groupBy(function ($member) use ($space) {
+                return $space->getUserRole($member->user_id)?->id;
+            });
+            $spaceRoles = $space->roles->sortByDesc('position');
+        @endphp
         <div class="space-members-header">Members — {{ $space->members->count() }}</div>
-        @foreach($space->members as $member)
+        @foreach($spaceRoles as $role)
             @php
-                $memberRole = $space->getUserRole($member->user_id);
-                $isTargetOwner = $space->isOwner($member->user_id);
-                $actorPosition = $space->getHighestRolePosition(auth()->id());
-                $targetPosition = $space->getHighestRolePosition($member->user_id);
-                $canActOn = !$isTargetOwner && $targetPosition < $actorPosition;
-                $canKick = $canActOn && $space->userHasPermission(auth()->id(), \App\Enums\SpacePermission::KICK_MEMBERS);
-                $canBan = $canActOn && $space->userHasPermission(auth()->id(), \App\Enums\SpacePermission::BAN_MEMBERS);
-                $canAssignRole = $canActOn && $space->userHasPermission(auth()->id(), \App\Enums\SpacePermission::MANAGE_ROLES);
+                $roleMembers = $membersByRole->get($role->id, collect());
             @endphp
-            <div class="space-member-item" style="flex-direction: column; align-items: stretch; gap: 0.2rem;">
-                <a href="{{ route('profile.show', $member->user) }}" data-user-popover="{{ $member->user->id }}" style="display: flex; align-items: center; gap: 0.4rem; text-decoration: none; color: inherit;">
-                    <div class="space-member-avatar">
-                        @if($member->user->getAvatarUrl())
-                            <img src="{{ $member->user->getAvatarUrl() }}" alt="Avatar" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;">
-                        @else
-                            {{ $member->user->name[0] }}
-                        @endif
+            @if($roleMembers->isNotEmpty())
+                <div class="space-member-group" style="margin-bottom: 0.45rem;">
+                    <div class="space-member-group-header" style="display: flex; align-items: center; gap: 0.25rem; margin-bottom: 0.2rem; font-size: 0.6rem; text-transform: uppercase; color: #6a6a6a; font-weight: 700;">
+                        <svg viewBox="0 0 24 24" width="8" height="8" aria-hidden="true">
+                            <circle cx="12" cy="12" r="7" fill="{{ $role->color }}"/>
+                        </svg>
+                        {{ $role->is_owner ? 'Owner' : $role->name }} ({{ $roleMembers->count() }})
                     </div>
-                    <span class="space-member-name">{{ $member->user->display_name }}</span>
-                    @if($member->role === 'owner')
-                        <span class="space-member-owner-badge">Owner</span>
-                    @endif
-                </a>
-
-                @if($memberRole)
-                    <span style="display: flex; align-items: center; gap: 0.3rem; font-size: 0.6rem; color: #6a6a6a; padding-left: 32px;">
-                        <span style="width: 8px; height: 8px; border-radius: 50%; background: {{ $memberRole->color }}; flex-shrink: 0;"></span>
-                        {{ $memberRole->name }}
-                    </span>
-                @endif
-
-                @if($canKick || $canBan || $canAssignRole)
-                    <div style="display: flex; gap: 0.3rem; flex-wrap: wrap; padding-left: 32px;">
-                        @if($canAssignRole)
-                            <form action="{{ route('space-members.assign-role', [$space, $member->user]) }}" method="POST" style="display: flex; gap: 0.2rem; align-items: center;">
-                                @csrf
-                                <select name="role_id" class="settings-input" style="width: auto; font-size: 0.6rem; padding: 0.1rem 0.3rem;" onchange="this.form.requestSubmit()">
-                                    @foreach($space->roles as $role)
-                                        @if($role->position < $actorPosition)
-                                            <option value="{{ $role->id }}" @selected($memberRole && $memberRole->id === $role->id)>{{ $role->name }}</option>
-                                        @endif
-                                    @endforeach
-                                </select>
-                            </form>
-                        @endif
-                        @if($canKick)
-                            <form action="{{ route('space-members.kick', [$space, $member->user]) }}" method="POST" onsubmit="return confirm('Kick {{ $member->user->display_name }} from this Space?')">
-                                @csrf
-                                <button type="submit" class="xp-action-btn xp-action-btn-danger" style="font-size: 0.6rem; padding: 0.05rem 0.4rem;">Kick</button>
-                            </form>
-                        @endif
-                        @if($canBan)
-                            <form action="{{ route('space-members.ban', [$space, $member->user]) }}" method="POST" onsubmit="return confirm('Ban {{ $member->user->display_name }} from this Space?')">
-                                @csrf
-                                <button type="submit" class="xp-action-btn xp-action-btn-danger" style="font-size: 0.6rem; padding: 0.05rem 0.4rem;">Ban</button>
-                            </form>
-                        @endif
-                    </div>
-                @endif
-            </div>
+                    @foreach($roleMembers as $member)
+                        @php
+                            $status = $member->user->getEffectiveStatus();
+                        @endphp
+                        <a href="{{ route('profile.show', $member->user) }}" class="space-member-item" data-space-member-row data-member-id="{{ $member->user->id }}" data-user-popover="{{ $member->user->id }}">
+                            <div class="space-member-avatar" style="position: relative;">
+                                @if($member->user->getAvatarUrl())
+                                    <img src="{{ $member->user->getAvatarUrl() }}" alt="Avatar" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;">
+                                @else
+                                    {{ $member->user->name[0] }}
+                                @endif
+                                <span class="space-member-status status-icon-{{ $status }}" style="position: absolute; right: -2px; bottom: -2px; box-sizing: content-box; width: 10px; height: 10px; border: 2px solid #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                    <svg viewBox="0 0 24 24" width="10" height="10" aria-hidden="true"><circle cx="12" cy="12" r="7" fill="currentColor"/></svg>
+                                </span>
+                            </div>
+                            <span class="space-member-name">{{ $member->user->display_name }}</span>
+                            @if($space->isOwner($member->user_id))
+                                <span class="space-member-owner-badge">Owner</span>
+                            @endif
+                        </a>
+                    @endforeach
+                </div>
+            @endif
         @endforeach
     @else
         <!-- ===== DEFAULT: YOUR PROFILE CARD ===== -->
@@ -114,3 +89,40 @@
         </div>
     @endif
 </aside>
+
+@if(isset($space))
+    @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const rows = Array.from(document.querySelectorAll('[data-space-member-row]'));
+            if (rows.length === 0) return;
+
+            const statusClasses = ['status-icon-online', 'status-icon-idle', 'status-icon-dnd', 'status-icon-offline'];
+            const endpoint = @json(url('/now-playing'));
+
+            function pollSpaceMembersPresence() {
+                rows.forEach(row => {
+                    const statusIcon = row.querySelector('.space-member-status');
+                    if (!statusIcon) return;
+
+                    fetch(endpoint + '/' + encodeURIComponent(row.dataset.memberId), {
+                        headers: { 'Accept': 'application/json' },
+                    })
+                        .then(response => response.ok ? response.json() : Promise.reject())
+                        .then(data => {
+                            const status = statusClasses.some(className => className === 'status-icon-' + data.status)
+                                ? data.status
+                                : 'offline';
+                            statusIcon.classList.remove(...statusClasses);
+                            statusIcon.classList.add('status-icon-' + status);
+                        })
+                        .catch(() => { /* Try again on the next poll. */ });
+                });
+            }
+
+            pollSpaceMembersPresence();
+            setInterval(pollSpaceMembersPresence, 15000);
+        });
+    </script>
+    @endpush
+@endif
