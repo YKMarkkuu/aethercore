@@ -43,9 +43,8 @@
 </form>
 
 @if($role && !$role->is_default)
-    <form action="{{ route('space-roles.destroy', [$space, $role]) }}" method="POST" style="margin-top: 0.4rem;" onsubmit="return confirm('Delete the {{ $role->name }} role? Members holding it will move to the default role.')">
-        @csrf
-        @method('DELETE')
-        <button type="submit" class="settings-btn settings-btn-danger" style="font-size: 0.65rem;">Delete Role</button>
-    </form>
+    <button type="button" class="settings-btn settings-btn-danger" style="font-size: 0.65rem; margin-top: 0.4rem;"
+        onclick="openRoleDeleteConfirm({{ $role->id }}, {{ Js::from($role->name) }}, {{ Js::from(route('space-roles.delete-preview', [$space, $role])) }}, {{ Js::from(route('space-roles.destroy', [$space, $role])) }})">
+        Delete Role
+    </button>
 @endif

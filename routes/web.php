@@ -139,6 +139,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/spaces/{space}/members/{user}/role', [SpaceMemberController::class, 'assignRole'])->name('space-members.assign-role');
             Route::post('/spaces/{space}/roles', [SpaceRoleController::class, 'store'])->name('space-roles.store');
             Route::patch('/spaces/{space}/roles/{role}', [SpaceRoleController::class, 'update'])->name('space-roles.update');
+            Route::get('/spaces/{space}/roles/{role}/delete-preview', [SpaceRoleController::class, 'deletePreview'])->name('space-roles.delete-preview');
             Route::delete('/spaces/{space}/roles/{role}', [SpaceRoleController::class, 'destroy'])->name('space-roles.destroy');
         });
 

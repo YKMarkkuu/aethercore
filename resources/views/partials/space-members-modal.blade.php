@@ -32,6 +32,7 @@
             <div id="rolesTabPane" class="hidden">
                 @include('partials.space-members.roles-tab', ['space' => $space])
             </div>
+            @include('partials.space-members.role-delete-confirm')
         </div>
     </div>
 </div>
@@ -73,4 +74,95 @@
     function toggleRoleEditor(key) {
         document.getElementById('roleEditor-' + key)?.classList.toggle('hidden');
     }
+
+    function openRoleDeleteConfirm(roleId, roleName, previewUrl, destroyUrl) {
+        fetch(previewUrl, { headers: { 'Accept': 'application/json' } })
+            .then(r => r.ok ? r.json() : Promise.reject())
+            .then(data => {
+                document.getElementById('roleDeleteConfirmTitle').textContent = 'Delete Role — ' + roleName;
+                document.getElementById('roleDeleteConfirmWarning').textContent = data.member_count > 0
+                    ? data.member_count + ' member' + (data.member_count === 1 ? '' : 's') + ' will be reassigned.'
+                    : 'No members currently hold this role.';
+
+                const membersWrap = document.getElementById('roleDeleteConfirmMembers');
+                membersWrap.replaceChildren();
+
+                data.members.forEach(m => {
+                    const row = document.createElement('div');
+                    row.style.cssText = 'display:flex;align-items:center;gap:0.4rem;font-size:0.7rem;color:#1e1e1e;';
+
+                    const avatar = document.createElement('span');
+                    avatar.style.cssText = 'width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,#3a7bd5,#1a4a9e);display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.55rem;font-weight:700;flex-shrink:0;overflow:hidden;';
+                    if (m.avatar_url) {
+                        const img = document.createElement('img');
+                        img.src = m.avatar_url;
+                        img.alt = '';
+                        img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+                        avatar.appendChild(img);
+                    } else {
+                        avatar.textContent = (m.display_name || '?').charAt(0).toUpperCase();
+                    }
+                    row.appendChild(avatar);
+
+                    const name = document.createElement('span');
+                    name.textContent = m.display_name;
+                    row.appendChild(name);
+
+                    membersWrap.appendChild(row);
+                });
+
+                if (data.member_count > data.members.length) {
+                    const more = document.createElement('div');
+                    more.style.cssText = 'font-size:0.65rem;color:#6a6a6a;';
+                    more.textContent = '+ ' + (data.member_count - data.members.length) + ' more';
+                    membersWrap.appendChild(more);
+                }
+
+                const reassignWrap = document.getElementById('roleDeleteConfirmReassignWrap');
+                const select = document.getElementById('roleDeleteConfirmReassignSelect');
+                const hiddenInput = document.getElementById('roleDeleteConfirmReassignInput');
+                select.replaceChildren();
+
+                if (data.member_count > 0) {
+                    reassignWrap.classList.remove('hidden');
+
+                    if (data.default_role) {
+                        const opt = document.createElement('option');
+                        opt.value = data.default_role.id;
+                        opt.textContent = data.default_role.name + ' (default)';
+                        select.appendChild(opt);
+                    }
+                    data.available_roles.forEach(r => {
+                        if (data.default_role && r.id === data.default_role.id) return;
+                        const opt = document.createElement('option');
+                        opt.value = r.id;
+                        opt.textContent = r.name;
+                        select.appendChild(opt);
+                    });
+
+                    hiddenInput.value = select.value;
+                    select.onchange = () => { hiddenInput.value = select.value; };
+                } else {
+                    reassignWrap.classList.add('hidden');
+                    hiddenInput.value = '';
+                }
+
+                document.getElementById('roleDeleteConfirmForm').action = destroyUrl;
+                document.getElementById('roleDeleteConfirmModal').classList.remove('hidden');
+            })
+            .catch(() => {
+                window.Toast?.show('Could not load role deletion details. Please try again.', 'error');
+            });
+    }
+
+    function closeRoleDeleteConfirm() {
+        document.getElementById('roleDeleteConfirmModal').classList.add('hidden');
+    }
+
+    // ajax-forms.js owns the actual submission; close the confirm modal as it starts.
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('roleDeleteConfirmForm')?.addEventListener('submit', function () {
+            closeRoleDeleteConfirm();
+        });
+    });
 </script>

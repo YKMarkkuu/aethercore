@@ -111,6 +111,64 @@ class SpaceRoleController extends Controller
         return back()->with('success', "Role \"{$role->name}\" updated.");
     }
 
+    /**
+     * Preview what deleting this role would affect, before the user
+     * confirms. Keep the same guards as destroy() so the preview is only
+     * available for roles the actor is allowed to delete.
+     */
+    public function deletePreview(Space $space, SpaceRole $role)
+    {
+        if (!$space->isMember(Auth::id())) {
+            abort(403);
+        }
+
+        if ($role->space_id !== $space->id) {
+            abort(404);
+        }
+
+        if ($role->is_owner) {
+            abort(403, 'The Owner role cannot be deleted.');
+        }
+
+        if ($role->is_default) {
+            abort(403, 'The default role cannot be deleted.');
+        }
+
+        $actorPosition = $space->getHighestRolePosition(Auth::id());
+
+        if ($role->position >= $actorPosition) {
+            abort(403, 'You cannot delete a role at or above your own level.');
+        }
+
+        $members = $role->members()->with('user')->get();
+        $defaultRole = $space->roles()->where('is_default', true)->first();
+
+        $availableRoles = $space->roles()
+            ->where('id', '!=', $role->id)
+            ->where('position', '<', $actorPosition)
+            ->get();
+
+        return response()->json([
+            'member_count' => $members->count(),
+            'members' => $members->take(5)->map(fn ($member) => [
+                'id' => $member->user->id,
+                'display_name' => $member->user->display_name,
+                'avatar_url' => $member->user->getAvatarUrl(),
+            ])->values(),
+            'default_role' => $defaultRole ? [
+                'id' => $defaultRole->id,
+                'name' => $defaultRole->name,
+                'color' => $defaultRole->color,
+            ] : null,
+            'available_roles' => $availableRoles->map(fn ($availableRole) => [
+                'id' => $availableRole->id,
+                'name' => $availableRole->name,
+                'color' => $availableRole->color,
+                'position' => $availableRole->position,
+            ])->values(),
+        ]);
+    }
+
     public function destroy(Request $request, Space $space, SpaceRole $role)
     {
         if ($role->space_id !== $space->id) {
@@ -131,9 +189,36 @@ class SpaceRoleController extends Controller
             abort(403, 'You cannot delete a role at or above your own level.');
         }
 
+        $targetRole = null;
+
+        if ($request->filled('reassign_to')) {
+            $targetRole = SpaceRole::where('id', $request->input('reassign_to'))
+                ->where('space_id', $space->id)
+                ->first();
+
+            if (!$targetRole) {
+                abort(422, 'That reassignment role does not belong to this Space.');
+            }
+
+            if ($targetRole->id === $role->id) {
+                abort(422, 'Cannot reassign members to the role being deleted.');
+            }
+
+            if ($targetRole->position >= $actorPosition) {
+                abort(403, 'You cannot reassign members to a role at or above your own level.');
+            }
+        } else {
+            $targetRole = $space->roles()->where('is_default', true)->first();
+        }
+
         $roleName = $role->name;
 
-        $space->members()->where('role_id', $role->id)->update(['role_id' => null]);
+        if ($targetRole) {
+            $space->members()->where('role_id', $role->id)->update(['role_id' => $targetRole->id]);
+        } else {
+            $space->members()->where('role_id', $role->id)->update(['role_id' => null]);
+        }
+
         $role->delete();
 
         if ($request->wantsJson()) {
