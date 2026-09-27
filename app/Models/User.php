@@ -189,14 +189,36 @@ class User extends Authenticatable
     {
         $friendIds = $this->getFriends()->pluck('id')->toArray();
 
-        $conversationPartnerIds = $this->conversations()
+        $conversations = $this->conversations()
             ->with('participants')
-            ->get()
+            ->get();
+
+        $conversationPartnerIds = $conversations
             ->flatMap(fn ($conversation) => $conversation->participants->pluck('user_id'))
             ->unique()
-            ->reject(fn ($id) => $id === $this->id)
+            ->reject(fn ($id) => (int) $id === (int) $this->id)
             ->values()
             ->toArray();
+
+        $lastMessageAtByUser = [];
+        foreach ($conversations as $conversation) {
+            $lastMessageAt = $conversation->last_message_at?->timestamp ?? 0;
+            if (!$lastMessageAt) {
+                continue;
+            }
+
+            foreach ($conversation->participants as $participant) {
+                $participantId = (int) $participant->user_id;
+                if ($participantId === (int) $this->id) {
+                    continue;
+                }
+
+                $lastMessageAtByUser[$participantId] = max(
+                    $lastMessageAtByUser[$participantId] ?? 0,
+                    $lastMessageAt
+                );
+            }
+        }
 
         $allIds = array_unique(array_merge($friendIds, $conversationPartnerIds));
 
@@ -211,7 +233,17 @@ class User extends Authenticatable
 
         $allIds = array_diff($allIds, $blockedIds);
 
-        return User::whereIn('id', $allIds)->get();
+        return User::whereIn('id', $allIds)
+            ->get()
+            ->sort(function ($left, $right) use ($lastMessageAtByUser) {
+                $recency = ($lastMessageAtByUser[$right->id] ?? 0)
+                    <=> ($lastMessageAtByUser[$left->id] ?? 0);
+
+                return $recency !== 0
+                    ? $recency
+                    : strcasecmp($left->display_name, $right->display_name);
+            })
+            ->values();
     }
 
     public function friendRequests()

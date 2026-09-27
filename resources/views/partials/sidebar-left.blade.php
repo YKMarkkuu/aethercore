@@ -326,7 +326,6 @@
         const statusRows = rows.filter(row => row.querySelector('.status-dot'));
         const ids = statusRows.map(row => row.dataset.friendId);
         if (ids.length === 0) return;
-        const rank = { online: 0, idle: 1, dnd: 2, offline: 3 };
 
         function pollFriendsPresence() {
             const params = new URLSearchParams();
@@ -366,16 +365,6 @@
                         }
                     });
 
-                    // Reorder only rows whose status is visible, preserving hidden rows' positions.
-                    const sortedStatusRows = statusRows.slice().sort((a, b) =>
-                        (rank[a.dataset.status] ?? 0) - (rank[b.dataset.status] ?? 0)
-                    );
-                    let nextStatusRow = 0;
-                    rows.forEach(row => {
-                        list.appendChild(row.querySelector('.status-dot')
-                            ? sortedStatusRows[nextStatusRow++]
-                            : row);
-                    });
                 })
                 .catch(() => { /* silent, try again next interval */ });
         }
