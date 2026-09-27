@@ -46,12 +46,25 @@ class ProfileController extends Controller
 
         $friendIds = array_unique(array_merge($sentIds, $receivedIds));
         
-        $feedPosts = Post::whereIn('user_id', $friendIds)
-                        ->orWhere('user_id', $user->id)
-                        ->orderBy('created_at', 'desc')
-                        ->limit(20)
-                        ->with('user')
-                        ->get();
+        $authId = Auth::id();
+
+        $feedPosts = Post::where(function ($q) use ($friendIds, $authId) {
+                $q->whereIn('user_id', $friendIds)
+                  ->orWhere('user_id', $authId)
+                  ->orWhereHas('user.profile', function ($subQ) {
+                      $subQ->where('visibility', 'public');
+                  });
+            })
+            ->where(function ($q) use ($friendIds, $authId) {
+                $q->whereDoesntHave('user.profile', function ($subQ) use ($friendIds, $authId) {
+                    $subQ->where('visibility', 'private')
+                         ->whereNotIn('user_id', array_merge($friendIds, [$authId]));
+                });
+            })
+            ->orderBy('created_at', 'desc')
+            ->limit(20)
+            ->with('user')
+            ->get();
 
         // ===== LAST.FM DATA =====
         // Period always comes from the profile owner's saved preference,
@@ -153,12 +166,11 @@ class ProfileController extends Controller
 
         $friendIds = array_unique(array_merge($sentIds, $receivedIds));
         
-        $feedPosts = Post::whereIn('user_id', $friendIds)
-                        ->orWhere('user_id', $user->id)
-                        ->orderBy('created_at', 'desc')
-                        ->limit(20)
-                        ->with('user')
-                        ->get();
+        $feedPosts = Post::where('user_id', $user->id)
+                ->orderBy('created_at', 'desc')
+                ->limit(20)
+                ->with('user')
+                ->get();
 
         // ===== LAST.FM DATA =====
         // Period always comes from the profile owner's saved preference,

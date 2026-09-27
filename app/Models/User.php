@@ -57,6 +57,18 @@ class User extends Authenticatable
         'banned_at' => 'datetime',
     ];
 
+    protected static function booted()
+    {
+        static::created(function ($user) {
+            $user->profile()->create([
+                'display_name' => $user->name,
+                'visibility' => 'public',
+                'dm_permission' => 'everyone',
+                'show_status_to' => 'everyone',
+            ]);
+        });
+    }
+
     // ===== RELATIONSHIPS =====
     
     public function profile()
