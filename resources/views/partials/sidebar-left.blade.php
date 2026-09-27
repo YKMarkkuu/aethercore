@@ -68,7 +68,7 @@
             <div class="status-group">
                 <div class="status-group-label">Direct Messages</div>
                 <div id="sidebarFriendsList">
-                @forelse(Auth::user()->getFriends() as $friend)
+                @forelse(Auth::user()->getDirectMessageContacts() as $friend)
                     @php
                         $viewerIsSelf = Auth::id() === $friend->id;
                         $viewerIsFriend = Auth::user()->isFriendWith($friend->id);

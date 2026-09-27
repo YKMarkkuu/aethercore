@@ -185,6 +185,35 @@ class User extends Authenticatable
         return User::whereIn('id', $friendIds)->get();
     }
 
+    public function getDirectMessageContacts()
+    {
+        $friendIds = $this->getFriends()->pluck('id')->toArray();
+
+        $conversationPartnerIds = $this->conversations()
+            ->with('participants')
+            ->get()
+            ->flatMap(fn ($conversation) => $conversation->participants->pluck('user_id'))
+            ->unique()
+            ->reject(fn ($id) => $id === $this->id)
+            ->values()
+            ->toArray();
+
+        $allIds = array_unique(array_merge($friendIds, $conversationPartnerIds));
+
+        $blockedIds = DB::table('blocks')
+            ->where('blocker_id', $this->id)
+            ->pluck('blocked_id')
+            ->merge(
+                DB::table('blocks')->where('blocked_id', $this->id)->pluck('blocker_id')
+            )
+            ->unique()
+            ->toArray();
+
+        $allIds = array_diff($allIds, $blockedIds);
+
+        return User::whereIn('id', $allIds)->get();
+    }
+
     public function friendRequests()
     {
         return $this->belongsToMany(User::class, 'friendships', 'friend_id', 'user_id')
