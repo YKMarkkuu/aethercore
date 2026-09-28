@@ -384,44 +384,7 @@
                 </div>
             </div>
 
-            <!-- ===== TOP 8 ALBUMS ===== -->
-            <div class="xp-panel">
-                <div class="xp-panel-header">💿 Top 8 Albums</div>
-                <div class="xp-panel-body">
-                    @php 
-                        $albums = $user->lastfm_data['top_albums'] ?? []; 
-                    @endphp
-                    @if(count($albums) > 0)
-                        <div class="xp-top8-grid">
-                            @foreach($albums as $album)
-                                @php
-                                    $hasRealImage = !empty($album['image']) && !isPlaceholderImage($album['image']);
-                                    $imageUrl = $hasRealImage ? forceImageSize($album['image']) : null;
-                                @endphp
-                                <div class="xp-top8-item">
-                                    <div class="xp-top8-thumb">
-                                        @if($imageUrl)
-                                            <img src="{{ $imageUrl }}" alt="{{ $album['name'] }}" loading="lazy">
-                                        @else
-                                            <div class="xp-top8-icon">
-                                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                                    <circle cx="12" cy="12" r="10"/>
-                                                    <circle cx="12" cy="12" r="3"/>
-                                                </svg>
-                                            </div>
-                                        @endif
-                                    </div>
-                                    <div class="xp-top8-name">{{ $album['name'] }}</div>
-                                    <div class="xp-top8-subtext">{{ $album['artist'] ?? 'Unknown Artist' }}</div>
-                                    <div class="xp-top8-scrobbles">{{ number_format($album['playcount'] ?? 0) }} scrobbles</div>
-                                </div>
-                            @endforeach
-                        </div>
-                    @else
-                        <span class="xp-top8-empty">No top albums found.</span>
-                    @endif
-                </div>
-            </div>
+            @include('partials.profile.top-albums-vinyl', ['albums' => $user->lastfm_data['top_albums'] ?? []])
 
             <!-- ===== TOP 8 SONGS ===== -->
             <div class="xp-panel">
