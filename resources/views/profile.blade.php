@@ -386,45 +386,7 @@
 
             @include('partials.profile.top-albums-vinyl', ['albums' => $user->lastfm_data['top_albums'] ?? []])
 
-            <!-- ===== TOP 8 SONGS ===== -->
-            <div class="xp-panel">
-                <div class="xp-panel-header">🎵 Top 8 Songs</div>
-                <div class="xp-panel-body">
-                    @php 
-                        $songs = $user->lastfm_data['top_songs'] ?? []; 
-                    @endphp
-                    @if(count($songs) > 0)
-                        <div class="xp-top8-grid">
-                            @foreach($songs as $song)
-                                @php
-                                    $hasRealImage = !empty($song['image']) && !isPlaceholderImage($song['image']);
-                                    $imageUrl = $hasRealImage ? forceImageSize($song['image']) : null;
-                                @endphp
-                                <div class="xp-top8-item">
-                                    <div class="xp-top8-thumb">
-                                        @if($imageUrl)
-                                            <img src="{{ $imageUrl }}" alt="{{ $song['name'] }}" loading="lazy">
-                                        @else
-                                            <div class="xp-top8-icon">
-                                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                                    <path d="M9 18V5l12-2v13"/>
-                                                    <circle cx="6" cy="18" r="3"/>
-                                                    <circle cx="18" cy="16" r="3"/>
-                                                </svg>
-                                            </div>
-                                        @endif
-                                    </div>
-                                    <div class="xp-top8-name">{{ $song['name'] }}</div>
-                                    <div class="xp-top8-subtext">{{ $song['artist'] ?? 'Unknown Artist' }}</div>
-                                    <div class="xp-top8-scrobbles">{{ number_format($song['playcount'] ?? 0) }} scrobbles</div>
-                                </div>
-                            @endforeach
-                        </div>
-                    @else
-                        <span class="xp-top8-empty">No top songs found.</span>
-                    @endif
-                </div>
-            </div>
+            @include('partials.profile.top-songs-cassette', ['songs' => $user->lastfm_data['top_songs'] ?? []])
         </div>
 
         <!-- ===== RIGHT COLUMN: Top 8 Friends + Posts ===== -->
