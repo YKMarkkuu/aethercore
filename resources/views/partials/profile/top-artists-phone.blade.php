@@ -6,8 +6,8 @@
 
     Self-contained: CSS is scoped under .rotary-phone, JS is an IIFE keyed
     to a per-render id. Replaces the whole old "Top 8 Artists" xp-panel.
-    Pixel-game aesthetic: chunky black outlines, flat fills, hard-edge
-    offset shadows, no border-radius, no blur, no gradients.
+    Realistic skeuomorphic styling: warm Bakelite and paper materials,
+    softly rounded forms, subtle gradients and stacked shadows.
 --}}
 @php
     $pid = 'phone-' . \Illuminate\Support\Str::random(6);
@@ -31,14 +31,7 @@
 @endphp
 
 <style>
-    /* =====================================================
-       ROTARY PHONE - scoped under .rotary-phone so the
-       midnight theme's !important overrides can't reach the
-       base, dial or speech bubble. Pixel-game rules: every
-       shape gets a solid 2-3px black border, shadows are flat
-       offset blocks (no blur), fills are flat (no gradients).
-       ===================================================== */
-    .rotary-phone { --pg-ink: #000000; }
+     /* Warm, softly shaded materials stay scoped to this component. */
     .rotary-phone [hidden] { display: none !important; }
 
     .rotary-phone .rp-header {
@@ -52,27 +45,28 @@
         display: flex;
         flex-wrap: wrap;
         align-items: flex-start;
-        gap: 14px;
-        padding-top: 4px;
+        gap: 16px;
+        padding-top: 6px;
     }
 
     /* ================= PHONE ================= */
     .rotary-phone .rp-phone {
         position: relative;
         flex: 0 0 auto;
-        width: 210px;
+        width: 200px;
         max-width: 100%;
+        margin: 0 auto;
     }
 
     /* handset, resting diagonally across the top of the base */
     .rotary-phone .rp-handset {
         position: relative;
         width: 86%;
-        height: 26px;
-        margin: 0 auto 6px;
-        background: #4a4640;
-        border: 3px solid var(--pg-ink);
-        box-shadow: 3px 3px 0 var(--pg-ink);
+        height: 24px;
+        margin: 0 auto 10px;
+        border-radius: 12px;
+        background: linear-gradient(180deg, #4c453b 0%, #332e27 55%, #221e19 100%);
+        box-shadow: 1px 1px 0 rgba(255, 255, 255, 0.08) inset, 2px 4px 5px rgba(0, 0, 0, 0.4);
         transform: rotate(-3deg);
     }
     .rotary-phone .rp-handset::before,
@@ -80,88 +74,86 @@
         content: "";
         position: absolute;
         top: 50%;
-        width: 22px;
-        height: 22px;
-        background: #4a4640;
-        border: 3px solid var(--pg-ink);
-        transform: translateY(-50%) rotate(45deg);
-        /* octagon-ish earpiece: clipped square reads as chunky-round in pixel style */
-        clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%);
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 35% 30%, #574f43 0%, #332e27 65%, #221e19 100%);
+        box-shadow: 1px 2px 3px rgba(0, 0, 0, 0.45);
+        transform: translateY(-50%);
     }
-    .rotary-phone .rp-handset::before { left: -8px; }
-    .rotary-phone .rp-handset::after { right: -8px; }
+    .rotary-phone .rp-handset::before { left: -10px; }
+    .rotary-phone .rp-handset::after { right: -10px; }
 
     /* base plate */
     .rotary-phone .rp-base {
         position: relative;
         aspect-ratio: 1 / 0.86;
-        background: #5a5650;
-        border: 3px solid var(--pg-ink);
-        box-shadow: 5px 5px 0 var(--pg-ink);
+        border-radius: 10px;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, transparent 28%), linear-gradient(150deg, #4c453b 0%, #332e27 55%, #221e19 100%);
+        box-shadow: 1px 1px 0 #171410, 2px 2px 0 #100e0b, 5px 7px 9px rgba(0, 0, 0, 0.45);
     }
     .rotary-phone .rp-base::before {
-        /* flat "shade" panel instead of a gradient, for pseudo-3D */
         content: "";
         position: absolute;
-        left: 3px;
-        right: 3px;
-        bottom: 3px;
-        height: 22%;
-        background: #46423c;
-        border-top: 3px solid var(--pg-ink);
+        inset: 0;
+        border-radius: inherit;
+        pointer-events: none;
+        box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.12), inset -1px -1px 0 rgba(0, 0, 0, 0.35);
     }
 
     /* raised dial rim + plate */
     .rotary-phone .rp-dial-rim {
         position: absolute;
-        top: 8%;
+        top: 9%;
         left: 50%;
-        width: 78%;
+        width: 76%;
         aspect-ratio: 1 / 1;
+        border-radius: 50%;
         transform: translateX(-50%);
-        background: #706a5f;
-        border: 3px solid var(--pg-ink);
-        box-shadow: 3px 3px 0 var(--pg-ink);
+        background: linear-gradient(150deg, #5c5449 0%, #3a342b 100%);
+        box-shadow: 1px 1px 0 rgba(255, 255, 255, 0.08) inset, 2px 3px 5px rgba(0, 0, 0, 0.4);
     }
     .rotary-phone .rp-dial-plate {
         position: absolute;
         inset: 9%;
-        background: #efe8c6;
-        border: 3px solid var(--pg-ink);
-        transition: transform 160ms steps(6, end);
+        border-radius: 50%;
+        background: radial-gradient(circle at 38% 32%, #f5edcf 0%, #e6dcbc 55%, #d8cca4 100%);
+        box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.6), inset 0 -3px 6px rgba(0, 0, 0, 0.18);
+        transition: transform 160ms ease-out;
     }
     .rotary-phone .rp-dial-plate::after {
-        /* centre hub */
         content: "";
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 20%;
-        height: 20%;
-        background: #5a5650;
-        border: 3px solid var(--pg-ink);
-        transform: translate(-50%, -50%);
-    }
-
-    /* finger holes, positioned by rotate() + translate() around the plate,
-       then counter-rotated so the digit stays upright */
-    .rotary-phone .rp-hole {
         position: absolute;
         top: 50%;
         left: 50%;
         width: 19%;
         height: 19%;
-        margin: -9.5% 0 0 -9.5%;
-        background: #1c1a17;
-        border: 2px solid var(--pg-ink);
+        border-radius: 50%;
+        background: radial-gradient(circle at 35% 30%, #6a6255 0%, #3a342b 75%);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+        transform: translate(-50%, -50%);
+    }
+
+    /* Finger holes remain upright as they are positioned around the dial. */
+    .rotary-phone .rp-hole {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 18%;
+        height: 18%;
+        margin: -9% 0 0 -9%;
+        border: 0;
+        border-radius: 50%;
+        background: radial-gradient(circle at 50% 35%, #2c2822 0%, #17140f 70%);
+        box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.75), inset 0 -1px 0 rgba(255, 255, 255, 0.06);
         color: #efe8c6;
         display: flex;
         align-items: center;
         justify-content: center;
-        font: 700 0.72rem/1 'Courier New', Courier, monospace;
+        font: 600 0.7rem/1 Tahoma, 'Segoe UI', Verdana, sans-serif;
         cursor: pointer;
         padding: 0;
-        transition: transform 90ms linear;
+        transition: transform 120ms ease-out, box-shadow 120ms ease-out;
         /* --a: angle for this hole, --r: radius from centre, set inline */
         transform: rotate(var(--a)) translate(0, var(--r)) rotate(calc(-1 * var(--a)));
     }
@@ -171,36 +163,37 @@
         }
     }
     .rotary-phone .rp-hole:focus-visible {
-        outline: 2px dotted #ffffff;
-        outline-offset: -4px;
+        outline: 2px dotted var(--accent-dark, #1a4a9e);
+        outline-offset: 2px;
     }
     .rotary-phone .rp-hole.is-selected {
-        background: var(--accent-dark);
-        border-color: var(--pg-ink);
+        background: radial-gradient(circle at 50% 35%, var(--accent, #3a7bd5) 0%, var(--accent-dark, #1a4a9e) 75%);
+        box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.45), inset 0 -1px 0 rgba(255, 255, 255, 0.15);
     }
 
-    /* finger-stop tab, bottom-right of the rim */
+    /* Finger-stop tab, bottom-right of the rim. */
     .rotary-phone .rp-stop {
         position: absolute;
-        bottom: 4%;
-        right: -2%;
-        width: 12%;
-        height: 22%;
-        background: #2a2824;
-        border: 3px solid var(--pg-ink);
-        box-shadow: 2px 2px 0 var(--pg-ink);
+        bottom: 5%;
+        right: -1%;
+        width: 10%;
+        height: 20%;
+        border-radius: 3px;
+        background: linear-gradient(150deg, #4c453b, #221e19);
+        box-shadow: 1px 2px 3px rgba(0, 0, 0, 0.45);
         z-index: 2;
     }
 
-    /* cradle switch + cord stub, bottom of the base, purely decorative */
+    /* Cradle switch at the bottom of the base. */
     .rotary-phone .rp-cradle {
         position: absolute;
         left: 50%;
-        bottom: -6px;
-        width: 30%;
-        height: 10px;
-        background: #2a2824;
-        border: 3px solid var(--pg-ink);
+        bottom: -5px;
+        width: 28%;
+        height: 9px;
+        border-radius: 3px;
+        background: linear-gradient(150deg, #332e27, #17140f);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
         transform: translateX(-50%);
     }
 
@@ -211,49 +204,33 @@
 
     /* ================= SPEECH BUBBLE ================= */
     .rotary-phone .rp-bubble-wrap {
-        flex: 1 1 180px;
-        min-width: 180px;
-        padding-left: 4px;
+        flex: 1 1 190px;
+        min-width: 190px;
     }
     .rotary-phone .rp-bubble {
         position: relative;
-        background: #fdf9e8;
-        border: 3px solid var(--pg-ink);
-        box-shadow: 5px 5px 0 var(--pg-ink);
-        padding: 10px;
-    }
-    /* comic pointer, aimed back at the phone: two stacked hard triangles */
-    .rotary-phone .rp-bubble::before,
-    .rotary-phone .rp-bubble::after {
-        content: "";
-        position: absolute;
-        top: 22px;
-        border-style: solid;
+        background: radial-gradient(rgba(0, 0, 0, 0.035) 1px, transparent 1px) 0 0/3px 3px, var(--surface-post, #f8f5ec);
+        border-radius: 6px;
+        box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.06), 2px 4px 7px rgba(0, 0, 0, 0.18);
+        padding: 11px;
     }
     .rotary-phone .rp-bubble::before {
-        left: -17px;
-        border-width: 10px 17px 10px 0;
-        border-color: transparent var(--pg-ink) transparent transparent;
-    }
-    .rotary-phone .rp-bubble::after {
-        left: -12px;
-        border-width: 8px 13px 8px 0;
-        border-color: transparent #fdf9e8 transparent transparent;
+        content: "";
+        position: absolute;
+        top: 24px;
+        left: -11px;
+        width: 18px;
+        height: 18px;
+        background: inherit;
+        border-radius: 4px;
+        transform: rotate(45deg);
+        box-shadow: -1px 1px 2px rgba(0, 0, 0, 0.08);
     }
     @media (max-width: 560px) {
-        .rotary-phone .rp-bubble-wrap { padding-left: 0; padding-top: 14px; }
-        .rotary-phone .rp-bubble::before,
-        .rotary-phone .rp-bubble::after {
-            top: -17px;
-            left: 24px;
-            border-width: 0 10px 17px 10px;
-            border-color: transparent transparent var(--pg-ink) transparent;
-        }
-        .rotary-phone .rp-bubble::after {
-            top: -12px;
-            left: 24px;
-            border-width: 0 8px 13px 8px;
-            border-color: transparent transparent #fdf9e8 transparent;
+        .rotary-phone .rp-bubble-wrap { padding-top: 16px; }
+        .rotary-phone .rp-bubble::before {
+            top: -9px;
+            left: 26px;
         }
     }
 
@@ -267,8 +244,9 @@
         flex: 0 0 auto;
         width: 56px;
         height: 56px;
+        border-radius: 4px;
         background: #cdbd94;
-        border: 3px solid var(--pg-ink);
+        box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.5), 1px 1px 3px rgba(0, 0, 0, 0.25);
         overflow: hidden;
     }
     .rotary-phone .rp-photo img {
@@ -277,19 +255,20 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
-        image-rendering: pixelated;
+        object-fit: cover;
     }
     .rotary-phone .rp-photo svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 
     .rotary-phone .rp-info { flex: 1; min-width: 0; }
     .rotary-phone .rp-rank-badge {
         display: inline-block;
-        padding: 0 5px;
-        margin-bottom: 3px;
-        background: #1c1a17;
-        color: #efe8c6;
-        border: 2px solid var(--pg-ink);
-        font: 700 0.6rem/1.4 'Courier New', Courier, monospace;
+        padding: 0 6px;
+        margin-bottom: 4px;
+        border-radius: 3px;
+        background: var(--accent-dark, #1a4a9e);
+        color: #ffffff;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        font: 700 0.6rem/1.4 Tahoma, 'Segoe UI', Verdana, sans-serif;
     }
     .rotary-phone .rp-name {
         font: 700 0.85rem/1.2 Tahoma, 'Segoe UI', Verdana, sans-serif;
@@ -301,16 +280,17 @@
         display: flex;
         align-items: center;
         gap: 6px;
-        margin-top: 8px;
-        padding: 3px 7px;
+        margin-top: 9px;
+        padding: 4px 8px;
+        border-radius: 3px;
         background: #efe8c6;
-        border: 2px solid var(--pg-ink);
+        box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.7), inset 0 -1px 0 rgba(0, 0, 0, 0.1);
         width: max-content;
         max-width: 100%;
     }
     .rotary-phone .rp-stat strong {
-        font: 700 0.85rem/1 'Courier New', Courier, monospace;
-        color: #1e1e1e;
+        font: 700 0.9rem/1 Tahoma, 'Segoe UI', Verdana, sans-serif;
+        color: var(--accent-dark, #1a4a9e);
     }
     .rotary-phone .rp-stat span {
         font: 600 0.6rem/1 Tahoma, 'Segoe UI', Verdana, sans-serif;
@@ -339,13 +319,22 @@
         @if($count === 0)
             <div class="rp-empty">No top artists found.</div>
         @else
-            {{-- shared pixel-person silhouette, reused when an artist has no Deezer photo --}}
+            {{-- Shared portrait fallback for artists without a photo. --}}
             <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
-                <symbol id="{{ $pid }}-blank" viewBox="0 0 20 20" shape-rendering="crispEdges">
-                    <rect width="20" height="20" fill="#cdbd94"/>
-                    <rect x="7" y="3" width="6" height="6" fill="#5a5650"/>
-                    <rect x="4" y="10" width="12" height="7" fill="#5a5650"/>
-                    <rect x="4" y="10" width="12" height="2" fill="#46423c"/>
+                <defs>
+                    <linearGradient id="{{ $pid }}-portrait-bg" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0" stop-color="#e5d8b7"/>
+                        <stop offset="1" stop-color="#b9a77f"/>
+                    </linearGradient>
+                    <linearGradient id="{{ $pid }}-portrait-figure" x1="0" y1="0" x2="0.9" y2="1">
+                        <stop offset="0" stop-color="#777267"/>
+                        <stop offset="1" stop-color="#45433e"/>
+                    </linearGradient>
+                </defs>
+                <symbol id="{{ $pid }}-blank" viewBox="0 0 20 20">
+                    <rect width="20" height="20" fill="url(#{{ $pid }}-portrait-bg)"/>
+                    <circle cx="10" cy="7" r="3.5" fill="url(#{{ $pid }}-portrait-figure)"/>
+                    <path d="M3 19c.35-4.55 3.05-7 7-7s6.65 2.45 7 7H3Z" fill="url(#{{ $pid }}-portrait-figure)"/>
                 </symbol>
             </svg>
 
