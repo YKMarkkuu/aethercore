@@ -28,6 +28,13 @@
         }
         return true;
     };
+
+    $tiltDeg = 24;
+    $gapCenterDeg = 70;
+    $gapSpanDeg = 70;
+    $arcSpanDeg = 360 - $gapSpanDeg;
+    $startAngle = $gapCenterDeg + ($gapSpanDeg / 2);
+    $stepAngle = $count > 1 ? $arcSpanDeg / ($count - 1) : 0;
 @endphp
 
 <style>
@@ -42,6 +49,7 @@
     .rotary-phone .rp-header svg { flex-shrink: 0; }
 
     .rotary-phone .rp-stage {
+        position: relative;
         display: flex;
         flex-wrap: wrap;
         align-items: flex-start;
@@ -55,19 +63,38 @@
         flex: 0 0 auto;
         width: 200px;
         max-width: 100%;
-        margin: 0 auto;
+        margin: 0;
+        perspective: 650px;
     }
 
-    /* handset, resting diagonally across the top of the base */
+    .rotary-phone .rp-tilt {
+        position: relative;
+        transform-style: preserve-3d;
+        transform: rotateX({{ $tiltDeg }}deg) rotateZ(-2deg);
+        transform-origin: 50% 100%;
+    }
+
+    .rotary-phone .rp-handset-shadow {
+        position: absolute;
+        left: 8%;
+        top: 4px;
+        width: 78%;
+        height: 20px;
+        background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.4), transparent 72%);
+        filter: blur(1.5px);
+        transform: rotate(-3deg);
+        pointer-events: none;
+    }
+
     .rotary-phone .rp-handset {
         position: relative;
-        width: 86%;
-        height: 24px;
-        margin: 0 auto 10px;
-        border-radius: 12px;
+        width: 84%;
+        height: 22px;
+        margin: 0 auto 14px;
+        border-radius: 11px;
         background: linear-gradient(180deg, #4c453b 0%, #332e27 55%, #221e19 100%);
-        box-shadow: 1px 1px 0 rgba(255, 255, 255, 0.08) inset, 2px 4px 5px rgba(0, 0, 0, 0.4);
-        transform: rotate(-3deg);
+        box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.08), 2px 4px 6px rgba(0, 0, 0, 0.4);
+        transform: translateZ(26px) rotate(-3deg);
     }
     .rotary-phone .rp-handset::before,
     .rotary-phone .rp-handset::after {
@@ -84,25 +111,36 @@
     .rotary-phone .rp-handset::before { left: -10px; }
     .rotary-phone .rp-handset::after { right: -10px; }
 
-    /* base plate */
     .rotary-phone .rp-base {
         position: relative;
         aspect-ratio: 1 / 0.86;
-        border-radius: 10px;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, transparent 28%), linear-gradient(150deg, #4c453b 0%, #332e27 55%, #221e19 100%);
+        transform-style: preserve-3d;
+    }
+
+    .rotary-phone .rp-base-wall,
+    .rotary-phone .rp-base-face {
+        position: absolute;
+        inset: 0;
+        clip-path: polygon(6% 0, 94% 0, 100% 100%, 0 100%);
+    }
+    .rotary-phone .rp-base-wall {
+        top: 12px;
+        background: linear-gradient(180deg, #2a251f 0%, #141210 100%);
+    }
+    .rotary-phone .rp-base-face {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.10) 0%, transparent 30%), linear-gradient(150deg, #4c453b 0%, #332e27 55%, #221e19 100%);
         box-shadow: 1px 1px 0 #171410, 2px 2px 0 #100e0b, 5px 7px 9px rgba(0, 0, 0, 0.45);
     }
-    .rotary-phone .rp-base::before {
+    .rotary-phone .rp-base-face::before {
         content: "";
         position: absolute;
         inset: 0;
-        border-radius: inherit;
+        clip-path: inherit;
         pointer-events: none;
-        box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.12), inset -1px -1px 0 rgba(0, 0, 0, 0.35);
+        box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.14), inset -1px -1px 0 rgba(0, 0, 0, 0.35);
     }
 
-    /* raised dial rim + plate */
-    .rotary-phone .rp-dial-rim {
+    .rotary-phone .rp-well {
         position: absolute;
         top: 9%;
         left: 50%;
@@ -110,15 +148,27 @@
         aspect-ratio: 1 / 1;
         border-radius: 50%;
         transform: translateX(-50%);
-        background: linear-gradient(150deg, #5c5449 0%, #3a342b 100%);
-        box-shadow: 1px 1px 0 rgba(255, 255, 255, 0.08) inset, 2px 3px 5px rgba(0, 0, 0, 0.4);
+        transform-style: preserve-3d;
+        background: linear-gradient(150deg, #241f1a 0%, #100e0b 100%);
+        box-shadow: inset 0 3px 7px rgba(0, 0, 0, 0.65);
+    }
+    .rotary-phone .rp-well::after {
+        content: "";
+        position: absolute;
+        inset: -4%;
+        border-radius: 50%;
+        background: linear-gradient(150deg, #332e27 0%, #1a1713 100%);
+        z-index: 0;
     }
     .rotary-phone .rp-dial-plate {
         position: absolute;
         inset: 9%;
+        z-index: 1;
         border-radius: 50%;
         background: radial-gradient(circle at 38% 32%, #f5edcf 0%, #e6dcbc 55%, #d8cca4 100%);
-        box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.6), inset 0 -3px 6px rgba(0, 0, 0, 0.18);
+        box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.6), inset 0 -3px 6px rgba(0, 0, 0, 0.18), 0 0 0 3px #b3a374, 1px 2px 3px rgba(0, 0, 0, 0.4);
+        transform: translateZ(10px) rotateZ(var(--dial-spin, 0deg));
+        transform-style: preserve-3d;
         transition: transform 160ms ease-out;
     }
     .rotary-phone .rp-dial-plate::after {
@@ -131,72 +181,58 @@
         border-radius: 50%;
         background: radial-gradient(circle at 35% 30%, #6a6255 0%, #3a342b 75%);
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
-        transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%) translateZ(4px);
     }
 
-    /* Finger holes remain upright as they are positioned around the dial. */
     .rotary-phone .rp-hole {
         position: absolute;
         top: 50%;
         left: 50%;
-        width: 18%;
-        height: 18%;
-        margin: -9% 0 0 -9%;
+        width: 16%;
+        height: 16%;
+        margin: -8% 0 0 -8%;
+        padding: 0;
         border: 0;
         border-radius: 50%;
-        background: radial-gradient(circle at 50% 35%, #2c2822 0%, #17140f 70%);
-        box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.75), inset 0 -1px 0 rgba(255, 255, 255, 0.06);
+        background: radial-gradient(circle at 50% 22%, #0b0908 0%, #3a342d 78%);
+        box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.16);
         color: #efe8c6;
+        font: 600 0.68rem/1 Tahoma, 'Segoe UI', Verdana, sans-serif;
         display: flex;
         align-items: center;
         justify-content: center;
-        font: 600 0.7rem/1 Tahoma, 'Segoe UI', Verdana, sans-serif;
         cursor: pointer;
-        padding: 0;
-        transition: transform 120ms ease-out, box-shadow 120ms ease-out;
-        /* --a: angle for this hole, --r: radius from centre, set inline */
-        transform: rotate(var(--a)) translate(0, var(--r)) rotate(calc(-1 * var(--a)));
+        transition: transform 100ms ease-out, color 100ms ease-out;
+        transform: rotate(var(--a)) translateY(var(--r)) rotate(calc(-1 * var(--a)));
+    }
+    .rotary-phone .rp-hole.is-selected {
+        background: radial-gradient(circle at 50% 22%, var(--accent-dark, #1a4a9e) 0%, var(--accent, #3a7bd5) 78%);
+        color: #ffffff;
+        text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
     }
     @media (hover: hover) {
         .rotary-phone .rp-hole:hover:not(.is-selected) {
-            transform: rotate(var(--a)) translate(0, calc(var(--r) - 3px)) rotate(calc(-1 * var(--a)));
+            transform: rotate(var(--a)) translateY(var(--r)) rotate(calc(-1 * var(--a))) scale(1.16);
+            color: #ffffff;
         }
     }
     .rotary-phone .rp-hole:focus-visible {
         outline: 2px dotted var(--accent-dark, #1a4a9e);
         outline-offset: 2px;
     }
-    .rotary-phone .rp-hole.is-selected {
-        background: radial-gradient(circle at 50% 35%, var(--accent, #3a7bd5) 0%, var(--accent-dark, #1a4a9e) 75%);
-        box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.45), inset 0 -1px 0 rgba(255, 255, 255, 0.15);
-    }
 
-    /* Finger-stop tab, bottom-right of the rim. */
-    .rotary-phone .rp-stop {
+    .rotary-phone .rp-finger-stop {
         position: absolute;
-        bottom: 5%;
-        right: -1%;
-        width: 10%;
-        height: 20%;
-        border-radius: 3px;
-        background: linear-gradient(150deg, #4c453b, #221e19);
-        box-shadow: 1px 2px 3px rgba(0, 0, 0, 0.45);
+        bottom: 3%;
+        right: 9%;
+        width: 11%;
+        height: 22%;
         z-index: 2;
+        border-radius: 3px 3px 10px 10px;
+        background: linear-gradient(150deg, #5c5449 0%, #2a2620 100%);
+        box-shadow: 1px 2px 3px rgba(0, 0, 0, 0.5), -7px -2px 9px rgba(0, 0, 0, 0.35);
+        transform: translateZ(22px);
     }
-
-    /* Cradle switch at the bottom of the base. */
-    .rotary-phone .rp-cradle {
-        position: absolute;
-        left: 50%;
-        bottom: -5px;
-        width: 28%;
-        height: 9px;
-        border-radius: 3px;
-        background: linear-gradient(150deg, #332e27, #17140f);
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-        transform: translateX(-50%);
-    }
-
     @media (prefers-reduced-motion: reduce) {
         .rotary-phone .rp-dial-plate,
         .rotary-phone .rp-hole { transition: none; }
@@ -340,38 +376,44 @@
 
             <div class="rp-stage">
                 <div class="rp-phone">
-                    <div class="rp-handset" aria-hidden="true"></div>
-                    <div class="rp-base">
-                        <div class="rp-dial-rim">
-                            <div class="rp-dial-plate" data-rp-dial>
+                    <div class="rp-tilt">
+                        <div class="rp-handset-shadow" aria-hidden="true"></div>
+                        <div class="rp-handset" aria-hidden="true"></div>
+                        <div class="rp-base">
+                            <div class="rp-base-wall" aria-hidden="true"></div>
+                            <div class="rp-base-face" aria-hidden="true"></div>
+                            <div class="rp-well">
+                                <div class="rp-dial-plate" data-rp-dial role="group" aria-label="Rotary dial: select an artist by rank">
                                 @foreach($artistList as $i => $artist)
                                     @php
                                         $rank = $i + 1;
-                                        $angle = -158 + ($i * 45); // 1 near 11 o'clock, sweeping clockwise to 8
+                                        $screenAngle = $startAngle + ($i * $stepAngle);
+                                        $cssSpin = round($screenAngle + 90, 1);
                                         $name = trim((string) ($artist['name'] ?? '')) ?: 'Unknown Artist';
                                         $plays = (int) ($artist['playcount'] ?? 0);
                                         $img = $isRealImage($artist['image'] ?? null) ? $artist['image'] : null;
                                     @endphp
                                     <button type="button"
                                             class="rp-hole @if($i === 0) is-selected @endif"
-                                            style="--a: {{ $angle }}deg; --r: -122%;"
+                                            style="--a: {{ $cssSpin }}deg; --r: -46px;"
                                             data-rp-hole
                                             data-rank="{{ $rank }}"
                                             data-name="{{ $name }}"
                                             data-image="{{ $img }}"
                                             data-plays="{{ number_format($plays) }}"
+                                            data-spin="{{ $cssSpin }}"
                                             aria-pressed="{{ $i === 0 ? 'true' : 'false' }}"
                                             aria-label="Dial {{ $rank }}: {{ $name }}, {{ number_format($plays) }} scrobbles">{{ $rank }}</button>
                                 @endforeach
+                                </div>
                             </div>
                         </div>
-                        <span class="rp-stop" aria-hidden="true"></span>
-                        <span class="rp-cradle" aria-hidden="true"></span>
+                        <div class="rp-finger-stop" aria-hidden="true"></div>
                     </div>
                 </div>
 
                 <div class="rp-bubble-wrap">
-                    <div class="rp-bubble" role="status" aria-live="polite">
+                    <div class="rp-bubble" role="status" aria-live="polite" aria-atomic="true">
                         <div class="rp-bubble-top">
                             <span class="rp-photo" data-rp-photo>
                                 <svg aria-hidden="true"><use href="#{{ $pid }}-blank"/></svg>
@@ -434,13 +476,11 @@
         });
         render(hole);
 
-        // Rotate the dial so the clicked hole swings toward the finger-stop,
-        // then spring back to rest - a rotary "pull and release".
-        var targetAngle = parseFloat(hole.style.getPropertyValue('--a'));
-        dial.style.transform = 'rotate(' + (targetAngle * -0.32) + 'deg)';
+        var spin = parseFloat(hole.dataset.spin) || 0;
+        dial.style.setProperty('--dial-spin', (spin * -0.32) + 'deg');
         window.clearTimeout(dial._rpSettle);
         dial._rpSettle = window.setTimeout(function () {
-            dial.style.transform = 'rotate(0deg)';
+            dial.style.setProperty('--dial-spin', '0deg');
         }, 170);
     }
 
