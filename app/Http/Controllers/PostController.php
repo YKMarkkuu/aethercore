@@ -15,7 +15,7 @@ class PostController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'content' => 'required|max:500',
+            'content' => 'required|max:2000',
         ]);
 
         Post::create([
