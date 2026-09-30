@@ -344,7 +344,7 @@
                 </div>
             </div>
 
-            @include('partials.profile.top-artists-phone', ['artists' => $user->lastfm_data['top_artists'] ?? []])
+            @include('partials.profile.top-artists-rolodex', ['artists' => $user->lastfm_data['top_artists'] ?? []])
 
             @include('partials.profile.top-albums-vinyl', ['albums' => $user->lastfm_data['top_albums'] ?? []])
 
