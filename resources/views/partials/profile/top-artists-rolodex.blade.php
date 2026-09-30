@@ -86,7 +86,7 @@
     .rolodex .rx-stage {
         position: relative;
         width: 100%;
-        height: 326px;
+        height: 345px;
         padding: 0;
     }
 
@@ -192,25 +192,21 @@
         box-shadow: inset 0 1px 0 rgba(0,0,0,0.5);
     }
 
-    /* ================= PEEK STACK =================
-       Rank is the stable position key. JS computes a compact slot from
-       rank order (highest rank first at top) while excluding active rank.
-       The actual position is always calculated from the slot variable.
-    */
+     /* ================= PEEK STACK ================= */
     .rolodex .rx-peek-stack {
         position: absolute;
         z-index: 4;
         top: 0;
         left: 8px;
         right: 8px;
-        height: 155px;
+        height: 192px;
     }
 
     .rolodex .rx-peek {
         position: absolute;
         left: 0;
         right: 0;
-        top: calc(var(--rx-peek-origin) + (var(--peek-slot) * var(--rx-step)));
+        top: calc(var(--rx-peek-origin) + ((var(--peek-rank) - 1) * var(--rx-step)));
         height: var(--rx-card-height);
         padding: 0 7px 0 6px;
         border: 1px solid var(--border-default, #b0a8a0);
@@ -280,32 +276,24 @@
         outline-offset: 2px;
     }
 
-    .rolodex .rx-peek[disabled] {
-        pointer-events: none;
+    .rolodex .rx-peek.is-active {
+        background:
+            linear-gradient(90deg, rgba(58,123,213,0.08), transparent 42%),
+            var(--rx-card);
+        box-shadow:
+            inset 3px 0 0 var(--accent),
+            1px 2px 2px rgba(0,0,0,0.2),
+            0 1px 0 rgba(255,255,255,0.5) inset;
     }
 
     @media (hover: hover) {
-        .rolodex .rx-peek:hover:not([disabled]) {
+        .rolodex .rx-peek:hover:not(.is-active) {
             border-color: var(--accent);
             box-shadow:
                 0 2px 4px rgba(0,0,0,0.25),
                 0 0 0 1px rgba(58,123,213,0.14),
                 inset 0 1px 0 rgba(255,255,255,0.5);
         }
-    }
-
-    .rolodex .rx-peek.is-incoming {
-        z-index: 18;
-        transform:
-            translateY(var(--rx-forward-y, 0px))
-            scale(1.035);
-        box-shadow:
-            2px 7px 9px rgba(0,0,0,0.3),
-            0 0 0 1px rgba(58,123,213,0.16);
-    }
-
-    .rolodex .rx-peek.is-outgoing-target {
-        z-index: 6;
     }
 
     /* ================= ACTIVE CARD ================= */
@@ -333,7 +321,7 @@
         cursor: pointer;
         transform: translateY(0) scale(1);
         transform-origin: 50% 100%;
-        transition: transform 220ms ease-out, box-shadow 220ms ease-out;
+        transition: opacity 180ms ease-out, transform 220ms ease-out, box-shadow 220ms ease-out;
         outline: none;
     }
 
@@ -354,18 +342,17 @@
             3px 5px 8px rgba(0,0,0,0.36);
     }
 
-    .rolodex .rx-active.is-sliding-back {
-        transform: translateY(var(--rx-back-y, -80px)) scale(0.985);
-        box-shadow: 1px 1px 0 rgba(255,255,255,0.45) inset, 2px 5px 7px rgba(0,0,0,0.28);
-    }
-
     @media (hover: hover) {
-        .rolodex .rx-active:hover:not(.is-sliding-back) {
+        .rolodex .rx-active:hover {
             box-shadow:
                 1px 2px 0 rgba(255,255,255,0.55) inset,
                 -1px -1px 0 rgba(0,0,0,0.14) inset,
                 3px 6px 10px rgba(0,0,0,0.4);
         }
+    }
+
+    .rolodex .rx-active.is-refreshing {
+        opacity: 0.35;
     }
 
     .rolodex .rx-active.is-nudged {
@@ -487,7 +474,7 @@
     }
 
     @media (max-width: 280px) {
-        .rolodex .rx-stage { height: 326px; }
+        .rolodex .rx-stage { height: 345px; }
         .rolodex .rx-active { left: 8px; right: 8px; }
     }
 </style>
@@ -541,7 +528,7 @@
 
                             <button type="button"
                                     class="rx-peek"
-                                    style="--peek-rank: {{ $rank }}; --peek-slot: 0;"
+                                    style="--peek-rank: {{ $rank }};"
                                     data-rx-peek
                                     data-rank="{{ $rank }}"
                                     data-name="{{ $name }}"
@@ -550,7 +537,6 @@
                                     data-plays-formatted="{{ number_format($plays) }}"
                                     data-compact="{{ $compactPlaycount($plays) }}"
                                     aria-pressed="{{ $rank === 1 ? 'true' : 'false' }}"
-                                    @if($rank === 1) disabled tabindex="-1" @endif
                                     aria-label="Rank {{ str_pad($rank, 2, '0', STR_PAD_LEFT) }}: {{ $name }}, {{ number_format($plays) }} scrobbles">
                                 <span class="rx-peek-rank">{{ str_pad($rank, 2, '0', STR_PAD_LEFT) }}</span>
                                 <span class="rx-peek-name">{{ $name }}</span>
@@ -591,7 +577,6 @@
     var root = document.getElementById(@json($rid));
     if (!root) return;
 
-    var frame = root.querySelector('.rx-frame');
     var active = root.querySelector('[data-rx-active]');
     var announcer = root.querySelector('[data-rx-announcer]');
     var peeks = Array.prototype.slice.call(root.querySelectorAll('[data-rx-peek]'));
@@ -607,7 +592,6 @@
     var stampEl = root.querySelector('[data-rx-stamp]');
     var photoWrap = root.querySelector('[data-rx-photo]');
     var activeRank = 1;
-    var isAnimating = false;
 
     var reducedMotion = window.matchMedia &&
         window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -655,67 +639,23 @@
             peek.dataset.name + ', ' + formatted + ' scrobbles.';
     }
 
-    /*
-     * Rank is the position key. The stack is rebuilt from rank values,
-     * highest rank at the top, active rank omitted. No DOM-index math
-     * determines a card's resting location.
-     */
-    function layoutPeeks(excludingRank) {
-        var ranks = peeks.map(function (peek) {
-            return parseInt(peek.dataset.rank, 10);
-        }).sort(function (a, b) {
-            return b - a;
-        });
+    function layoutPeeks() {
+        peeks.forEach(function (peek) {
+            var rank = parseInt(peek.dataset.rank, 10);
+            var on = rank === activeRank;
 
-        var slot = 0;
-
-        ranks.forEach(function (rank) {
-            var peek = byRank[rank];
-            var isActive = rank === excludingRank;
-
+            /* Rank is the stable position key; DOM order never determines slot. */
             peek.style.setProperty('--peek-rank', String(rank));
-
-            if (isActive) {
-                peek.hidden = true;
-                peek.disabled = true;
-                peek.setAttribute('aria-pressed', 'true');
-                peek.tabIndex = -1;
-                peek.style.setProperty('--peek-slot', '-1');
-                return;
-            }
-
             peek.hidden = false;
             peek.disabled = false;
-            peek.setAttribute('aria-pressed', 'false');
             peek.tabIndex = 0;
-            peek.style.setProperty('--peek-slot', String(slot));
-            slot += 1;
-        });
-    }
-
-    function peekTopPx(peek) {
-        var slot = parseInt(peek.style.getPropertyValue('--peek-slot'), 10);
-        if (isNaN(slot)) return 0;
-
-        return 16 + (slot * 22);
-    }
-
-    function activeTopPx() {
-        var frameRect = frame.getBoundingClientRect();
-        var activeRect = active.getBoundingClientRect();
-        return activeRect.top - frameRect.top;
-    }
-
-    function clearMotionClasses() {
-        active.classList.remove('is-sliding-back');
-        peeks.forEach(function (peek) {
-            peek.classList.remove('is-incoming', 'is-outgoing-target');
-            peek.style.removeProperty('--rx-forward-y');
+            peek.setAttribute('aria-pressed', on ? 'true' : 'false');
+            peek.classList.toggle('is-active', on);
         });
     }
 
     function nudgeActive() {
-        if (reducedMotion || isAnimating) return;
+        if (reducedMotion) return;
 
         active.classList.remove('is-nudged');
         void active.offsetWidth;
@@ -727,73 +667,40 @@
         }, 150);
     }
 
-    function commitSelection(newRank, shouldFocus) {
+    function refreshActive(newRank, shouldFocus) {
+        var target = byRank[newRank];
+        if (!target) return;
+
         activeRank = newRank;
-        var newPeek = byRank[newRank];
+        layoutPeeks();
 
-        clearMotionClasses();
-        layoutPeeks(activeRank);
-        renderActive(newPeek);
-
-        if (shouldFocus) {
-            active.focus();
+        if (reducedMotion) {
+            renderActive(target);
+            if (shouldFocus) target.focus();
+            return;
         }
+
+        active.classList.add('is-refreshing');
+        window.clearTimeout(root._rxFadeTimer);
+        root._rxFadeTimer = window.setTimeout(function () {
+            renderActive(target);
+            active.classList.remove('is-refreshing');
+        }, 90);
+
+        if (shouldFocus) target.focus();
     }
 
     function selectRank(newRank, shouldFocus) {
         if (!byRank[newRank]) return;
+
         if (newRank === activeRank) {
+            layoutPeeks();
+            if (shouldFocus) byRank[newRank].focus();
             nudgeActive();
-            if (shouldFocus) active.focus();
-            return;
-        }
-        if (isAnimating) return;
-
-        var oldRank = activeRank;
-        var oldPeek = byRank[oldRank];
-        var incoming = byRank[newRank];
-
-        /* Layout uses ranks, not DOM order, before computing travel distances. */
-        layoutPeeks(oldRank);
-
-        var incomingTop = peekTopPx(incoming);
-        var outgoingTargetTop = peekTopPx(oldPeek);
-        var currentActiveTop = activeTopPx();
-
-        isAnimating = true;
-
-        oldPeek.hidden = false;
-        oldPeek.disabled = true;
-        oldPeek.setAttribute('aria-pressed', 'false');
-        oldPeek.classList.add('is-outgoing-target');
-
-        incoming.hidden = false;
-        incoming.disabled = true;
-        incoming.setAttribute('aria-pressed', 'true');
-        incoming.style.setProperty(
-            '--rx-forward-y',
-            String(currentActiveTop - incomingTop) + 'px'
-        );
-        incoming.classList.add('is-incoming');
-
-        active.style.setProperty(
-            '--rx-back-y',
-            String(outgoingTargetTop - currentActiveTop) + 'px'
-        );
-        active.classList.add('is-sliding-back');
-
-        if (reducedMotion) {
-            commitSelection(newRank, shouldFocus);
-            isAnimating = false;
             return;
         }
 
-        window.clearTimeout(root._rxSwapTimer);
-        root._rxSwapTimer = window.setTimeout(function () {
-            commitSelection(newRank, shouldFocus);
-            active.style.removeProperty('--rx-back-y');
-            isAnimating = false;
-        }, 225);
+        refreshActive(newRank, shouldFocus);
     }
 
     peeks.forEach(function (peek) {
@@ -849,7 +756,7 @@
         }
     });
 
-    layoutPeeks(activeRank);
+    layoutPeeks();
     renderActive(byRank[activeRank]);
 })();
 </script>
