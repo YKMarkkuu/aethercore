@@ -1,13 +1,13 @@
 {{--
-    TOP 8 ARTISTS - ROTARY PHONE
+    TOP 8 ARTISTS - WALL PHONE
 
     Expects: $artists = [ ['name' =>, 'image' =>, 'playcount' =>], ... ]
     Usage:   @include('partials.profile.top-artists-phone', ['artists' => $user->lastfm_data['top_artists'] ?? []])
 
-    Self-contained: CSS is scoped under .rotary-phone, JS is an IIFE keyed
+    Self-contained: CSS scoped under .wall-phone, JS is an IIFE keyed
     to a per-render id. Replaces the whole old "Top 8 Artists" xp-panel.
-    Realistic skeuomorphic styling: warm Bakelite and paper materials,
-    softly rounded forms, subtle gradients and stacked shadows.
+    Flat Windows XP-era skeuomorphic styling: warm Bakelite, aged LCD,
+    photo buttons, soft stacked shadows.
 --}}
 @php
     $pid = 'phone-' . \Illuminate\Support\Str::random(6);
@@ -21,330 +21,378 @@
         if (empty($url)) {
             return false;
         }
+
         foreach (['2a96cbd8b46e442fc41c2b86b821562f', 'avatar_default', 'default_avatar', 'noimage', 'placeholder'] as $needle) {
             if (str_contains($url, $needle)) {
                 return false;
             }
         }
+
         return true;
     };
-
-    $tiltDeg = 24;
-    $gapCenterDeg = 70;
-    $gapSpanDeg = 70;
-    $arcSpanDeg = 360 - $gapSpanDeg;
-    $startAngle = $gapCenterDeg + ($gapSpanDeg / 2);
-    $stepAngle = $count > 1 ? $arcSpanDeg / ($count - 1) : 0;
 @endphp
 
 <style>
-     /* Warm, softly shaded materials stay scoped to this component. */
-    .rotary-phone [hidden] { display: none !important; }
+    /* ================= WALL PHONE ================= */
+    .wall-phone [hidden] { display: none !important; }
 
-    .rotary-phone .rp-header {
+    .wall-phone {
+        --wp-bakelite: #5a3928;
+        --wp-bakelite-dark: #3a2419;
+        --wp-bakelite-deep: #24160f;
+        --wp-face: #7a5239;
+        --wp-face-light: #8c6044;
+        --wp-cream: #e8d9b5;
+        --wp-cream-light: #f3e8c9;
+        --wp-lcd: #d9d4ad;
+        --wp-lcd-dark: #293126;
+        --wp-amber: #d99027;
+        --wp-amber-bright: #ffb52e;
+        --wp-muted: #716856;
+        --wp-border: #a68b61;
+        --wp-shadow: rgba(0, 0, 0, 0.38);
+    }
+
+    .wall-phone .wp-header {
         display: flex;
         align-items: center;
         gap: 0.35rem;
     }
-    .rotary-phone .rp-header svg { flex-shrink: 0; }
 
-    .rotary-phone .rp-stage {
-        position: relative;
-        display: flex;
-        flex-wrap: wrap;
-        align-items: flex-start;
-        gap: 16px;
-        padding-top: 6px;
+    .wall-phone .wp-header svg {
+        flex-shrink: 0;
     }
 
-    /* ================= PHONE ================= */
-    .rotary-phone .rp-phone {
+    .wall-phone .wp-empty {
+        padding: 0.6rem 0;
+        color: var(--text-muted);
+        font: 0.75rem/1.35 Tahoma, 'Segoe UI', Verdana, sans-serif;
+    }
+
+    .wall-phone .wp-stage {
+        display: flex;
+        align-items: flex-start;
+        justify-content: flex-start;
+        padding: 6px 0 2px;
+    }
+
+    .wall-phone .wp-phone {
         position: relative;
-        flex: 0 0 auto;
         width: 200px;
+        height: 220px;
         max-width: 100%;
         margin: 0;
-        perspective: 650px;
+        filter: drop-shadow(3px 5px 5px rgba(0, 0, 0, 0.22));
     }
 
-    .rotary-phone .rp-tilt {
+    /* Thin amber strip, echoing the reference phone's colored top edge. */
+    .wall-phone .wp-amber-strip {
+        position: absolute;
+        z-index: 5;
+        top: 0;
+        left: 3px;
+        right: 3px;
+        height: 5px;
+        border-radius: 3px 3px 1px 1px;
+        background: linear-gradient(180deg, #f3b445 0%, var(--wp-amber) 58%, #a85e16 100%);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.45), 0 1px 2px rgba(0,0,0,0.28);
+    }
+
+    .wall-phone .wp-body {
+        position: absolute;
+        inset: 5px 0 0;
+        overflow: hidden;
+        border-radius: 9px 9px 6px 6px;
+        background:
+            linear-gradient(135deg, rgba(255,255,255,0.12), transparent 27%),
+            linear-gradient(160deg, var(--wp-bakelite) 0%, var(--wp-bakelite-dark) 58%, var(--wp-bakelite-deep) 100%);
+        border: 1px solid #2a1a12;
+        box-shadow:
+            inset 1px 1px 0 rgba(255,255,255,0.13),
+            inset -2px -3px 0 rgba(0,0,0,0.2),
+            2px 3px 0 rgba(0,0,0,0.18),
+            4px 7px 9px var(--wp-shadow);
+    }
+
+    .wall-phone .wp-face {
+        position: absolute;
+        top: 9px;
+        right: 8px;
+        bottom: 8px;
+        left: 49px;
+        padding: 7px 7px 6px;
+        border-radius: 5px;
+        background:
+            linear-gradient(135deg, rgba(255,255,255,0.08), transparent 32%),
+            linear-gradient(160deg, var(--wp-face-light) 0%, var(--wp-face) 60%, #68462f 100%);
+        border: 1px solid rgba(35, 20, 13, 0.75);
+        box-shadow:
+            inset 1px 1px 0 rgba(255,255,255,0.10),
+            inset -1px -2px 0 rgba(0,0,0,0.22);
+    }
+
+    .wall-phone .wp-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-rows: repeat(4, minmax(0, 1fr));
+        gap: 4px;
+        height: 151px;
+    }
+
+    .wall-phone .wp-button {
         position: relative;
-        transform-style: preserve-3d;
-        transform: rotateX({{ $tiltDeg }}deg) rotateZ(-2deg);
-        transform-origin: 50% 100%;
-    }
-
-    .rotary-phone .rp-handset-shadow {
-        position: absolute;
-        left: 8%;
-        top: 4px;
-        width: 78%;
-        height: 20px;
-        background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.4), transparent 72%);
-        filter: blur(1.5px);
-        transform: rotate(-3deg);
-        pointer-events: none;
-    }
-
-    .rotary-phone .rp-handset {
-        position: relative;
-        width: 84%;
-        height: 22px;
-        margin: 0 auto 14px;
-        border-radius: 11px;
-        background: linear-gradient(180deg, #4c453b 0%, #332e27 55%, #221e19 100%);
-        box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.08), 2px 4px 6px rgba(0, 0, 0, 0.4);
-        transform: translateZ(26px) rotate(-3deg);
-    }
-    .rotary-phone .rp-handset::before,
-    .rotary-phone .rp-handset::after {
-        content: "";
-        position: absolute;
-        top: 50%;
-        width: 26px;
-        height: 26px;
-        border-radius: 50%;
-        background: radial-gradient(circle at 35% 30%, #574f43 0%, #332e27 65%, #221e19 100%);
-        box-shadow: 1px 2px 3px rgba(0, 0, 0, 0.45);
-        transform: translateY(-50%);
-    }
-    .rotary-phone .rp-handset::before { left: -10px; }
-    .rotary-phone .rp-handset::after { right: -10px; }
-
-    .rotary-phone .rp-base {
-        position: relative;
-        aspect-ratio: 1 / 0.86;
-        transform-style: preserve-3d;
-    }
-
-    .rotary-phone .rp-base-wall,
-    .rotary-phone .rp-base-face {
-        position: absolute;
-        inset: 0;
-        clip-path: polygon(6% 0, 94% 0, 100% 100%, 0 100%);
-    }
-    .rotary-phone .rp-base-wall {
-        top: 12px;
-        background: linear-gradient(180deg, #2a251f 0%, #141210 100%);
-    }
-    .rotary-phone .rp-base-face {
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.10) 0%, transparent 30%), linear-gradient(150deg, #4c453b 0%, #332e27 55%, #221e19 100%);
-        box-shadow: 1px 1px 0 #171410, 2px 2px 0 #100e0b, 5px 7px 9px rgba(0, 0, 0, 0.45);
-    }
-    .rotary-phone .rp-base-face::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        clip-path: inherit;
-        pointer-events: none;
-        box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.14), inset -1px -1px 0 rgba(0, 0, 0, 0.35);
-    }
-
-    .rotary-phone .rp-well {
-        position: absolute;
-        top: 9%;
-        left: 50%;
-        width: 76%;
-        aspect-ratio: 1 / 1;
-        border-radius: 50%;
-        transform: translateX(-50%);
-        transform-style: preserve-3d;
-        background: linear-gradient(150deg, #241f1a 0%, #100e0b 100%);
-        box-shadow: inset 0 3px 7px rgba(0, 0, 0, 0.65);
-    }
-    .rotary-phone .rp-well::after {
-        content: "";
-        position: absolute;
-        inset: -4%;
-        border-radius: 50%;
-        background: linear-gradient(150deg, #332e27 0%, #1a1713 100%);
-        z-index: 0;
-    }
-    .rotary-phone .rp-dial-plate {
-        position: absolute;
-        inset: 9%;
-        z-index: 1;
-        border-radius: 50%;
-        background: radial-gradient(circle at 38% 32%, #f5edcf 0%, #e6dcbc 55%, #d8cca4 100%);
-        box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.6), inset 0 -3px 6px rgba(0, 0, 0, 0.18), 0 0 0 3px #b3a374, 1px 2px 3px rgba(0, 0, 0, 0.4);
-        transform: translateZ(10px) rotateZ(var(--dial-spin, 0deg));
-        transform-style: preserve-3d;
-        transition: transform 160ms ease-out;
-    }
-    .rotary-phone .rp-dial-plate::after {
-        content: "";
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 19%;
-        height: 19%;
-        border-radius: 50%;
-        background: radial-gradient(circle at 35% 30%, #6a6255 0%, #3a342b 75%);
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
-        transform: translate(-50%, -50%) translateZ(4px);
-    }
-
-    .rotary-phone .rp-hole {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 16%;
-        height: 16%;
-        margin: -8% 0 0 -8%;
+        min-width: 0;
+        min-height: 0;
         padding: 0;
-        border: 0;
-        border-radius: 50%;
-        background: radial-gradient(circle at 50% 22%, #0b0908 0%, #3a342d 78%);
-        box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.16);
-        color: #efe8c6;
-        font: 600 0.68rem/1 Tahoma, 'Segoe UI', Verdana, sans-serif;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        overflow: hidden;
+        border: 2px solid #b69a6d;
+        border-radius: 4px;
+        background: var(--wp-cream);
+        box-shadow:
+            inset 1px 1px 0 rgba(255,255,255,0.65),
+            inset -1px -1px 0 rgba(0,0,0,0.22),
+            1px 1px 2px rgba(0,0,0,0.32);
         cursor: pointer;
-        transition: transform 100ms ease-out, color 100ms ease-out;
-        transform: rotate(var(--a)) translateY(var(--r)) rotate(calc(-1 * var(--a)));
+        transition: border-color 100ms ease-out, box-shadow 100ms ease-out, transform 100ms ease-out;
     }
-    .rotary-phone .rp-hole.is-selected {
-        background: radial-gradient(circle at 50% 22%, var(--accent-dark, #1a4a9e) 0%, var(--accent, #3a7bd5) 78%);
-        color: #ffffff;
-        text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
-    }
-    @media (hover: hover) {
-        .rotary-phone .rp-hole:hover:not(.is-selected) {
-            transform: rotate(var(--a)) translateY(var(--r)) rotate(calc(-1 * var(--a))) scale(1.16);
-            color: #ffffff;
-        }
-    }
-    .rotary-phone .rp-hole:focus-visible {
-        outline: 2px dotted var(--accent-dark, #1a4a9e);
+
+    .wall-phone .wp-button:focus-visible {
+        outline: 2px dotted var(--wp-amber-bright);
         outline-offset: 2px;
     }
 
-    .rotary-phone .rp-finger-stop {
-        position: absolute;
-        bottom: 3%;
-        right: 9%;
-        width: 11%;
-        height: 22%;
-        z-index: 2;
-        border-radius: 3px 3px 10px 10px;
-        background: linear-gradient(150deg, #5c5449 0%, #2a2620 100%);
-        box-shadow: 1px 2px 3px rgba(0, 0, 0, 0.5), -7px -2px 9px rgba(0, 0, 0, 0.35);
-        transform: translateZ(22px);
-    }
-    @media (prefers-reduced-motion: reduce) {
-        .rotary-phone .rp-dial-plate,
-        .rotary-phone .rp-hole { transition: none; }
+    .wall-phone .wp-button.is-selected {
+        border-color: var(--wp-amber-bright);
+        box-shadow:
+            0 0 0 1px rgba(255,181,46,0.32),
+            0 0 7px rgba(255,181,46,0.58),
+            inset 1px 1px 0 rgba(255,255,255,0.65),
+            inset -1px -1px 0 rgba(0,0,0,0.2);
     }
 
-    /* ================= SPEECH BUBBLE ================= */
-    .rotary-phone .rp-bubble-wrap {
-        flex: 1 1 190px;
-        min-width: 190px;
-    }
-    .rotary-phone .rp-bubble {
-        position: relative;
-        background: radial-gradient(rgba(0, 0, 0, 0.035) 1px, transparent 1px) 0 0/3px 3px, var(--surface-post, #f8f5ec);
-        border-radius: 6px;
-        box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.06), 2px 4px 7px rgba(0, 0, 0, 0.18);
-        padding: 11px;
-    }
-    .rotary-phone .rp-bubble::before {
-        content: "";
-        position: absolute;
-        top: 24px;
-        left: -11px;
-        width: 18px;
-        height: 18px;
-        background: inherit;
-        border-radius: 4px;
-        transform: rotate(45deg);
-        box-shadow: -1px 1px 2px rgba(0, 0, 0, 0.08);
-    }
-    @media (max-width: 560px) {
-        .rotary-phone .rp-bubble-wrap { padding-top: 16px; }
-        .rotary-phone .rp-bubble::before {
-            top: -9px;
-            left: 26px;
+    @media (hover: hover) {
+        .wall-phone .wp-button:hover:not(.is-selected) {
+            border-color: #e6c47e;
+            box-shadow:
+                0 0 4px rgba(255,214,132,0.38),
+                inset 1px 1px 0 rgba(255,255,255,0.65),
+                inset -1px -1px 0 rgba(0,0,0,0.2);
         }
     }
 
-    .rotary-phone .rp-bubble-top {
-        display: flex;
-        gap: 8px;
-        align-items: flex-start;
-    }
-    .rotary-phone .rp-photo {
-        position: relative;
-        flex: 0 0 auto;
-        width: 56px;
-        height: 56px;
-        border-radius: 4px;
-        background: #cdbd94;
-        box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.5), 1px 1px 3px rgba(0, 0, 0, 0.25);
-        overflow: hidden;
-    }
-    .rotary-phone .rp-photo img {
+    .wall-phone .wp-photo,
+    .wall-phone .wp-photo-fallback {
         position: absolute;
         inset: 0;
         width: 100%;
         height: 100%;
-        object-fit: cover;
-        object-fit: cover;
-    }
-    .rotary-phone .rp-photo svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-
-    .rotary-phone .rp-info { flex: 1; min-width: 0; }
-    .rotary-phone .rp-rank-badge {
-        display: inline-block;
-        padding: 0 6px;
-        margin-bottom: 4px;
-        border-radius: 3px;
-        background: var(--accent-dark, #1a4a9e);
-        color: #ffffff;
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
-        font: 700 0.6rem/1.4 Tahoma, 'Segoe UI', Verdana, sans-serif;
-    }
-    .rotary-phone .rp-name {
-        font: 700 0.85rem/1.2 Tahoma, 'Segoe UI', Verdana, sans-serif;
-        color: #1e1e1e;
-        overflow-wrap: anywhere;
     }
 
-    .rotary-phone .rp-stat {
+    .wall-phone .wp-photo {
+        display: block;
+        object-fit: cover;
+    }
+
+    .wall-phone .wp-photo-fallback {
+        display: block;
+    }
+
+    .wall-phone .wp-rank {
+        position: absolute;
+        z-index: 2;
+        top: 2px;
+        left: 2px;
+        min-width: 13px;
+        height: 13px;
+        padding: 0 3px;
+        border-radius: 2px;
+        background: rgba(42, 27, 18, 0.88);
+        color: #fff4d7;
+        box-shadow: 0 1px 1px rgba(0,0,0,0.42);
+        font: 700 8px/13px Tahoma, 'Segoe UI', Verdana, sans-serif;
+        text-align: center;
+        pointer-events: none;
+    }
+
+    .wall-phone .wp-button.is-selected .wp-rank {
+        background: var(--wp-amber);
+        color: #25170d;
+    }
+
+    /* Aged calculator-style LCD. */
+    .wall-phone .wp-lcd {
+        position: relative;
         display: flex;
-        align-items: center;
-        gap: 6px;
-        margin-top: 9px;
-        padding: 4px 8px;
-        border-radius: 3px;
-        background: #efe8c6;
-        box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.7), inset 0 -1px 0 rgba(0, 0, 0, 0.1);
-        width: max-content;
-        max-width: 100%;
-    }
-    .rotary-phone .rp-stat strong {
-        font: 700 0.9rem/1 Tahoma, 'Segoe UI', Verdana, sans-serif;
-        color: var(--accent-dark, #1a4a9e);
-    }
-    .rotary-phone .rp-stat span {
-        font: 600 0.6rem/1 Tahoma, 'Segoe UI', Verdana, sans-serif;
-        color: #6a6a6a;
-        text-transform: uppercase;
-        letter-spacing: 0.3px;
+        flex-direction: column;
+        justify-content: center;
+        height: 31px;
+        margin-top: 6px;
+        padding: 3px 6px;
+        overflow: hidden;
+        border: 1px solid #5d583d;
+        border-radius: 2px;
+        background:
+            linear-gradient(180deg, rgba(255,255,255,0.16), transparent 42%),
+            var(--wp-lcd);
+        box-shadow:
+            inset 1px 1px 2px rgba(0,0,0,0.25),
+            inset -1px -1px 0 rgba(255,255,255,0.25),
+            1px 1px 2px rgba(0,0,0,0.28);
+        color: var(--wp-lcd-dark);
+        font-family: Tahoma, 'Segoe UI', Verdana, sans-serif;
     }
 
-    .rotary-phone .rp-empty {
-        padding: 0.6rem 0;
-        font-size: 0.75rem;
-        color: var(--text-muted);
-        font-family: Tahoma, 'Segoe UI', Verdana, sans-serif;
+    .wall-phone .wp-lcd-name {
+        min-width: 0;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        font: 700 9px/12px 'Courier New', Tahoma, 'Segoe UI', Verdana, sans-serif;
+    }
+
+    .wall-phone .wp-lcd-plays {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        color: #62604d;
+        font: 8px/10px 'Courier New', Tahoma, 'Segoe UI', Verdana, sans-serif;
+    }
+
+    .wall-phone .wp-status {
+        position: absolute;
+        right: 5px;
+        bottom: 7px;
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: #8c5a21;
+        box-shadow: inset 0 1px 1px rgba(0,0,0,0.35);
+        transition: background-color 120ms ease-out, box-shadow 120ms ease-out;
+    }
+
+    .wall-phone .wp-status.is-connected {
+        background: var(--wp-amber-bright);
+        box-shadow:
+            0 0 5px rgba(255,181,46,0.8),
+            inset 0 1px 1px rgba(255,255,255,0.45);
+    }
+
+    /* ================= HANDSET ================= */
+    .wall-phone .wp-handset-zone {
+        position: absolute;
+        z-index: 6;
+        top: 12px;
+        left: 5px;
+        width: 40px;
+        height: 191px;
+        pointer-events: none;
+    }
+
+    .wall-phone .wp-handset-shadow {
+        position: absolute;
+        left: 8px;
+        top: 5px;
+        width: 27px;
+        height: 178px;
+        border-radius: 50%;
+        background: rgba(0,0,0,0.34);
+        filter: blur(4px);
+        opacity: 0.6;
+    }
+
+    /*
+     * One curved handset shape made from CSS: rounded vertical grip plus
+     * rounded receiver cups. CSS keeps the silhouette crisp and simple.
+     */
+    .wall-phone .wp-handset {
+        position: absolute;
+        left: 9px;
+        top: 5px;
+        width: 25px;
+        height: 169px;
+        border-radius: 13px;
+        background:
+            linear-gradient(90deg, rgba(255,255,255,0.09), transparent 23% 72%, rgba(0,0,0,0.18)),
+            linear-gradient(180deg, #6a4936 0%, #4b3022 48%, #382218 100%);
+        border: 1px solid #281810;
+        box-shadow:
+            inset 1px 1px 0 rgba(255,255,255,0.12),
+            inset -2px -2px 0 rgba(0,0,0,0.22),
+            2px 3px 4px rgba(0,0,0,0.42);
+        transform: translateY(0);
+        transform-origin: 50% 14px;
+        transition: transform 150ms ease-out;
+    }
+
+    .wall-phone .wp-handset::before,
+    .wall-phone .wp-handset::after {
+        content: "";
+        position: absolute;
+        left: -6px;
+        width: 36px;
+        height: 47px;
+        border-radius: 12px;
+        background:
+            radial-gradient(circle at 35% 28%, #77543e 0%, #513424 42%, #382319 100%);
+        border: 1px solid #281810;
+        box-shadow:
+            inset 1px 1px 0 rgba(255,255,255,0.11),
+            inset -2px -2px 0 rgba(0,0,0,0.2),
+            1px 2px 3px rgba(0,0,0,0.34);
+    }
+
+    .wall-phone .wp-handset::before { top: -5px; }
+    .wall-phone .wp-handset::after { bottom: -5px; }
+
+    .wall-phone .wp-handset.is-lifting {
+        transform: translateY(-5px);
+    }
+
+    /* ================= VISIBLY COILED CORD ================= */
+    .wall-phone .wp-cord {
+        position: absolute;
+        z-index: 2;
+        left: 17px;
+        top: 157px;
+        width: 31px;
+        height: 63px;
+        overflow: visible;
+    }
+
+    .wall-phone .wp-cord path {
+        fill: none;
+        stroke: #24170f;
+        stroke-width: 3.2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        /*
+         * Short rounded dashes create visible coil ridges rather than a
+         * single wire. The path alternates tighter upper loops and looser
+         * lower loops.
+         */
+        stroke-dasharray: 2.2 3.2;
+        filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.35));
+    }
+
+    .wall-phone .wp-cord-highlight {
+        fill: none;
+        stroke: rgba(150,104,69,0.72);
+        stroke-width: 1;
+        stroke-linecap: round;
+        stroke-dasharray: 1.3 4.1;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .wall-phone .wp-handset,
+        .wall-phone .wp-status,
+        .wall-phone .wp-button {
+            transition: none;
+        }
     }
 </style>
 
-<div class="xp-panel rotary-phone" id="{{ $pid }}">
-    <div class="xp-panel-header rp-header">
+<div class="xp-panel wall-phone" id="{{ $pid }}">
+    <div class="xp-panel-header wp-header">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/>
         </svg>
@@ -353,9 +401,9 @@
 
     <div class="xp-panel-body">
         @if($count === 0)
-            <div class="rp-empty">No top artists found.</div>
+            <div class="wp-empty">No top artists found.</div>
         @else
-            {{-- Shared portrait fallback for artists without a photo. --}}
+            {{-- Compact portrait fallback: deliberately simple so it reads at ~40px. --}}
             <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
                 <defs>
                     <linearGradient id="{{ $pid }}-portrait-bg" x1="0" y1="0" x2="1" y2="1">
@@ -369,63 +417,77 @@
                 </defs>
                 <symbol id="{{ $pid }}-blank" viewBox="0 0 20 20">
                     <rect width="20" height="20" fill="url(#{{ $pid }}-portrait-bg)"/>
-                    <circle cx="10" cy="7" r="3.5" fill="url(#{{ $pid }}-portrait-figure)"/>
-                    <path d="M3 19c.35-4.55 3.05-7 7-7s6.65 2.45 7 7H3Z" fill="url(#{{ $pid }}-portrait-figure)"/>
+                    <circle cx="10" cy="6.4" r="3.1" fill="url(#{{ $pid }}-portrait-figure)"/>
+                    <path d="M3.4 19c.45-4.05 2.65-6.55 6.6-6.55s6.15 2.5 6.6 6.55H3.4Z" fill="url(#{{ $pid }}-portrait-figure)"/>
                 </symbol>
             </svg>
 
-            <div class="rp-stage">
-                <div class="rp-phone">
-                    <div class="rp-tilt">
-                        <div class="rp-handset-shadow" aria-hidden="true"></div>
-                        <div class="rp-handset" aria-hidden="true"></div>
-                        <div class="rp-base">
-                            <div class="rp-base-wall" aria-hidden="true"></div>
-                            <div class="rp-base-face" aria-hidden="true"></div>
-                            <div class="rp-well">
-                                <div class="rp-dial-plate" data-rp-dial role="group" aria-label="Rotary dial: select an artist by rank">
+            <div class="wp-stage">
+                <div class="wp-phone">
+                    <div class="wp-amber-strip" aria-hidden="true"></div>
+
+                    <div class="wp-body">
+                        <div class="wp-face">
+                            <div class="wp-grid" role="group" aria-label="Top 8 artists: select an artist to call">
                                 @foreach($artistList as $i => $artist)
                                     @php
                                         $rank = $i + 1;
-                                        $screenAngle = $startAngle + ($i * $stepAngle);
-                                        $cssSpin = round($screenAngle + 90, 1);
                                         $name = trim((string) ($artist['name'] ?? '')) ?: 'Unknown Artist';
                                         $plays = (int) ($artist['playcount'] ?? 0);
                                         $img = $isRealImage($artist['image'] ?? null) ? $artist['image'] : null;
                                     @endphp
+
                                     <button type="button"
-                                            class="rp-hole @if($i === 0) is-selected @endif"
-                                            style="--a: {{ $cssSpin }}deg; --r: -46px;"
-                                            data-rp-hole
+                                            class="wp-button @if($i === 0) is-selected @endif"
+                                            data-wp-button
                                             data-rank="{{ $rank }}"
                                             data-name="{{ $name }}"
                                             data-image="{{ $img }}"
                                             data-plays="{{ number_format($plays) }}"
-                                            data-spin="{{ $cssSpin }}"
                                             aria-pressed="{{ $i === 0 ? 'true' : 'false' }}"
-                                            aria-label="Dial {{ $rank }}: {{ $name }}, {{ number_format($plays) }} scrobbles">{{ $rank }}</button>
+                                            aria-label="Rank {{ $rank }}: {{ $name }}, {{ number_format($plays) }} scrobbles">
+                                        @if($img)
+                                            <img class="wp-photo" src="{{ $img }}" alt="" loading="lazy">
+                                        @else
+                                            <svg class="wp-photo-fallback" aria-hidden="true"><use href="#{{ $pid }}-blank"/></svg>
+                                        @endif
+                                        <span class="wp-rank" aria-hidden="true">{{ $rank }}</span>
+                                    </button>
                                 @endforeach
-                                </div>
                             </div>
-                        </div>
-                        <div class="rp-finger-stop" aria-hidden="true"></div>
-                    </div>
-                </div>
 
-                <div class="rp-bubble-wrap">
-                    <div class="rp-bubble" role="status" aria-live="polite" aria-atomic="true">
-                        <div class="rp-bubble-top">
-                            <span class="rp-photo" data-rp-photo>
-                                <svg aria-hidden="true"><use href="#{{ $pid }}-blank"/></svg>
-                            </span>
-                            <div class="rp-info">
-                                <span class="rp-rank-badge" data-rp-rank>No. 1</span>
-                                <div class="rp-name" data-rp-name></div>
+                            <div class="wp-lcd"
+                                 data-wp-lcd
+                                 aria-live="polite"
+                                 aria-atomic="true">
+                                <div class="wp-lcd-name" data-wp-name></div>
+                                <div class="wp-lcd-plays" data-wp-plays></div>
+                                <span class="wp-status" data-wp-status aria-hidden="true"></span>
                             </div>
                         </div>
-                        <div class="rp-stat">
-                            <strong data-rp-plays></strong>
-                            <span>scrobbles</span>
+
+                        <div class="wp-handset-zone" aria-hidden="true">
+                            <div class="wp-handset-shadow"></div>
+
+                            <svg class="wp-cord" viewBox="0 0 31 63" aria-hidden="true" focusable="false">
+                                <path d="M15 1
+                                         C9 4, 22 7, 15 11
+                                         C7 15, 23 18, 15 22
+                                         C7 26, 24 29, 15 33
+                                         C5 38, 25 40, 15 45
+                                         C7 49, 23 53, 16 57
+                                         C13 59, 13 61, 14 63"/>
+                                <path class="wp-cord-highlight"
+                                      d="M15 1
+                                         C9 4, 22 7, 15 11
+                                         C7 15, 23 18, 15 22
+                                         C7 26, 24 29, 15 33
+                                         C5 38, 25 40, 15 45
+                                         C7 49, 23 53, 16 57
+                                         C13 59, 13 61, 14 63"/>
+                            </svg>
+
+                            <div class="wp-handset" data-wp-handset></div>
                         </div>
                     </div>
                 </div>
@@ -440,74 +502,96 @@
     var root = document.getElementById(@json($pid));
     if (!root) return;
 
-    var dial = root.querySelector('[data-rp-dial]');
-    var holes = Array.prototype.slice.call(root.querySelectorAll('[data-rp-hole]'));
-    var photoWrap = root.querySelector('[data-rp-photo]');
-    var blankHref = '#' + @json($pid) + '-blank';
-    var rankEl = root.querySelector('[data-rp-rank]');
-    var nameEl = root.querySelector('[data-rp-name]');
-    var playsEl = root.querySelector('[data-rp-plays]');
+    var buttons = Array.prototype.slice.call(root.querySelectorAll('[data-wp-button]'));
+    var nameEl = root.querySelector('[data-wp-name]');
+    var playsEl = root.querySelector('[data-wp-plays]');
+    var statusEl = root.querySelector('[data-wp-status]');
+    var handset = root.querySelector('[data-wp-handset]');
+    var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    function render(hole) {
-        rankEl.textContent = 'No. ' + hole.dataset.rank;
-        nameEl.textContent = hole.dataset.name;
-        playsEl.textContent = hole.dataset.plays;
+    function fallbackSvg() {
+        return '<svg class="wp-photo-fallback" aria-hidden="true"><use href="#' +
+            @json($pid) + '-blank"/></svg>';
+    }
 
-        photoWrap.innerHTML = '';
-        if (hole.dataset.image) {
-            var img = document.createElement('img');
-            img.src = hole.dataset.image;
-            img.alt = '';
-            img.loading = 'lazy';
-            img.onerror = function () {
-                photoWrap.innerHTML = '<svg aria-hidden="true"><use href="' + blankHref + '"/></svg>';
-            };
-            photoWrap.appendChild(img);
-        } else {
-            photoWrap.innerHTML = '<svg aria-hidden="true"><use href="' + blankHref + '"/></svg>';
+    function render(button) {
+        nameEl.textContent = button.dataset.name;
+        playsEl.textContent = button.dataset.plays + ' scrobbles';
+        statusEl.classList.add('is-connected');
+
+        buttons.forEach(function (item) {
+            var selected = item === button;
+            item.classList.toggle('is-selected', selected);
+            item.setAttribute('aria-pressed', selected ? 'true' : 'false');
+        });
+
+        if (!reducedMotion) {
+            handset.classList.remove('is-lifting');
+            void handset.offsetWidth;
+            handset.classList.add('is-lifting');
+
+            window.clearTimeout(handset._wpLiftTimer);
+            handset._wpLiftTimer = window.setTimeout(function () {
+                handset.classList.remove('is-lifting');
+            }, 150);
         }
     }
 
-    function select(hole) {
-        holes.forEach(function (h) {
-            var on = h === hole;
-            h.classList.toggle('is-selected', on);
-            h.setAttribute('aria-pressed', on ? 'true' : 'false');
-        });
-        render(hole);
-
-        var spin = parseFloat(hole.dataset.spin) || 0;
-        dial.style.setProperty('--dial-spin', (spin * -0.32) + 'deg');
-        window.clearTimeout(dial._rpSettle);
-        dial._rpSettle = window.setTimeout(function () {
-            dial.style.setProperty('--dial-spin', '0deg');
-        }, 170);
+    function select(button, focusButton) {
+        if (!button) return;
+        if (focusButton) button.focus();
+        render(button);
     }
 
-    holes.forEach(function (hole) {
-        hole.addEventListener('click', function () { select(hole); });
+    buttons.forEach(function (button) {
+        var image = button.querySelector('img');
+
+        if (image) {
+            image.addEventListener('error', function () {
+                image.remove();
+                button.insertAdjacentHTML('afterbegin', fallbackSvg());
+            });
+        }
+
+        button.addEventListener('click', function () {
+            select(button, false);
+        });
     });
 
-    // Left/Right cycle through dial positions 1-8; number keys jump directly.
     root.addEventListener('keydown', function (e) {
-        var current = holes.indexOf(document.activeElement);
+        var current = buttons.indexOf(document.activeElement);
+
         if (/^[1-8]$/.test(e.key)) {
-            var byRank = holes[parseInt(e.key, 10) - 1];
-            if (byRank) { byRank.focus(); select(byRank); }
+            var byRank = buttons[parseInt(e.key, 10) - 1];
+            if (byRank) {
+                e.preventDefault();
+                select(byRank, true);
+            }
             return;
         }
+
         if (current < 0) return;
 
         var next = current;
-        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = Math.min(holes.length - 1, current + 1);
-        else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = Math.max(0, current - 1);
-        else return;
+
+        if (e.key === 'ArrowRight') {
+            next = Math.min(buttons.length - 1, current + 1);
+        } else if (e.key === 'ArrowLeft') {
+            next = Math.max(0, current - 1);
+        } else if (e.key === 'ArrowDown') {
+            next = Math.min(buttons.length - 1, current + 2);
+        } else if (e.key === 'ArrowUp') {
+            next = Math.max(0, current - 2);
+        } else {
+            return;
+        }
 
         e.preventDefault();
-        holes[next].focus();
+        buttons[next].focus();
+        select(buttons[next], false);
     });
 
-    render(holes[0]);
+    render(buttons[0]);
 })();
 </script>
 @endif
