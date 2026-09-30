@@ -44,10 +44,8 @@
         --wp-face-light: #8c6044;
         --wp-cream: #e8d9b5;
         --wp-cream-light: #f3e8c9;
-        --wp-lcd: #d9d4ad;
+        --wp-lcd: #e8e4dc;
         --wp-lcd-dark: #293126;
-        --wp-amber: #d99027;
-        --wp-amber-bright: #ffb52e;
         --wp-muted: #716856;
         --wp-border: #a68b61;
         --wp-shadow: rgba(0, 0, 0, 0.38);
@@ -72,30 +70,17 @@
     .wall-phone .wp-stage {
         display: flex;
         align-items: flex-start;
-        justify-content: flex-start;
+        justify-content: center;
         padding: 6px 0 2px;
     }
 
     .wall-phone .wp-phone {
         position: relative;
-        width: 200px;
+        width: 100%;
         height: 220px;
-        max-width: 100%;
+        max-width: 240px;
         margin: 0;
         filter: drop-shadow(3px 5px 5px rgba(0, 0, 0, 0.22));
-    }
-
-    /* Thin amber strip, echoing the reference phone's colored top edge. */
-    .wall-phone .wp-amber-strip {
-        position: absolute;
-        z-index: 5;
-        top: 0;
-        left: 3px;
-        right: 3px;
-        height: 5px;
-        border-radius: 3px 3px 1px 1px;
-        background: linear-gradient(180deg, #f3b445 0%, var(--wp-amber) 58%, #a85e16 100%);
-        box-shadow: inset 0 1px 0 rgba(255,255,255,0.45), 0 1px 2px rgba(0,0,0,0.28);
     }
 
     .wall-phone .wp-body {
@@ -145,7 +130,7 @@
         min-height: 0;
         padding: 0;
         overflow: hidden;
-        border: 2px solid #b69a6d;
+        border: 2px solid var(--border-default);
         border-radius: 4px;
         background: var(--wp-cream);
         box-shadow:
@@ -157,24 +142,24 @@
     }
 
     .wall-phone .wp-button:focus-visible {
-        outline: 2px dotted var(--wp-amber-bright);
+        outline: 2px dotted var(--accent-dark);
         outline-offset: 2px;
     }
 
     .wall-phone .wp-button.is-selected {
-        border-color: var(--wp-amber-bright);
+        border-color: var(--accent);
         box-shadow:
-            0 0 0 1px rgba(255,181,46,0.32),
-            0 0 7px rgba(255,181,46,0.58),
+            0 0 0 1px rgba(58,123,213,0.35),
+            0 0 7px rgba(58,123,213,0.6),
             inset 1px 1px 0 rgba(255,255,255,0.65),
             inset -1px -1px 0 rgba(0,0,0,0.2);
     }
 
     @media (hover: hover) {
         .wall-phone .wp-button:hover:not(.is-selected) {
-            border-color: #e6c47e;
+            border-color: var(--accent);
             box-shadow:
-                0 0 4px rgba(255,214,132,0.38),
+                0 0 4px rgba(58,123,213,0.4),
                 inset 1px 1px 0 rgba(255,255,255,0.65),
                 inset -1px -1px 0 rgba(0,0,0,0.2);
         }
@@ -215,8 +200,8 @@
     }
 
     .wall-phone .wp-button.is-selected .wp-rank {
-        background: var(--wp-amber);
-        color: #25170d;
+        background: var(--accent);
+        color: #ffffff;
     }
 
     /* Aged calculator-style LCD. */
@@ -248,13 +233,14 @@
         white-space: nowrap;
         text-overflow: ellipsis;
         font: 700 9px/12px 'Courier New', Tahoma, 'Segoe UI', Verdana, sans-serif;
+        color: #1e1e1e;
     }
 
     .wall-phone .wp-lcd-plays {
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
-        color: #62604d;
+        color: #6a6a6a;
         font: 8px/10px 'Courier New', Tahoma, 'Segoe UI', Verdana, sans-serif;
     }
 
@@ -265,15 +251,15 @@
         width: 5px;
         height: 5px;
         border-radius: 50%;
-        background: #8c5a21;
+        background: #6a6a6a;
         box-shadow: inset 0 1px 1px rgba(0,0,0,0.35);
         transition: background-color 120ms ease-out, box-shadow 120ms ease-out;
     }
 
     .wall-phone .wp-status.is-connected {
-        background: var(--wp-amber-bright);
+        background: var(--accent);
         box-shadow:
-            0 0 5px rgba(255,181,46,0.8),
+            0 0 5px rgba(58,123,213,0.65),
             inset 0 1px 1px rgba(255,255,255,0.45);
     }
 
@@ -424,8 +410,6 @@
 
             <div class="wp-stage">
                 <div class="wp-phone">
-                    <div class="wp-amber-strip" aria-hidden="true"></div>
-
                     <div class="wp-body">
                         <div class="wp-face">
                             <div class="wp-grid" role="group" aria-label="Top 8 artists: select an artist to call">
