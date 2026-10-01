@@ -418,7 +418,7 @@
                                 <button type="button" data-wrap="~~" title="Strikethrough"><del>S</del></button>
                                 <button type="button" data-wrap="`" title="Code">&lt;/&gt;</button>
                             </div>
-                            <textarea name="content" class="settings-input" rows="2" maxlength="500" placeholder="Share something..." style="resize: none; font-size: 0.75rem; padding: 0.3rem 0.5rem;"></textarea>
+                            <textarea name="content" class="settings-input" rows="2" maxlength="2000" placeholder="Share something..." style="resize: none; font-size: 0.75rem; padding: 0.3rem 0.5rem;"></textarea>
                             <button type="submit" class="settings-btn" style="margin-top: 0.2rem; font-size: 0.65rem; padding: 0.15rem 0.6rem;">Post</button>
                         </form>
                         <hr class="xp-divider" style="margin: 0.2rem 0;">

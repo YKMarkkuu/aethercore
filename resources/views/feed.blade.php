@@ -22,7 +22,7 @@
                 <button type="button" data-wrap="~~" title="Strikethrough"><del>S</del></button>
                 <button type="button" data-wrap="`" title="Code">&lt;/&gt;</button>
             </div>
-            <textarea name="content" class="settings-input" rows="2" maxlength="500" placeholder="What's on your mind, {{ Auth::user()->display_name }}?" style="resize: none;"></textarea>
+            <textarea name="content" class="settings-input" rows="2" maxlength="2000" placeholder="What's on your mind, {{ Auth::user()->display_name }}?" style="resize: none;"></textarea>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.3rem;">
                 <span class="settings-hint" style="margin: 0;">**bold** *italic* ~~strike~~ `code`</span>
                 <button type="submit" class="settings-btn">Post</button>
