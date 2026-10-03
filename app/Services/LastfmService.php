@@ -16,6 +16,93 @@ class LastfmService
     }
 
     /**
+     * Cached Top Artists (3h fresh cache, 7d stale fallback copy).
+     */
+    public function getTopArtists($username, $limit = 8, $period = 'overall')
+    {
+        return $this->cachedChart(
+            $this->chartCacheKey('artists', $username, $period, (int) $limit),
+            fn () => $this->getTopArtistsDirect($username, $limit, $period)
+        );
+    }
+
+    /**
+     * Cached Top Tracks (3h fresh cache, 7d stale fallback copy).
+     */
+    public function getTopTracks($username, $limit = 8, $period = 'overall')
+    {
+        return $this->cachedChart(
+            $this->chartCacheKey('tracks', $username, $period, (int) $limit),
+            fn () => $this->getTopTracksDirect($username, $limit, $period)
+        );
+    }
+
+    /**
+     * Cached Top Albums (3h fresh cache, 7d stale fallback copy).
+     */
+    public function getTopAlbums($username, $limit = 8, $period = 'overall')
+    {
+        return $this->cachedChart(
+            $this->chartCacheKey('albums', $username, $period, (int) $limit),
+            fn () => $this->getTopAlbumsDirect($username, $limit, $period)
+        );
+    }
+
+    public function getStaleTopArtists($username, $limit = 8, $period = 'overall'): ?array
+    {
+        $stale = Cache::get($this->chartCacheKey('artists', $username, $period, (int) $limit) . ':stale');
+
+        return is_array($stale) ? $stale : null;
+    }
+
+    public function getStaleTopTracks($username, $limit = 8, $period = 'overall'): ?array
+    {
+        $stale = Cache::get($this->chartCacheKey('tracks', $username, $period, (int) $limit) . ':stale');
+
+        return is_array($stale) ? $stale : null;
+    }
+
+    public function getStaleTopAlbums($username, $limit = 8, $period = 'overall'): ?array
+    {
+        $stale = Cache::get($this->chartCacheKey('albums', $username, $period, (int) $limit) . ':stale');
+
+        return is_array($stale) ? $stale : null;
+    }
+
+    private function chartCacheKey(string $type, string $username, string $period, int $limit): string
+    {
+        return 'lastfm:charts:' . $type . ':' . md5(strtolower($username)) . ':' . $period . ':' . $limit;
+    }
+
+    private function cachedChart(string $cacheKey, callable $fetch): array
+    {
+        $cached = Cache::get($cacheKey);
+
+        if ($cached !== null) {
+            if (!is_array($cached)) {
+                \Log::warning('Last.fm chart cache held a non-array value', [
+                    'cache_key' => $cacheKey,
+                ]);
+
+                return [];
+            }
+
+            return $cached;
+        }
+
+        $fresh = $fetch();
+
+        if (!empty($fresh)) {
+            Cache::put($cacheKey, $fresh, now()->addHours(3));
+            Cache::put($cacheKey . ':stale', $fresh, now()->addDays(7));
+        } else {
+            Cache::put($cacheKey, $fresh, now()->addMinutes(2));
+        }
+
+        return $fresh;
+    }
+
+    /**
      * Fetch Top Artists directly from Last.fm (no cache)
      *
      * @param string $period overall|7day|1month|3month|6month|12month
@@ -34,6 +121,13 @@ class LastfmService
         $response = Http::get($url);
 
         if ($response->failed()) {
+            \Log::warning('Last.fm fetch failed', [
+                'method'   => 'user.getTopArtists',
+                'username' => $username,
+                'period'   => $period,
+                'status'   => $response->status(),
+                'body'     => \Illuminate\Support\Str::limit($response->body(), 500),
+            ]);
             return [];
         }
 
@@ -82,6 +176,13 @@ class LastfmService
         $response = Http::get($url);
 
         if ($response->failed()) {
+            \Log::warning('Last.fm fetch failed', [
+                'method'   => 'user.getTopTracks',
+                'username' => $username,
+                'period'   => $period,
+                'status'   => $response->status(),
+                'body'     => \Illuminate\Support\Str::limit($response->body(), 500),
+            ]);
             return [];
         }
 
@@ -141,6 +242,13 @@ class LastfmService
         $response = Http::get($url);
 
         if ($response->failed()) {
+            \Log::warning('Last.fm fetch failed', [
+                'method'   => 'user.getTopAlbums',
+                'username' => $username,
+                'period'   => $period,
+                'status'   => $response->status(),
+                'body'     => \Illuminate\Support\Str::limit($response->body(), 500),
+            ]);
             return [];
         }
 
@@ -179,6 +287,12 @@ class LastfmService
         $response = Http::get($url);
 
         if ($response->failed()) {
+            \Log::warning('Last.fm fetch failed', [
+                'method'   => 'user.getRecentTracks',
+                'username' => $username,
+                'status'   => $response->status(),
+                'body'     => \Illuminate\Support\Str::limit($response->body(), 500),
+            ]);
             return null;
         }
 

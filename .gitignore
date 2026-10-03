@@ -22,3 +22,7 @@ yarn-error.log
 *.blade.php.*-bak
 *.blade.php.*-bak2
 
+
+# Local PHP backup files
+*.php.*-bak
+*.php.pre-*-bak

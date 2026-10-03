@@ -367,23 +367,26 @@ class ProfileController extends Controller
             return $lastfmData;
         }
 
+        $lastfm = new LastfmService();
+
         try {
-            $lastfm = new LastfmService();
-
-            $artists = $lastfm->getTopArtistsDirect($user->lastfm_username, 8, $period);
-            if ($artists && is_array($artists)) {
-                $lastfmData['top_artists'] = array_slice($artists, 0, 8);
+            $artists = $lastfm->getTopArtists($user->lastfm_username, 8, $period);
+            if (empty($artists)) {
+                $artists = $lastfm->getStaleTopArtists($user->lastfm_username, 8, $period) ?? [];
             }
+            $lastfmData['top_artists'] = array_slice((array) $artists, 0, 8);
 
-            $tracks = $lastfm->getTopTracksDirect($user->lastfm_username, 8, $period);
-            if ($tracks && is_array($tracks)) {
-                $lastfmData['top_songs'] = array_slice($tracks, 0, 8);
+            $tracks = $lastfm->getTopTracks($user->lastfm_username, 8, $period);
+            if (empty($tracks)) {
+                $tracks = $lastfm->getStaleTopTracks($user->lastfm_username, 8, $period) ?? [];
             }
+            $lastfmData['top_songs'] = array_slice((array) $tracks, 0, 8);
 
-            $albums = $lastfm->getTopAlbumsDirect($user->lastfm_username, 8, $period);
-            if ($albums && is_array($albums)) {
-                $lastfmData['top_albums'] = array_slice($albums, 0, 8);
+            $albums = $lastfm->getTopAlbums($user->lastfm_username, 8, $period);
+            if (empty($albums)) {
+                $albums = $lastfm->getStaleTopAlbums($user->lastfm_username, 8, $period) ?? [];
             }
+            $lastfmData['top_albums'] = array_slice((array) $albums, 0, 8);
 
             // Now playing is always "right now", so it isn't affected by period
             $nowPlaying = $lastfm->getNowPlaying($user->lastfm_username);
@@ -396,10 +399,16 @@ class ProfileController extends Controller
             }
 
         } catch (\Exception $e) {
-            // Silent fail - just return empty data
             \Log::warning('Last.fm fetch failed for user: ' . ($user->lastfm_username ?? 'unknown'), [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'user_id' => $user->id,
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
             ]);
+
+            $lastfmData['top_artists'] = $lastfm->getStaleTopArtists($user->lastfm_username, 8, $period) ?? [];
+            $lastfmData['top_songs'] = $lastfm->getStaleTopTracks($user->lastfm_username, 8, $period) ?? [];
+            $lastfmData['top_albums'] = $lastfm->getStaleTopAlbums($user->lastfm_username, 8, $period) ?? [];
         }
 
         return $lastfmData;
