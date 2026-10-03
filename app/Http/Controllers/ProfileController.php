@@ -551,7 +551,7 @@ class ProfileController extends Controller
      */
     public function nowPlaying(User $user)
     {
-        if (! Auth::user()->canSeeStatusOf($user)) {
+        if (! Auth::user()->canViewProfileOf($user) || ! Auth::user()->canSeeStatusOf($user)) {
             return response()->json([
                 'status' => 'offline',
                 'status_label' => 'Offline',
@@ -609,7 +609,7 @@ class ProfileController extends Controller
         $statusResult = [];
 
         foreach ($users as $user) {
-            if (! Auth::user()->canSeeStatusOf($user)) {
+            if (! Auth::user()->canViewProfileOf($user) || ! Auth::user()->canSeeStatusOf($user)) {
                 $statusResult[$user->id] = ['status' => 'offline', 'label' => 'Offline', 'color' => '#6b7280'];
                 continue;
             }
