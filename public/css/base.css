@@ -28,6 +28,8 @@
     --text-primary: #1e1e1e;
     --text-muted: #6a6a6a;
     --text-faint: #9a9488;
+    /* White text, borders, and icons on colored accent backgrounds */
+    --text-on-accent: #ffffff;
 
     /* Accent (blue — links, buttons, active states) */
     --accent-light: #245edb;
