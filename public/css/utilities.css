@@ -108,7 +108,7 @@
 }
 .popup-status {
     font-size: 0.7rem;
-    color: #3a8a3a;
+    color: var(--status-online);
 }
 .popup-pronouns {
     font-size: 0.6rem;
@@ -122,7 +122,7 @@
 
 .popup-divider {
     border: none;
-    border-top: 1px solid #c0b8b0;
+    border-top: 1px solid var(--border-muted);
     margin: 0.3rem 0;
 }
 
@@ -211,16 +211,16 @@
 }
 
 .popup-status .status-dot-text.online {
-    background: #4ade80;
+    background: var(--status-online-indicator);
 }
 .popup-status .status-dot-text.idle {
-    background: #fbbf24;
+    background: var(--status-idle-indicator);
 }
 .popup-status .status-dot-text.dnd {
-    background: #ef4444;
+    background: var(--status-dnd-indicator);
 }
 .popup-status .status-dot-text.offline {
-    background: #6b7280;
+    background: var(--status-offline-indicator);
 }
 
 /* ===== STATUS DROPDOWN ===== */
@@ -269,16 +269,16 @@
     font-size: 1rem;
 }
 .status-dot.online {
-    color: #4ade80;
+    color: var(--status-online-indicator);
 }
 .status-dot.idle {
-    color: #fbbf24;
+    color: var(--status-idle-indicator);
 }
 .status-dot.dnd {
-    color: #ef4444;
+    color: var(--status-dnd-indicator);
 }
 .status-dot.offline {
-    color: #6b7280;
+    color: var(--status-offline-indicator);
 }
 
 /* ===== SETTINGS MODAL ===== */
@@ -366,7 +366,7 @@
     background: var(--surface-sunken);
 }
 .settings-nav::-webkit-scrollbar-thumb {
-    background: #c0b8b0;
+    background: var(--border-muted);
     border: 1px solid var(--border-default);
     border-radius: 4px;
 }
@@ -464,7 +464,7 @@
 }
 
 .settings-error {
-    color: #ef4444;
+    color: var(--status-dnd-indicator);
     font-size: 0.7rem;
     margin-top: 0.2rem;
 }
@@ -521,10 +521,10 @@
     margin-right: 5px;
     vertical-align: middle;
 }
-.status-dot-mini.status-dot-online { background: #4ade80; }
-.status-dot-mini.status-dot-idle { background: #fbbf24; }
-.status-dot-mini.status-dot-dnd { background: #ef4444; }
-.status-dot-mini.status-dot-offline { background: #6b7280; }
+.status-dot-mini.status-dot-online { background: var(--status-online-indicator); }
+.status-dot-mini.status-dot-idle { background: var(--status-idle-indicator); }
+.status-dot-mini.status-dot-dnd { background: var(--status-dnd-indicator); }
+.status-dot-mini.status-dot-offline { background: var(--status-offline-indicator); }
 
 /* ===== SELF MINI PROFILE (Discord-style banner card) ===== */
 .profile-popup {
@@ -589,8 +589,8 @@
 .popup-name { font-size: 0.95rem; font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .popup-username { font-size: 0.68rem; color: var(--text-muted); }
 .popup-status { font-size: 0.7rem; display: flex; align-items: center; margin-top: 0.1rem; }
-.popup-note { font-size: 0.72rem; color: #4a5a7a; font-style: italic; padding: 0.4rem 0.9rem 0; }
-.popup-divider { border: none; border-top: 1px solid #c0b8b0; margin: 0.5rem 0; }
+.popup-note { font-size: 0.72rem; color: var(--info-note-bg); font-style: italic; padding: 0.4rem 0.9rem 0; }
+.popup-divider { border: none; border-top: 1px solid var(--border-muted); margin: 0.5rem 0; }
 .popup-actions, .popup-actions-bottom { display: flex; flex-direction: column; gap: 2px; padding: 0 0.5rem; }
 .popup-actions-bottom { padding-bottom: 0.5rem; }
 .popup-action {
@@ -620,12 +620,12 @@
     justify-content: center;
 }
 .popup-action-icon .status-dot-mini { margin-right: 0; }
-.status-icon-online { color: #4ade80; }
-.status-icon-idle { color: #fbbf24; }
-.status-icon-dnd { color: #ef4444; }
-.status-icon-offline { color: #6b7280; }
-.popup-action-danger { color: #c04040; }
-.popup-action-danger svg { stroke: #c04040; }
+.status-icon-online { color: var(--status-online-indicator); }
+.status-icon-idle { color: var(--status-idle-indicator); }
+.status-icon-dnd { color: var(--status-dnd-indicator); }
+.status-icon-offline { color: var(--status-offline-indicator); }
+.popup-action-danger { color: var(--status-dnd); }
+.popup-action-danger svg { stroke: var(--status-dnd); }
 .popup-action-danger:hover { background: var(--danger-bg); }
 
 .popup-status-menu { position: relative; }
@@ -711,7 +711,7 @@
 .user-popover-name { font-size: 1rem; font-weight: 700; color: var(--text-primary); }
 .user-popover-username { font-size: 0.7rem; color: var(--text-muted); }
 .user-popover-status { font-size: 0.72rem; margin-top: 0.2rem; color: var(--text-primary); display: flex; align-items: center; }
-.user-popover-note { font-size: 0.72rem; color: #4a5a7a; font-style: italic; margin-top: 0.3rem; }
+.user-popover-note { font-size: 0.72rem; color: var(--info-note-bg); font-style: italic; margin-top: 0.3rem; }
 .user-popover-bio { font-size: 0.76rem; color: var(--text-primary); margin-top: 0.4rem; line-height: 1.4; }
 .user-popover-actions { display: flex; gap: 0.4rem; margin-top: 0.7rem; flex-wrap: wrap; }
 .user-popover-btn {
@@ -732,7 +732,7 @@
 .user-popover-btn:hover { background: var(--surface-hover); }
 .user-popover-btn:disabled { opacity: 0.6; cursor: default; }
 .user-popover-btn-primary { background: var(--accent); border-color: var(--accent-dark); color: var(--text-on-accent); }
-.user-popover-btn-primary:hover { background: #2f68b8; }
+.user-popover-btn-primary:hover { background: var(--accent-hover-strong); }
 .user-popover-btn-danger { background: var(--danger-bg); border-color: var(--danger-border); color: var(--danger-text); }
 
 .msg-avatar-xp[data-user-popover] { cursor: pointer; }

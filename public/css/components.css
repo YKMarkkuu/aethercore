@@ -112,7 +112,7 @@
 }
 .post-time {
     font-size: 0.6rem;
-    color: #888888;
+    color: var(--status-offline);
     margin-left: auto;
 }
 .post-content {
@@ -174,7 +174,7 @@
     height: 15px;
 }
 .post-like-btn-active {
-    color: #c04040;
+    color: var(--status-dnd);
 }
 .post-like-btn-active:hover {
     color: #a03030;
@@ -362,7 +362,7 @@
 
 .xp-right-stats .stat-divider {
     border: none;
-    border-top: 1px solid #c0b8b0;
+    border-top: 1px solid var(--border-muted);
     margin: 0.3rem 0;
 }
 
@@ -535,7 +535,7 @@
 }
 .device-status {
     font-size: 0.65rem;
-    color: #3a8a3a;
+    color: var(--status-online);
     font-weight: 500;
 }
 
@@ -657,7 +657,7 @@
 }
 .xp-profile-status {
     font-size: 0.7rem;
-    color: #3a8a3a;
+    color: var(--status-online);
 }
 .xp-profile-bio {
     font-size: 0.9rem;
@@ -801,7 +801,7 @@
 .xp-friend-badge {
     display: inline-block;
     background: var(--surface-hover);
-    border: 1px solid #c0b8b0;
+    border: 1px solid var(--border-muted);
     border-radius: 4px;
     padding: 0.1rem 0.6rem;
     font-size: 0.7rem;
@@ -817,7 +817,7 @@
 .xp-top-badge {
     display: inline-block;
     background: var(--surface-hover);
-    border: 1px solid #c0b8b0;
+    border: 1px solid var(--border-muted);
     border-radius: 4px;
     padding: 0.1rem 0.6rem;
     font-size: 0.7rem;
@@ -1195,7 +1195,7 @@
 }
 .chat-status-xp {
     font-size: 0.65rem;
-    color: #3a8a3a;
+    color: var(--status-online);
 }
 
 .chat-icon-btn {
@@ -1493,7 +1493,7 @@
     align-items: center;
     gap: 0.2rem;
     background: var(--surface-panel-header);
-    border: 1px solid #c0b8b0;
+    border: 1px solid var(--border-muted);
     border-radius: 10px;
     padding: 0.05rem 0.4rem;
     cursor: pointer;

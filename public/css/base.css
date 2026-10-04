@@ -17,12 +17,14 @@
     --surface-input: #ffffff;
     --surface-post: #f8f5ec;
     --surface-sunken: #e8e4dc;
+    --info-note-bg: #4a5a7a;
 
     /* Borders */
     --border-default: #b0a8a0;
     --border-light: #d0c8c0;
     --border-subtle: #e0dcd0;
     --border-dark: #a09890;
+    --border-muted: #c0b8b0;
 
     /* Text */
     --text-primary: #1e1e1e;
@@ -35,6 +37,7 @@
     --accent-light: #245edb;
     --accent: #3a7bd5;
     --accent-dark: #1a4a9e;
+    --accent-hover-strong: #2f68b8;
 
     /* Status colors */
     --success-bg: #d4e8d4;
@@ -46,6 +49,18 @@
     --danger-bg: #f0d8d8;
     --danger-border: #c8a0a0;
     --danger-text: #6a2a2a;
+
+    /* Status text (light theme) */
+    --status-online: #3a8a3a;
+    --status-idle: #c9a840;
+    --status-dnd: #c04040;
+    --status-offline: #888888;
+
+    /* Status indicators (dots) */
+    --status-online-indicator: #4ade80;
+    --status-idle-indicator: #fbbf24;
+    --status-dnd-indicator: #ef4444;
+    --status-offline-indicator: #6b7280;
 }
 
 /* ============================================

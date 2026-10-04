@@ -219,7 +219,7 @@ body {
 }
 
 .sidebar-list::-webkit-scrollbar-thumb {
-    background: #c0b8b0;
+    background: var(--border-muted);
     border: 1px solid var(--border-dark);
     border-radius: 4px;
 }
@@ -248,7 +248,7 @@ body {
     letter-spacing: 0.3px;
     padding: 0.3rem 0.4rem 0.1rem;
     font-weight: 700;
-    border-bottom: 1px solid #c0b8b0;
+    border-bottom: 1px solid var(--border-muted);
 }
 
 .friend-item {
@@ -297,19 +297,19 @@ body {
 
 .friend-status {
     font-size: 0.6rem;
-    color: #3a8a3a;
+    color: var(--status-online);
 }
 
 .friend-status.offline {
-    color: #888888;
+    color: var(--status-offline);
 }
 
 .friend-status.idle {
-    color: #c9a840;
+    color: var(--status-idle);
 }
 
 .friend-status.dnd {
-    color: #c04040;
+    color: var(--status-dnd);
 }
 
 .space-item {
@@ -437,7 +437,7 @@ body {
 
 .mini-profile-status {
     font-size: 0.6rem;
-    color: #3a8a3a;
+    color: var(--status-online);
 }
 
 .mini-profile-badge {
@@ -496,7 +496,7 @@ body {
 }
 
 .right-sidebar::-webkit-scrollbar-thumb {
-    background: #c0b8b0;
+    background: var(--border-muted);
     border: 1px solid var(--border-dark);
     border-radius: 4px;
 }
@@ -527,7 +527,7 @@ body {
 .right-profile-status {
     text-align: center;
     font-size: 0.7rem;
-    color: #3a8a3a;
+    color: var(--status-online);
     margin-bottom: 0.3rem;
 }
 
@@ -540,7 +540,7 @@ body {
 
 .right-profile-divider {
     border: none;
-    border-top: 1px solid #c0b8b0;
+    border-top: 1px solid var(--border-muted);
     margin: 0.3rem 0;
 }
 
@@ -691,7 +691,7 @@ body {
 
 .popup-status {
     font-size: 0.7rem;
-    color: #3a8a3a;
+    color: var(--status-online);
 }
 
 .popup-pronouns {
@@ -707,7 +707,7 @@ body {
 
 .popup-divider {
     border: none;
-    border-top: 1px solid #c0b8b0;
+    border-top: 1px solid var(--border-muted);
     margin: 0.3rem 0;
 }
 
@@ -960,7 +960,7 @@ body {
 
 .post-time {
     font-size: 0.6rem;
-    color: #888888;
+    color: var(--status-offline);
     margin-left: auto;
 }
 
@@ -1085,7 +1085,7 @@ body {
 
 .xp-right-stats .stat-divider {
     border: none;
-    border-top: 1px solid #c0b8b0;
+    border-top: 1px solid var(--border-muted);
     margin: 0.3rem 0;
 }
 
@@ -1137,7 +1137,7 @@ body {
 
 .device-status {
     font-size: 0.65rem;
-    color: #3a8a3a;
+    color: var(--status-online);
     font-weight: 500;
 }
 
@@ -1229,7 +1229,7 @@ body {
 
 .xp-profile-status {
     font-size: 0.7rem;
-    color: #3a8a3a;
+    color: var(--status-online);
     font-weight: 500;
 }
 
@@ -1325,7 +1325,7 @@ body {
 .xp-friend-badge {
     display: inline-block;
     background: var(--surface-hover);
-    border: 1px solid #c0b8b0;
+    border: 1px solid var(--border-muted);
     border-radius: 4px;
     padding: 0.1rem 0.6rem;
     font-size: 0.7rem;
@@ -1664,7 +1664,7 @@ body {
 
 .chat-status-xp {
     font-size: 0.65rem;
-    color: #3a8a3a;
+    color: var(--status-online);
 }
 
 .chat-header-right {
@@ -1955,7 +1955,7 @@ body {
 .xp-top-badge {
     display: inline-block;
     background: var(--surface-hover);
-    border: 1px solid #c0b8b0;
+    border: 1px solid var(--border-muted);
     border-radius: 4px;
     padding: 0.1rem 0.6rem;
     font-size: 0.7rem;
