@@ -50,13 +50,13 @@
                 </form>
             @endif
             @if($canKick)
-                <form action="{{ route('space-members.kick', [$space, $member->user]) }}" method="POST" onsubmit="return confirm('Kick {{ $member->user->display_name }} from this Space?')">
+                <form action="{{ route('space-members.kick', [$space, $member->user]) }}" method="POST" onsubmit="return confirm('Kick this member from this Space?')">
                     @csrf
                     <button type="submit" class="xp-action-btn xp-action-btn-danger" style="font-size: 0.6rem; padding: 0.05rem 0.4rem;">Kick</button>
                 </form>
             @endif
             @if($canBan)
-                <form action="{{ route('space-members.ban', [$space, $member->user]) }}" method="POST" onsubmit="return confirm('Ban {{ $member->user->display_name }} from this Space?')">
+                <form action="{{ route('space-members.ban', [$space, $member->user]) }}" method="POST" onsubmit="return confirm('Ban this member from this Space?')">
                     @csrf
                     <button type="submit" class="xp-action-btn xp-action-btn-danger" style="font-size: 0.6rem; padding: 0.05rem 0.4rem;">Ban</button>
                 </form>

@@ -47,7 +47,7 @@
                                 <button class="settings-btn" style="font-size: 0.65rem;">Unban</button>
                             </form>
                         @else
-                            <form action="{{ route('admin.users.ban', $user) }}" method="POST" onsubmit="return confirm('Ban {{ $user->display_name }}? They will be logged out immediately.')">
+                            <form action="{{ route('admin.users.ban', $user) }}" method="POST" onsubmit="return confirm('Ban this user? They will be logged out immediately.')">
                                 @csrf
                                 <button class="settings-btn settings-btn-danger" style="font-size: 0.65rem;">Ban</button>
                             </form>
@@ -73,7 +73,7 @@
                             </form>
                         @endif
 
-                        <form action="{{ route('admin.users.destroy', $user) }}" method="POST" onsubmit="return confirm('Delete {{ $user->display_name }}? This is soft-deleted and can be restored later.')">
+                        <form action="{{ route('admin.users.destroy', $user) }}" method="POST" onsubmit="return confirm('Delete this user? This is a soft delete and can be restored later.')">
                             @csrf
                             @method('DELETE')
                             <button class="settings-btn settings-btn-danger" style="font-size: 0.65rem;">Delete</button>
