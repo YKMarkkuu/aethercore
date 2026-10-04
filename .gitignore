@@ -26,3 +26,7 @@ yarn-error.log
 # Local PHP backup files
 *.php.*-bak
 *.php.pre-*-bak
+
+# Local CSS backup files
+*.css.*-bak
+*.css.pre-*-bak
