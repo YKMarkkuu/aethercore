@@ -423,6 +423,12 @@ class ProfileController extends Controller
 
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
+        $request->validate([
+            'bio' => 'nullable|string|max:500',
+            'display_name' => 'nullable|string|max:50',
+            'location' => 'nullable|string|max:100',
+        ]);
+
         $user = $request->user();
         
         if ($request->has('name')) {
@@ -472,6 +478,9 @@ class ProfileController extends Controller
             'status_message' => 'nullable|string|max:100',
             'avatar' => 'nullable|file|mimes:jpg,jpeg,png,webp,gif|max:5120',
             'banner' => 'nullable|file|mimes:jpg,jpeg,png,webp,gif|max:8192',
+            'display_name' => 'nullable|string|max:50',
+            'bio' => 'nullable|string|max:500',
+            'location' => 'nullable|string|max:100',
         ]);
 
         $user = auth()->user();
