@@ -15,6 +15,7 @@
                 'sessions' => 'Logged-in Devices',
                 'privacy-visibility' => 'Profile Visibility',
                 'privacy-messages' => 'Direct Messages',
+                'privacy-comments' => 'Post Comments',
                 'privacy-status' => 'Activity Status',
                 'blocked-users' => 'Blocked Users',
             ],

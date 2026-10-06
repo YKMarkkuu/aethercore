@@ -15,6 +15,18 @@ class CommentController extends Controller
             abort(403);
         }
 
+        $permission = $post->user->profile->comment_permission ?? 'everyone';
+        $isOwner = Auth::id() === $post->user->id;
+
+        if (! $isOwner) {
+            if ($permission === 'nobody') {
+                abort(403, 'Comments are disabled on this post.');
+            }
+            if ($permission === 'friends' && ! Auth::user()->isFriendWith($post->user->id)) {
+                abort(403, 'Only friends can comment on this post.');
+            }
+        }
+
         $request->validate([
             'content' => 'required|string|max:500',
         ]);

@@ -117,11 +117,12 @@ class SettingsController extends Controller
             'visibility' => 'sometimes|in:public,friends,private',
             'dm_permission' => 'sometimes|in:everyone,friends,nobody',
             'show_status_to' => 'sometimes|in:everyone,friends,nobody',
+            'comment_permission' => 'nullable|in:everyone,friends,nobody',
         ]);
 
         $profile = $this->profileFor(Auth::user());
 
-        foreach (['visibility', 'dm_permission', 'show_status_to'] as $field) {
+        foreach (['visibility', 'dm_permission', 'show_status_to', 'comment_permission'] as $field) {
             if ($request->has($field)) {
                 $profile->$field = $request->input($field);
             }
