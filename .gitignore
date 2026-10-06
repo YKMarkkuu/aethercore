@@ -30,3 +30,7 @@ yarn-error.log
 # Local CSS backup files
 *.css.*-bak
 *.css.pre-*-bak
+
+# Database backups
+*.sql
+!database/**/*.sql
