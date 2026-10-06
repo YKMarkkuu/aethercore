@@ -218,7 +218,7 @@
                             <button type="submit" class="xp-action-btn xp-action-btn-danger">Unblock</button>
                         </form>
                     @else
-                        <form action="{{ route('users.block', $user->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Block this user? This will also unfriend them.')">
+                        <form action="{{ route('users.block', $user->id) }}" method="POST" style="display:inline;" data-confirm="Block this user? This will also unfriend them." data-confirm-danger="true" data-confirm-title="Block User" data-confirm-ok="Block">
                             @csrf
                             <button type="submit" class="xp-action-btn xp-action-btn-danger">Block</button>
                         </form>

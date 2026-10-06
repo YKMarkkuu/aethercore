@@ -51,7 +51,7 @@
                 <button type="submit" class="settings-btn" style="width: 100%; font-size: 0.65rem; margin-bottom: 0.3rem;">Share to Feed</button>
             </form>
             @if($isOwner)
-                <form action="{{ route('spaces.destroy', $space) }}" method="POST" onsubmit="return confirm('Delete this Space? This can\'t be undone.')">
+                <form action="{{ route('spaces.destroy', $space) }}" method="POST" data-confirm="Delete this Space? This can't be undone." data-confirm-danger="true" data-confirm-title="Delete Space" data-confirm-ok="Delete Space">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="delete-btn" style="font-size: 0.65rem;">Delete Space</button>

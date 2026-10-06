@@ -73,7 +73,7 @@
                         </form>
 
                         @if($report->reportable_type !== \App\Models\User::class)
-                            <form action="{{ route('admin.reports.delete-content', $report) }}" method="POST" onsubmit="return confirm('Delete this content?')">
+                            <form action="{{ route('admin.reports.delete-content', $report) }}" method="POST" data-confirm="Delete this content?" data-confirm-danger="true" data-confirm-title="Delete Content">
                                 @csrf
                                 <button type="submit" class="settings-btn settings-btn-danger" style="font-size: 0.7rem;">Delete Content</button>
                             </form>

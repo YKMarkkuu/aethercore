@@ -301,7 +301,13 @@
             if (e.target.closest('.msg-edit-btn')) { startEdit(row); return; }
 
             if (e.target.closest('.msg-delete-btn')) {
-                if (confirm('Delete this message? This can\'t be undone.')) deleteMessage(row);
+                window.Toast.confirm('Delete this message? This can\'t be undone.', {
+                    danger: true,
+                    title: 'Delete Message',
+                    confirmText: 'Delete'
+                }).then((ok) => {
+                    if (ok) deleteMessage(row);
+                });
                 return;
             }
         });

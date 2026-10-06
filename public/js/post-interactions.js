@@ -121,23 +121,30 @@ document.addEventListener('DOMContentLoaded', function () {
     document.body.addEventListener('click', function (e) {
         const deleteBtn = e.target.closest('.post-comment-delete');
         if (!deleteBtn) return;
-        if (!confirm('Delete this comment?')) return;
 
-        const commentRow = deleteBtn.closest('.post-comment');
-        const postItem = deleteBtn.closest('.post-item');
-        const commentId = commentRow.dataset.commentId;
+        window.Toast.confirm('Delete this comment?', {
+            danger: true,
+            title: 'Delete Comment',
+            confirmText: 'Delete'
+        }).then((ok) => {
+            if (!ok) return;
 
-        fetch(`/comments/${commentId}`, {
-            method: 'DELETE',
-            headers: apiHeaders(),
-        })
-            .then(r => r.ok ? r.json() : Promise.reject())
-            .then(() => {
-                commentRow.remove();
-                postItem.querySelector('.post-comment-count').textContent =
-                    postItem.querySelectorAll('.post-comment').length;
+            const commentRow = deleteBtn.closest('.post-comment');
+            const postItem = deleteBtn.closest('.post-item');
+            const commentId = commentRow.dataset.commentId;
+
+            fetch(`/comments/${commentId}`, {
+                method: 'DELETE',
+                headers: apiHeaders(),
             })
-            .catch(() => alert('Could not delete that comment. Please try again.'));
+                .then(r => r.ok ? r.json() : Promise.reject())
+                .then(() => {
+                    commentRow.remove();
+                    postItem.querySelector('.post-comment-count').textContent =
+                        postItem.querySelectorAll('.post-comment').length;
+                })
+                .catch(() => alert('Could not delete that comment. Please try again.'));
+        });
     });
 
     // ===== SHARE MODAL =====
