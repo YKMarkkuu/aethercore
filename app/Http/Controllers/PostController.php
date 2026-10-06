@@ -42,6 +42,10 @@ class PostController extends Controller
      */
     public function toggleLike(Post $post)
     {
+        if (! Auth::user()->canViewProfileOf($post->user)) {
+            abort(403);
+        }
+
         $userId = Auth::id();
 
         $existing = PostLike::where('post_id', $post->id)
@@ -75,6 +79,10 @@ class PostController extends Controller
      */
     public function repost(Request $request, Post $post)
     {
+        if (! Auth::user()->canViewProfileOf($post->user)) {
+            abort(403);
+        }
+
         $request->validate([
             'content' => 'nullable|string|max:500',
         ]);
@@ -105,6 +113,10 @@ class PostController extends Controller
      */
     public function shareToChat(Request $request, Post $post)
     {
+        if (! Auth::user()->canViewProfileOf($post->user)) {
+            abort(403);
+        }
+
         $request->validate([
             'friend_id' => 'required|integer|exists:users,id',
         ]);
@@ -173,8 +185,10 @@ class PostController extends Controller
         $userId = Auth::id();
 
         $posts = Post::whereIn('id', $request->post_ids)
-            ->with(['likes', 'comments.user'])
-            ->get();
+            ->with(['user.profile', 'likes', 'comments.user'])
+            ->get()
+            ->filter(fn ($post) => Auth::user()->canViewProfileOf($post->user))
+            ->values();
 
         return response()->json([
             'posts' => $posts->map(function ($post) use ($userId) {

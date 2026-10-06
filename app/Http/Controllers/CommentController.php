@@ -11,6 +11,10 @@ class CommentController extends Controller
 {
     public function store(Request $request, Post $post)
     {
+        if (! Auth::user()->canViewProfileOf($post->user)) {
+            abort(403);
+        }
+
         $request->validate([
             'content' => 'required|string|max:500',
         ]);
