@@ -2186,3 +2186,67 @@
     color: var(--accent-dark);
     border-radius: 3px;
 }
+
+/* ===== FRIEND REQUEST BUTTONS ===== */
+.request-btn {
+    padding: 0.15rem 0.5rem;
+    font-size: 0.65rem;
+    font-weight: 600;
+    font-family: Tahoma, 'Segoe UI', Verdana, sans-serif;
+    cursor: pointer;
+    border-radius: 3px;
+    border: 1px solid var(--border-dark);
+    box-shadow:
+        inset 1px 1px 0 rgba(255, 255, 255, 0.5),
+        inset -1px -1px 0 rgba(0, 0, 0, 0.1);
+    transition: 0.15s;
+}
+
+.request-btn-accept {
+    background: linear-gradient(180deg, var(--success-bg) 0%, #b8d4b8 100%);
+    color: var(--success-text);
+    border-color: var(--success-border);
+}
+
+.request-btn-accept:hover {
+    background: linear-gradient(180deg, #c8dfc8 0%, #a8c4a8 100%);
+}
+
+.request-btn-decline {
+    background: linear-gradient(180deg, var(--surface-primary) 0%, var(--surface-secondary) 100%);
+    color: var(--text-primary);
+}
+
+.request-btn-decline:hover {
+    background: linear-gradient(180deg, var(--surface-hover) 0%, var(--surface-secondary) 100%);
+}
+
+/* ===== GENERIC DELETE BUTTON (outside .post-actions) ===== */
+.delete-btn {
+    padding: 0.15rem 0.5rem;
+    font-size: 0.65rem;
+    font-weight: 600;
+    font-family: Tahoma, 'Segoe UI', Verdana, sans-serif;
+    cursor: pointer;
+    border-radius: 3px;
+    border: 1px solid var(--danger-border);
+    background: linear-gradient(180deg, var(--danger-bg) 0%, #e0c0c0 100%);
+    color: var(--danger-text);
+    box-shadow:
+        inset 1px 1px 0 rgba(255, 255, 255, 0.5),
+        inset -1px -1px 0 rgba(0, 0, 0, 0.1);
+    transition: 0.15s;
+}
+
+.delete-btn:hover {
+    background: linear-gradient(180deg, #e8d0d0 0%, #d8b0b0 100%);
+}
+
+/* ===== RESPONSIVE TWEAK ===== */
+@media (max-width: 480px) {
+    .request-btn,
+    .delete-btn {
+        font-size: 0.6rem;
+        padding: 0.1rem 0.4rem;
+    }
+}
