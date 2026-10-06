@@ -34,7 +34,7 @@ class SpaceController extends Controller
         $request->validate([
             'name' => 'required|string|max:100',
             'description' => 'nullable|string|max:300',
-            'icon' => 'nullable|image|max:5120',
+            'icon' => 'nullable|mimes:jpg,jpeg,png,webp,gif|max:5120',
         ]);
 
         $space = Space::create([
