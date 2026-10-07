@@ -10,6 +10,7 @@
          these pages inherit any future theme automatically instead of
          being a second hardcoded island. -->
     <link rel="stylesheet" href="{{ asset('css/base.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/motion.css') }}">
     <link rel="stylesheet" href="{{ asset('css/guest.css') }}">
 </head>
 <body class="guest-body">
