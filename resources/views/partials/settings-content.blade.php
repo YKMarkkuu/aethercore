@@ -108,13 +108,6 @@
             <div class="settings-v2-scrollarea {{ $catKey === $defaultCategory ? '' : 'hidden' }}"
                  data-category-content="{{ $catKey }}">
 
-                @if(session('success'))
-                    <div class="settings-alert success">{{ session('success') }}</div>
-                @endif
-                @if(session('error'))
-                    <div class="settings-alert error">{{ session('error') }}</div>
-                @endif
-
                 @foreach($cat['subs'] as $subKey => $subLabel)
                     <section id="section-{{ $subKey }}" class="settings-v2-section" data-section="{{ $subKey }}">
                         <h2 class="settings-v2-h2">{{ $subLabel }}</h2>

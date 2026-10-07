@@ -308,6 +308,21 @@
     </script>
     <script src="{{ asset('js/presence.js') }}"></script>
     <script src="{{ asset('js/presence-friends.js') }}"></script>
+    <script>
+        // ===== FLASH MESSAGE → TOAST BRIDGE =====
+        // Reads Laravel session flash messages and shows them as toasts.
+        // This makes every back()->with('success'|'error', ...) in the
+        // codebase produce a visible notification without needing to
+        // edit the controller or the individual views.
+        document.addEventListener('DOMContentLoaded', function () {
+            @if (session('success'))
+                window.Toast?.show(@json(session('success')), 'success');
+            @endif
+            @if (session('error'))
+                window.Toast?.show(@json(session('error')), 'error');
+            @endif
+        });
+    </script>
         @stack('scripts')
 </body>
 </html>

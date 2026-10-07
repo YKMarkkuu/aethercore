@@ -1,7 +1,7 @@
 <form action="{{ route('settings.privacy') }}" method="POST">
     @csrf
     <div class="settings-group">
-        <select name="visibility" class="settings-input" onchange="this.form.submit()">
+        <select name="visibility" class="settings-input" onchange="this.form.requestSubmit()">
             <option value="public" @selected(($user->profile->visibility ?? 'public') === 'public')>Public</option>
             <option value="friends" @selected(($user->profile->visibility ?? 'public') === 'friends')>Friends only</option>
             <option value="private" @selected(($user->profile->visibility ?? 'public') === 'private')>Only me</option>

@@ -72,12 +72,6 @@
         </aside>
 
         <main class="admin-main">
-            @if(session('success'))
-                <div style="background: #d4e8d4; border: 2px solid #8ab88a; border-radius: 4px; padding: 0.5rem 1rem; margin-bottom: 1rem; color: #1e4a1e;">
-                    {{ session('success') }}
-                </div>
-            @endif
-
             @if($errors->any())
                 <div style="background: #f0d8d8; border: 2px solid #c8a0a0; border-radius: 4px; padding: 0.5rem 1rem; margin-bottom: 1rem; color: #6a2a2a;">
                     @foreach($errors->all() as $error)
@@ -89,5 +83,16 @@
             @yield('content')
         </main>
     </div>
+    <script src="{{ asset('js/toast.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            @if (session('success'))
+                window.Toast?.show(@json(session('success')), 'success');
+            @endif
+            @if (session('error'))
+                window.Toast?.show(@json(session('error')), 'error');
+            @endif
+        });
+    </script>
 </body>
 </html>
