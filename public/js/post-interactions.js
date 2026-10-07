@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 likeBtn.querySelector('svg').setAttribute('fill', data.liked ? 'currentColor' : 'none');
                 likeBtn.querySelector('.post-like-count').textContent = data.count;
             })
-            .catch(() => alert('Could not like that post. Please try again.'));
+            .catch(() => window.Toast.show("Couldn't register that like. Please try again.", 'error'));
     });
 
     // ===== COMMENT TOGGLE =====
@@ -114,7 +114,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 input.value = '';
             })
-            .catch(() => alert('Could not post that comment. Please try again.'));
+            .catch(() => window.Toast.show("Couldn't post your comment. Please try again.", 'error'));
     });
 
     // ===== DELETE COMMENT =====
@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     postItem.querySelector('.post-comment-count').textContent =
                         postItem.querySelectorAll('.post-comment').length;
                 })
-                .catch(() => alert('Could not delete that comment. Please try again.'));
+                .catch(() => window.Toast.show("Couldn't delete that comment. Please try again.", 'error'));
         });
     });
 
@@ -188,7 +188,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 window.location.reload();
             })
             .catch(() => {
-                alert('Could not repost. Please try again.');
+                window.Toast.show("Couldn't repost that. Please try again.", 'error');
                 btn.disabled = false;
             });
     };
@@ -211,7 +211,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 setTimeout(window.closeShareModal, 700);
             })
             .catch(() => {
-                alert('Could not share with that friend. Please try again.');
+                window.Toast.show("Couldn't send that to your friend. Please try again.", 'error');
                 friendBtn.disabled = false;
                 friendBtn.textContent = friendBtn.textContent.replace('Sending...', '');
             });

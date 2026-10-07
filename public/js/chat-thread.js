@@ -326,7 +326,7 @@
             })
                 .then(r => r.ok ? r.json() : Promise.reject())
                 .then(data => patchMessage(data.message))
-                .catch(() => alert('Could not react to that message. Please try again.'));
+                .catch(() => window.Toast.show("Couldn't add that reaction. Give it another try.", 'error'));
         }
 
         function startEdit(row) {
@@ -353,7 +353,7 @@
                 })
                     .then(r => r.ok ? r.json() : Promise.reject())
                     .then(data => { patchMessage(data.message); contentEl.classList.remove('hidden'); inputEl.classList.add('hidden'); })
-                    .catch(() => { alert('Could not save that edit. Please try again.'); contentEl.classList.remove('hidden'); inputEl.classList.add('hidden'); });
+                    .catch(() => { window.Toast.show("Couldn't save your edit. Please try again.", 'error'); contentEl.classList.remove('hidden'); inputEl.classList.add('hidden'); });
             }
             function onKeydown(e) { if (e.key === 'Enter') { e.preventDefault(); finishEdit(true); } if (e.key === 'Escape') { e.preventDefault(); finishEdit(false); } }
             function onBlur() { finishEdit(true); }
@@ -365,7 +365,7 @@
             fetch(endpoints.destroy(row.dataset.messageId), { method: 'DELETE', headers: apiHeaders() })
                 .then(r => r.ok ? r.json() : Promise.reject())
                 .then(data => patchMessage(data.message))
-                .catch(() => alert('Could not delete that message. Please try again.'));
+                .catch(() => window.Toast.show("Couldn't delete that message. Please try again.", 'error'));
         }
 
         function patchMessage(message) {

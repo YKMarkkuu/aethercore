@@ -62,7 +62,7 @@
             updateBioPreview(form.dataset.savedBio);
             window.toggleEditMode();
         } catch (error) {
-            alert(error.message || 'Could not save your profile. Please try again.');
+            window.Toast.show(error.message || "Couldn't save your profile. Please try again.", 'error');
         } finally {
             saveButton.disabled = false;
             saveButton.textContent = 'Save Changes';

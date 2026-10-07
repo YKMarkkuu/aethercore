@@ -55,10 +55,10 @@
                 .then(r => r.ok ? r.json() : r.json().then(data => Promise.reject(data)))
                 .then(() => {
                     window.closeReportModal();
-                    alert('Thanks — this has been reported to the team.');
+                    window.Toast.show('Thanks, your report has been sent to the team.', 'success');
                 })
                 .catch((err) => {
-                    alert(err?.error || 'Could not submit that report. Please try again.');
+                    window.Toast.show(err?.error || "Couldn't send that report. Please try again.", 'error');
                 })
                 .finally(() => {
                     submitBtn.disabled = false;

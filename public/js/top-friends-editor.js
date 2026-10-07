@@ -15,11 +15,7 @@
     let savedIds = orderedIds.slice();
 
     function showMessage(message, type) {
-        if (window.Toast?.show) {
-            window.Toast.show(message, type);
-        } else {
-            window.alert(message);
-        }
+        window.Toast.show(message, type);
     }
 
     function updateProfileList(friends) {

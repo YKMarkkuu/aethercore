@@ -743,7 +743,7 @@
                     closeImageAdjustModal();
                 })
                 .catch(() => {
-                    alert('Something went wrong saving your image. Please try again.');
+                    window.Toast.show('Something went wrong saving your image. Please try again.', 'error');
                 })
                 .finally(() => {
                     saveBtn.disabled = false;

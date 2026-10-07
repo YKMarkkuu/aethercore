@@ -128,7 +128,7 @@
                 applyOwnStatus(data.status);
                 document.getElementById('statusMenu')?.classList.add('hidden');
             })
-            .catch(() => alert('Could not update your status. Please try again.'))
+            .catch(() => window.Toast.show("Couldn't change your status. Please try again.", 'error'))
             .finally(() => { btn.disabled = false; });
     });
 })();
