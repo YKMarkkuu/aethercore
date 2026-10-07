@@ -1,0 +1,89 @@
+/* ============================================
+   MOTION TOKENS
+   ============================================
+   Animation language for AetherCore. Every transition and animation
+   in the app should reference these tokens instead of hardcoded values.
+
+   Rules:
+   - Chrome (buttons, rows, menus) uses short, decelerating transitions.
+   - Physical objects (music widgets) get weight and slight overshoot.
+   - Anything carrying meaning animates; everything else is instant.
+   - Never use `transition: all`. List properties explicitly.
+
+   Reduced motion: the block at the bottom of this file zeroes all
+   --motion-* duration tokens when the user prefers reduced motion.
+   That means anything using these tokens automatically respects it.
+   ============================================ */
+
+:root {
+    /* ===== DURATIONS ===== */
+    --motion-instant: 0ms;           /* pressed states, focus rings, selection, tab switches */
+    --motion-hover: 100ms;           /* hover color/bg/border/shadow on buttons, rows, links */
+    --motion-quick: 140ms;           /* toggle slider, reaction pop, tooltip fade, badge appear */
+    --motion-menu: 160ms;            /* menus, popovers, status menu, user popover */
+    --motion-window-in: 160ms;       /* modals and dialogs opening */
+    --motion-window-out: 100ms;      /* modals and dialogs closing */
+    --motion-toast-in: 180ms;        /* toast / balloon entering */
+    --motion-toast-out: 160ms;       /* toast / balloon exiting */
+    --motion-object: 220ms;          /* music-widget physical moves: sleeve lift, card flip */
+    --motion-slow: 320ms;            /* accordion collapse, deferred-widget reveal. Ceiling. */
+    --motion-marquee: 1200ms;        /* XP progress marquee loop */
+
+    /* ===== EASING ===== */
+    --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);      /* entrances, hover */
+    --ease-in: cubic-bezier(0.55, 0.06, 0.68, 0.19);    /* exits */
+    --ease-inout: cubic-bezier(0.45, 0, 0.55, 1);       /* reversible states */
+    --ease-thunk: cubic-bezier(0.34, 1.3, 0.64, 1);     /* physical objects, overshoot ≤ 8% */
+    --ease-linear: linear;                              /* spin loops, marquee */
+}
+
+/* ===== REDUCED MOTION =====
+   Zeroes all duration tokens. Anything using var(--motion-*) becomes instant.
+   State changes (color, visibility, selection) still apply — only movement
+   and duration are removed. Sound is a separate setting, not affected here. */
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --motion-hover: 0ms;
+        --motion-quick: 0ms;
+        --motion-menu: 0ms;
+        --motion-window-in: 0ms;
+        --motion-window-out: 0ms;
+        --motion-toast-in: 0ms;
+        --motion-toast-out: 0ms;
+        --motion-object: 0ms;
+        --motion-slow: 0ms;
+        --motion-marquee: 0ms;
+    }
+}
+
+/* ===== SHARED STATE HELPERS =====
+   Global focus and press behaviour for buttons and interactive rows.
+   These use the tokens above so reduced-motion automatically applies. */
+
+/* Visible focus ring in the XP style — a dotted outline.
+   Applied to anything focusable that doesn't already define its own. */
+:focus-visible {
+    outline: 2px dotted var(--accent-dark);
+    outline-offset: 2px;
+}
+
+/* Pressed state for buttons. Instant visual depress: swap the bevel.
+   Components that define their own bevel may override; this is the default. */
+button:not(:disabled):active,
+input[type="submit"]:not(:disabled):active,
+input[type="button"]:not(:disabled):active {
+    transform: translateY(1px);
+}
+
+/* Disabled buttons: no pointer, no press. */
+button:disabled,
+input[type="submit"]:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Busy buttons: progress cursor, no transform on press. */
+button[data-busy="true"],
+button.ajax-busy {
+    cursor: progress;
+}

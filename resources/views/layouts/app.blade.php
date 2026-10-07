@@ -8,6 +8,7 @@
     
         <!-- CSS -->
     <link rel="stylesheet" href="{{ asset('css/base.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/motion.css') }}">
     <link rel="stylesheet" href="{{ asset('css/components.css') }}">
     <link rel="stylesheet" href="{{ asset('css/utilities.css') }}">
     <link rel="stylesheet" href="{{ asset('css/settings-v2.css') }}">
