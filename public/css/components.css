@@ -2250,3 +2250,65 @@
         padding: 0.1rem 0.4rem;
     }
 }
+
+/* ===== MIGRATED FROM app.css (was orphaned, not loaded) ===== */
+
+.sidebar-view {
+    display: block;
+}
+
+.space-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.mini-profile-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.post-actions span {
+    cursor: default;
+}
+
+.xp-stats {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    padding: 0.4rem 0;
+}
+
+.xp-stat {
+    text-align: center;
+}
+
+.xp-profile-stats {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.xp-stat-box {
+    background: var(--surface-primary);
+    border: 2px solid var(--border-default);
+    border-radius: 4px;
+    padding: 0.3rem 1rem;
+    text-align: center;
+    flex: 1;
+    min-width: 60px;
+}
+
+.conversation-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.chat-header-right {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.xp-profile-cover:active {
+    cursor: grabbing;
+}
