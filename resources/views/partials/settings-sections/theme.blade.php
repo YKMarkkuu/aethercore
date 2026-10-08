@@ -1,4 +1,4 @@
-<form action="{{ route('settings.theme') }}" method="POST">
+<form action="{{ route('settings.theme') }}" method="POST" data-ajax-reset="false">
     @csrf
     <div class="settings-group">
         <select name="theme" class="settings-input">

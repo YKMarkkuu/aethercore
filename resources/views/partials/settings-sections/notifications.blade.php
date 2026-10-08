@@ -1,6 +1,6 @@
 <p class="settings-subtitle" style="margin-top: -0.3rem;">Choose what you get notified about.</p>
 
-<form action="{{ route('settings.notifications') }}" method="POST" id="notificationsForm">
+<form action="{{ route('settings.notifications') }}" method="POST" id="notificationsForm" data-ajax-reset="false">
     @csrf
 
     <div class="settings-toggle-row">

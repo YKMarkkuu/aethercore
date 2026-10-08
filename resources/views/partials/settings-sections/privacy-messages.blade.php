@@ -1,4 +1,4 @@
-<form action="{{ route('settings.privacy') }}" method="POST">
+<form action="{{ route('settings.privacy') }}" method="POST" data-ajax-reset="false">
     @csrf
     <div class="settings-group">
         <select name="dm_permission" class="settings-input">
