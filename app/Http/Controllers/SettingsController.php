@@ -7,9 +7,31 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class SettingsController extends Controller
 {
+    /**
+     * Fields the bulk-save endpoint (updatePreferences) is allowed to touch.
+     * field => [table, validation rule]. Single source of truth: anything
+     * not listed here is rejected with a 422 on settings.<key>.
+     *
+     * 'theme' is a placeholder rule here — its real allowlist comes from
+     * User::getAvailableThemes() at request time (see updatePreferences).
+     */
+    protected const BULK_SETTINGS = [
+        'visibility'              => ['profiles', 'in:public,friends,private'],
+        'dm_permission'           => ['profiles', 'in:everyone,friends,nobody'],
+        'comment_permission'      => ['profiles', 'in:everyone,friends,nobody'],
+        'show_status_to'          => ['profiles', 'in:everyone,friends,nobody'],
+        'theme'                   => ['users',    'string'],
+        'notify_email'            => ['profiles', 'boolean'],
+        'notify_friend_requests'  => ['profiles', 'boolean'],
+        'notify_messages'         => ['profiles', 'boolean'],
+        'notify_likes_comments'   => ['profiles', 'boolean'],
+    ];
+
     public function index()
     {
         $user = Auth::user();
@@ -158,6 +180,86 @@ class SettingsController extends Controller
         $profile->save();
 
         return $this->respond($request, 'Notification preferences updated!');
+    }
+
+    /**
+     * Bulk preferences save (settings modal Apply/OK bar).
+     *
+     * Payload: {"settings": {"visibility": "friends", "notify_messages": false}}
+     * Only keys present are touched. Validation is all-or-nothing: any
+     * invalid or unknown key rejects the whole request with a 422 and
+     * nothing is written.
+     */
+    public function updatePreferences(Request $request)
+    {
+        $user = Auth::user();
+
+        $input = $request->input('settings');
+        $sentKeys = is_array($input) ? array_keys($input) : [];
+
+        $rules = ['settings' => ['required', 'array']];
+
+        foreach ($sentKeys as $key) {
+            if (! array_key_exists($key, self::BULK_SETTINGS)) {
+                continue; // reported by the after() hook below
+            }
+
+            $fieldRule = self::BULK_SETTINGS[$key][1];
+
+            if ($key === 'theme') {
+                $fieldRule = [$fieldRule, Rule::in(array_keys($user->getAvailableThemes()))];
+            }
+
+            $rules["settings.{$key}"] = array_merge(['required'], (array) $fieldRule);
+        }
+
+        $validator = Validator::make($request->all(), $rules);
+
+        $validator->after(function ($validator) use ($sentKeys) {
+            foreach ($sentKeys as $key) {
+                if (! array_key_exists($key, self::BULK_SETTINGS)) {
+                    $validator->errors()->add("settings.{$key}", 'That setting is not recognised.');
+                }
+            }
+        });
+
+        $validated = $validator->validate(); // throws -> standard Laravel 422
+
+        $saved = DB::transaction(function () use ($user, $validated) {
+            $saved = [];
+            $profile = null;
+            $userChanged = false;
+
+            foreach ($validated['settings'] as $field => $value) {
+                [$table, $rule] = self::BULK_SETTINGS[$field];
+
+                if ($rule === 'boolean') {
+                    $value = filter_var($value, FILTER_VALIDATE_BOOLEAN);
+                }
+
+                if ($table === 'users') {
+                    $user->{$field} = $value;
+                    $userChanged = true;
+                } else {
+                    // profileFor() returns an unsaved Profile if the row is missing.
+                    $profile ??= $this->profileFor($user);
+                    $profile->{$field} = $value;
+                }
+
+                $saved[$field] = $value;
+            }
+
+            if ($profile) {
+                $profile->save();
+            }
+            if ($userChanged) {
+                $user->save();
+            }
+
+            return $saved;
+        });
+
+        return $this->respond($request, 'Settings saved.', null, ['saved' => $saved]);
     }
 
     /**
