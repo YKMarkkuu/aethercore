@@ -8,10 +8,19 @@
 
 .settings-v2 {
     display: flex;
+    flex-direction: column;
     height: 100%;
     width: 100%;
     overflow: hidden;
     color: var(--text-primary);
+}
+
+.settings-v2-body {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    overflow: hidden;
 }
 
 /* ===== SIDEBAR ===== */
@@ -153,6 +162,33 @@
     max-width: none;
 }
 
+/* ===== SAVE BAR ===== */
+.settings-v2-savebar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.5rem 0.8rem;
+    background: linear-gradient(180deg, var(--surface-panel-header) 0%, var(--surface-secondary) 100%);
+    border-top: 1px solid var(--border-default);
+    flex-shrink: 0;
+    min-height: 40px;
+}
+
+.settings-savebar-status {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+.settings-savebar-actions {
+    display: flex;
+    gap: 0.4rem;
+}
+
+.settings-savebar-actions .settings-btn {
+    min-width: 75px;
+}
+
 /* ===== TOGGLE SWITCHES (used by Notification Preferences) ===== */
 .settings-toggle-row {
     display: flex;
@@ -215,6 +251,6 @@
 }
 
 @media (max-width: 768px) {
-    .settings-v2 { flex-direction: column; }
+    .settings-v2-body { flex-direction: column; }
     .settings-v2-sidebar { width: 100%; max-height: 160px; }
 }

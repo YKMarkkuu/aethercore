@@ -57,7 +57,11 @@
             @include('partials.sidebar-right')
 
             <!-- SETTINGS MODAL -->
-            @include('partials.settings-modal')
+            {{-- Not rendered on the full-page /settings route, where
+                 partials.settings-content is included directly. --}}
+            @unless(request()->routeIs('settings.index'))
+                @include('partials.settings-modal')
+            @endunless
 
             <!-- REPORT MODAL -->
             @include('partials.report-modal')
@@ -288,13 +292,19 @@
 
         // ===== SETTINGS MODAL =====
         function openSettingsModal() {
-            document.getElementById('settingsModal').classList.remove('hidden');
+            const modal = document.getElementById('settingsModal');
+            if (!modal) {
+                // On the /settings route the modal isn't rendered; navigate instead.
+                window.location.href = '{{ route('settings.index') }}';
+                return;
+            }
+            modal.classList.remove('hidden');
             const popup = document.getElementById('profilePopup');
             if (popup) popup.classList.add('hidden');
         }
 
         function closeSettings() {
-            document.getElementById('settingsModal').classList.add('hidden');
+            document.getElementById('settingsModal')?.classList.add('hidden');
         }
 
         function switchSettingsTab(tab) {
