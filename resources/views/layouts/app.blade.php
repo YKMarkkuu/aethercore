@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="{{ asset('css/settings-v2.css') }}">
 
     @if(Auth::check() && Auth::user()->theme && Auth::user()->theme !== 'aethercore')
-        <link rel="stylesheet" href="{{ asset('css/themes/' . Auth::user()->theme . '.css') }}">
+        <link rel="stylesheet" id="themeStylesheet" href="{{ asset('css/themes/' . Auth::user()->theme . '.css') }}">
     @endif
 </head>
 <body>
@@ -83,6 +83,7 @@
         <script src="{{ asset('js/chat-thread.js') }}"></script>
         <script src="{{ asset('js/realtime-posts.js') }}"></script>
         <script src="{{ asset('js/settings-modal.js') }}"></script>
+        <script src="{{ asset('js/settings-save.js') }}"></script>
         <script src="{{ asset('js/report-modal.js') }}"></script>
         <script src="{{ asset('js/user-popover.js') }}"></script>
     <script>
@@ -304,7 +305,7 @@
         }
 
         function closeSettings() {
-            document.getElementById('settingsModal')?.classList.add('hidden');
+            window.SettingsSave?.requestClose?.();
         }
 
         function switchSettingsTab(tab) {

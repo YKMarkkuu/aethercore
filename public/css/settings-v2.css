@@ -255,7 +255,9 @@
    save bar and will be removed from the partials in Step 5.
    Non-bulk sections (Account, Security, Music, Your Data, Danger)
    keep their buttons. */
-.settings-v2-scrollarea[data-bulk="true"] .settings-v2-section .settings-btn {
+/* Hide Save button ONLY in converted bulk sections.
+   Other bulk sections keep theirs until Step 5 converts them. */
+.settings-v2-section[data-section="privacy-status"] .settings-btn {
     display: none;
 }
 
