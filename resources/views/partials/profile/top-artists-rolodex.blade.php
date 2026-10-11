@@ -77,12 +77,6 @@
         flex-shrink: 0;
     }
 
-    .rolodex .rx-empty {
-        padding: 0.6rem 0;
-        color: var(--text-muted);
-        font: 0.75rem/1.35 Tahoma, 'Segoe UI', Verdana, sans-serif;
-    }
-
     .rolodex .rx-stage {
         position: relative;
         width: 100%;
@@ -490,7 +484,29 @@
 
     <div class="xp-panel-body">
         @if($count === 0)
-            <div class="rx-empty">No top artists found.</div>
+            {{-- Empty state: same metal frame as the populated widget, with no peek
+                 cards and a single empty index card. --}}
+            <div class="rx-stage">
+                <div class="rx-frame">
+                    <div class="rx-top-rail" aria-hidden="true"></div>
+                    <div class="rx-side-rail rx-side-rail--left" aria-hidden="true"></div>
+                    <div class="rx-side-rail rx-side-rail--right" aria-hidden="true"></div>
+
+                    <div class="rx-peek-stack" aria-hidden="true"></div>
+
+                    <div class="rx-active"
+                         role="region"
+                         aria-label="Top artists"
+                         style="grid-template-columns: 1fr; cursor: default; pointer-events: none;">
+                        <div class="rx-detail">
+                            <div class="rx-typed-header">NO CARDS FILED</div>
+                            <div class="rx-scrobbles" style="margin-top: 10px;">No top artists found.</div>
+                        </div>
+                    </div>
+
+                    <div class="rx-bottom-edge" aria-hidden="true"></div>
+                </div>
+            </div>
         @else
             {{-- Shared portrait fallback carried over unchanged from the wall phone. --}}
             <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
