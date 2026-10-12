@@ -123,6 +123,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/spaces/{space}/join', [SpaceController::class, 'join'])->name('spaces.join');
         Route::post('/spaces/{space}/leave', [SpaceController::class, 'leave'])->name('spaces.leave');
         Route::delete('/spaces/{space}', [SpaceController::class, 'destroy'])->name('spaces.destroy');
+        Route::put('/spaces/{space}', [SpaceController::class, 'update'])->name('spaces.update');
         Route::post('/spaces/{space}/share', [SpaceController::class, 'shareToFeed'])->name('spaces.share');
 
         Route::post('/spaces/{space}/channels', [SpaceChannelController::class, 'store'])->name('space-channels.store');

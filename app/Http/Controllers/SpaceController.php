@@ -70,6 +70,69 @@ class SpaceController extends Controller
     }
 
     /**
+     * Edit a Space's name, description, and icon. Only fields present in
+     * the request are touched (same pattern as SettingsController::
+     * updatePrivacy()), so a name-only edit never clears the description.
+     *
+     * Authorized by the MANAGE_SPACE permission. The owner always passes
+     * (Space::userHasPermission() short-circuits on isOwner()), and the
+     * seeded Owner and Admin roles both carry MANAGE_SPACE.
+     *
+     * NOTE: browsers can't send multipart/form-data over a real PUT, so a
+     * form that uploads an icon must POST with @method('PUT') /
+     * _method=PUT. ajax-forms.js already does this via FormData.
+     */
+    public function update(Request $request, Space $space)
+    {
+        if (!$space->userHasPermission(Auth::id(), \App\Enums\SpacePermission::MANAGE_SPACE)) {
+            abort(403);
+        }
+
+        $request->validate([
+            'name' => 'sometimes|string|max:100',
+            'description' => 'nullable|string|max:300',
+            'icon' => 'nullable|file|mimes:jpg,jpeg,png,webp,gif|max:5120', // no SVG
+        ]);
+
+        if ($request->has('name')) {
+            $space->name = $request->name;
+        }
+
+        if ($request->has('description')) {
+            $space->description = $request->description;
+        }
+
+        $oldIcon = null;
+        if ($request->hasFile('icon')) {
+            $oldIcon = $space->icon;
+            $space->icon = $request->file('icon')->store('space-icons', 'public');
+        }
+
+        $space->save();
+
+        // Delete the old file only after the new one is stored and saved,
+        // and only if it lives in this feature's own folder.
+        if ($oldIcon && str_starts_with($oldIcon, 'space-icons/')) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($oldIcon);
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Space updated.',
+                'space' => [
+                    'id' => $space->id,
+                    'name' => $space->name,
+                    'description' => $space->description,
+                    'icon_url' => $space->getIconUrl(),
+                ],
+            ]);
+        }
+
+        return back()->with('success', 'Space updated.');
+    }
+
+    /**
      * Shows the Space. If you're not a member yet (arrived via an
      * invite card from the Feed), shows a join prompt instead of the
      * channels/chat.
