@@ -1,7 +1,12 @@
-<!-- ===== SPACE MEMBERS MODAL ===== -->
-<!-- Included once from spaces/show.blade.php. Two tabs: Members (existing)
-    and Roles (new in this response). Role CRUD reuses this same modal
-    shell — no separate modal. -->
+<!-- ===== SPACE SETTINGS MODAL ===== -->
+<!-- Included once from spaces/show.blade.php (members only; non-members
+     get the join prompt instead). Tabs: General (owner only), Members,
+     Roles, Danger Zone. Every tab is a [data-tab] button whose pane is
+     #{tab}TabPane, so switchMembersTab() is one loop. -->
+@php
+    $isSpaceOwner = $space->isOwner(auth()->id());
+    $defaultTab = $isSpaceOwner ? 'general' : 'members';
+@endphp
 <style>
     .members-tab-btn.active { background: var(--accent); color: #ffffff; border-color: var(--accent-dark); }
 </style>
@@ -10,27 +15,37 @@
         <div class="settings-modal-header">
             <h2 style="display: flex; align-items: center; gap: 6px;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                    <circle cx="9" cy="7" r="4"/>
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
                 </svg>
-                Members — {{ $space->name }}
+                Settings — {{ $space->name }}
             </h2>
             <button class="settings-modal-close" onclick="toggleMembersModal()">✕</button>
         </div>
 
-        <div style="display: flex; gap: 0.4rem; padding: 0.5rem 1rem 0;">
-            <button type="button" class="settings-btn members-tab-btn active" id="membersTabBtn" onclick="switchMembersTab('members')">Members</button>
-            <button type="button" class="settings-btn members-tab-btn" id="rolesTabBtn" onclick="switchMembersTab('roles')">Roles</button>
+        <div style="display: flex; gap: 0.4rem; padding: 0.5rem 1rem 0; flex-wrap: wrap;">
+            @if($isSpaceOwner)
+                <button type="button" class="settings-btn members-tab-btn {{ $defaultTab === 'general' ? 'active' : '' }}" data-tab="general" onclick="switchMembersTab('general')">General</button>
+            @endif
+            <button type="button" class="settings-btn members-tab-btn {{ $defaultTab === 'members' ? 'active' : '' }}" data-tab="members" onclick="switchMembersTab('members')">Members</button>
+            <button type="button" class="settings-btn members-tab-btn" data-tab="roles" onclick="switchMembersTab('roles')">Roles</button>
+            <button type="button" class="settings-btn members-tab-btn" data-tab="danger" onclick="switchMembersTab('danger')">Danger Zone</button>
         </div>
 
         <div style="padding: 0.75rem 1rem; overflow-y: auto;">
-            <div id="membersTabPane">
+            @if($isSpaceOwner)
+                <div id="generalTabPane" class="{{ $defaultTab === 'general' ? '' : 'hidden' }}">
+                    @include('partials.space-members.general-tab', ['space' => $space])
+                </div>
+            @endif
+            <div id="membersTabPane" class="{{ $defaultTab === 'members' ? '' : 'hidden' }}">
                 @include('partials.space-members.member-list', ['space' => $space])
             </div>
             <div id="rolesTabPane" class="hidden">
                 @include('partials.space-members.roles-tab', ['space' => $space])
+            </div>
+            <div id="dangerTabPane" class="hidden">
+                @include('partials.space-members.danger-tab', ['space' => $space])
             </div>
             @include('partials.space-members.role-delete-confirm')
         </div>
@@ -42,11 +57,15 @@
         document.getElementById('membersModal').classList.toggle('hidden');
     }
 
+    // One loop over the rendered [data-tab] buttons. A tab that isn't
+    // rendered for this viewer (General, for non-owners) simply has no
+    // button, so it can never be activated.
     function switchMembersTab(tab) {
-        document.getElementById('membersTabPane').classList.toggle('hidden', tab !== 'members');
-        document.getElementById('rolesTabPane').classList.toggle('hidden', tab !== 'roles');
-        document.getElementById('membersTabBtn').classList.toggle('active', tab === 'members');
-        document.getElementById('rolesTabBtn').classList.toggle('active', tab === 'roles');
+        document.querySelectorAll('#membersModal [data-tab]').forEach(btn => {
+            const on = btn.dataset.tab === tab;
+            btn.classList.toggle('active', on);
+            document.getElementById(btn.dataset.tab + 'TabPane')?.classList.toggle('hidden', !on);
+        });
     }
 
     // Combines the search box and role dropdown into one filter pass over
