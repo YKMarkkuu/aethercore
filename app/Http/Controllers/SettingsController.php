@@ -96,19 +96,6 @@ class SettingsController extends Controller
         ]);
     }
 
-    public function updateTheme(Request $request)
-    {
-        $request->validate([
-            'theme' => 'required|in:aethercore,midnight,daylight,retro',
-        ]);
-
-        $user = Auth::user();
-        $user->theme = $request->theme;
-        $user->save();
-
-        return $this->respond($request, 'Theme updated! Refresh to see it everywhere.');
-    }
-
     public function connectLastfm(Request $request)
     {
         $request->validate([
@@ -124,62 +111,6 @@ class SettingsController extends Controller
         Cache::forget('lastfm_top_albums_' . $user->id);
 
         return $this->respond($request, 'Last.fm connected successfully!');
-    }
-
-    /**
-     * Privacy Controls (updates.txt Tier 2, #8). Three independent
-     * settings, each an <select onchange="this.form.submit()"> in the
-     * UI, each POSTing to this one endpoint — only the fields present
-     * in the request are touched, so one dropdown's change never
-     * clobbers the other two.
-     */
-    public function updatePrivacy(Request $request)
-    {
-        $request->validate([
-            'visibility' => 'sometimes|in:public,friends,private',
-            'dm_permission' => 'sometimes|in:everyone,friends,nobody',
-            'show_status_to' => 'sometimes|in:everyone,friends,nobody',
-            'comment_permission' => 'nullable|in:everyone,friends,nobody',
-        ]);
-
-        $profile = $this->profileFor(Auth::user());
-
-        foreach (['visibility', 'dm_permission', 'show_status_to', 'comment_permission'] as $field) {
-            if ($request->has($field)) {
-                $profile->$field = $request->input($field);
-            }
-        }
-
-        $profile->save();
-
-        return $this->respond($request, 'Privacy settings updated!');
-    }
-
-    /**
-     * Notification Preferences. Same one-endpoint-per-toggle pattern as
-     * updatePrivacy() — each checkbox posts independently, so unrelated
-     * preferences never get clobbered. Unchecked checkboxes simply
-     * don't appear in the request, so we always write an explicit
-     * true/false rather than relying on `has()`.
-     */
-    public function updateNotifications(Request $request)
-    {
-        $request->validate([
-            'notify_email' => 'sometimes|boolean',
-            'notify_friend_requests' => 'sometimes|boolean',
-            'notify_messages' => 'sometimes|boolean',
-            'notify_likes_comments' => 'sometimes|boolean',
-        ]);
-
-        $profile = $this->profileFor(Auth::user());
-
-        foreach (['notify_email', 'notify_friend_requests', 'notify_messages', 'notify_likes_comments'] as $field) {
-            $profile->$field = $request->boolean($field);
-        }
-
-        $profile->save();
-
-        return $this->respond($request, 'Notification preferences updated!');
     }
 
     /**

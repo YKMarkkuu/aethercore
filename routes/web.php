@@ -85,10 +85,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::middleware(['throttle:actions'])->group(function () {
         Route::post('/settings/account', [SettingsController::class, 'updateAccount'])->name('settings.account');
-        Route::post('/settings/theme', [SettingsController::class, 'updateTheme'])->name('settings.theme');
         Route::post('/settings/lastfm', [SettingsController::class, 'connectLastfm'])->name('settings.lastfm');
-        Route::post('/settings/privacy', [SettingsController::class, 'updatePrivacy'])->name('settings.privacy');
-        Route::post('/settings/notifications', [SettingsController::class, 'updateNotifications'])->name('settings.notifications');
         Route::patch('/settings/preferences', [SettingsController::class, 'updatePreferences'])->name('settings.preferences');
         Route::delete('/settings/sessions/{id}', [SettingsController::class, 'destroySession'])->name('settings.sessions.destroy');
         Route::delete('/settings/delete', [SettingsController::class, 'deleteAccount'])->name('settings.delete');

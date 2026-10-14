@@ -250,17 +250,6 @@
     transform: translateX(18px);
 }
 
-/* Hide per-section Save buttons inside bulk categories (Privacy,
-   Notifications, Appearance). These are superseded by the global
-   save bar and will be removed from the partials in Step 5.
-   Non-bulk sections (Account, Security, Music, Your Data, Danger)
-   keep their buttons. */
-/* Hide Save button ONLY in converted bulk sections.
-   Other bulk sections keep theirs until Step 5 converts them. */
-.settings-v2-section[data-section="privacy-status"] .settings-btn {
-    display: none;
-}
-
 /* ===== DIRTY STATE MARKERS ===== */
 
 /* Trailing * on sidebar sublinks and categories with pending edits */
