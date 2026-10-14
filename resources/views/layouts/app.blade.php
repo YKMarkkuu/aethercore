@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="{{ asset('css/motion.css') }}">
     <link rel="stylesheet" href="{{ asset('css/components.css') }}">
     <link rel="stylesheet" href="{{ asset('css/utilities.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/settings-v2.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/settings.css') }}">
 
     @if(Auth::check() && Auth::user()->theme && Auth::user()->theme !== 'aethercore')
         <link rel="stylesheet" id="themeStylesheet" href="{{ asset('css/themes/' . Auth::user()->theme . '.css') }}">

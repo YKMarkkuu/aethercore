@@ -6,7 +6,7 @@
    rest of the app (base.css variables), not a separate theme.
    ============================================ */
 
-.settings-v2 {
+.settings {
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -15,7 +15,7 @@
     color: var(--text-primary);
 }
 
-.settings-v2-body {
+.settings-body {
     display: flex;
     flex: 1;
     min-height: 0;
@@ -24,7 +24,7 @@
 }
 
 /* ===== SIDEBAR ===== */
-.settings-v2-sidebar {
+.settings-sidebar {
     width: 190px;
     flex-shrink: 0;
     background: linear-gradient(180deg, var(--surface-panel-header) 0%, var(--surface-secondary) 100%);
@@ -33,14 +33,14 @@
     overflow-y: auto;
 }
 
-.settings-v2-user {
+.settings-user {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     padding: 0.35rem;
     margin-bottom: 0.4rem;
 }
-.settings-v2-avatar {
+.settings-avatar {
     width: 30px;
     height: 30px;
     border-radius: 50%;
@@ -55,13 +55,13 @@
     flex-shrink: 0;
     border: 1px solid rgba(255,255,255,0.3);
 }
-.settings-v2-avatar img { width: 100%; height: 100%; object-fit: cover; }
-.settings-v2-username { font-size: 0.78rem; font-weight: 700; color: var(--text-primary); }
-.settings-v2-edit-link { font-size: 0.65rem; color: var(--text-muted); text-decoration: none; }
-.settings-v2-edit-link:hover { color: var(--accent-dark); text-decoration: underline; }
+.settings-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.settings-username { font-size: 0.78rem; font-weight: 700; color: var(--text-primary); }
+.settings-edit-link { font-size: 0.65rem; color: var(--text-muted); text-decoration: none; }
+.settings-edit-link:hover { color: var(--accent-dark); text-decoration: underline; }
 
-.settings-v2-search { padding: 0 0.35rem; margin-bottom: 0.5rem; }
-.settings-v2-search input {
+.settings-search { padding: 0 0.35rem; margin-bottom: 0.5rem; }
+.settings-search input {
     width: 100%;
     background: var(--surface-input);
     border: 1px solid var(--border-default);
@@ -71,9 +71,9 @@
     font-size: 0.72rem;
 }
 
-.settings-v2-nav { display: flex; flex-direction: column; gap: 2px; }
+.settings-nav { display: flex; flex-direction: column; gap: 2px; }
 
-.settings-v2-group-btn {
+.settings-group-btn {
     display: flex;
     align-items: center;
     gap: 0.4rem;
@@ -91,19 +91,19 @@
     border-radius: 4px;
     font-family: inherit;
 }
-.settings-v2-group-btn:hover { background: var(--surface-hover); }
-.settings-v2-group.active > .settings-v2-group-btn { background: var(--surface-secondary); }
-.settings-v2-group-icon { display: flex; color: var(--accent); }
+.settings-group-btn:hover { background: var(--surface-hover); }
+.settings-group.active > .settings-group-btn { background: var(--surface-secondary); }
+.settings-group-icon { display: flex; color: var(--accent); }
 
-.settings-v2-subs {
+.settings-subs {
     margin: 0.1rem 0 0.3rem 1.1rem;
     display: flex;
     flex-direction: column;
     gap: 1px;
 }
-.settings-v2-subs.hidden { display: none; }
+.settings-subs.hidden { display: none; }
 
-.settings-v2-sublink {
+.settings-sublink {
     display: block;
     width: 100%;
     text-align: left;
@@ -116,8 +116,8 @@
     cursor: pointer;
     font-family: inherit;
 }
-.settings-v2-sublink:hover { color: var(--text-primary); }
-.settings-v2-sublink.active {
+.settings-sublink:hover { color: var(--text-primary); }
+.settings-sublink.active {
     color: var(--accent-dark);
     border-left-color: var(--accent);
     background: rgba(58, 123, 213, 0.08);
@@ -125,32 +125,32 @@
 }
 
 /* ===== CONTENT (single scrollable pane per category) ===== */
-.settings-v2-content-wrap {
+.settings-content-wrap {
     flex: 1;
     min-width: 0;
     overflow: hidden;
     background: var(--surface-primary);
 }
 
-.settings-v2-scrollarea {
+.settings-scrollarea {
     height: 100%;
     overflow-y: auto;
     padding: 1rem 1.25rem;
 }
-.settings-v2-scrollarea.hidden { display: none; }
-.settings-v2-scrollarea::-webkit-scrollbar { width: 10px; }
-.settings-v2-scrollarea::-webkit-scrollbar-track { background: var(--surface-sunken); border-left: 1px solid var(--border-light); }
-.settings-v2-scrollarea::-webkit-scrollbar-thumb { background: #c8c0b8; border: 1px solid var(--border-default); border-radius: 4px; }
+.settings-scrollarea.hidden { display: none; }
+.settings-scrollarea::-webkit-scrollbar { width: 10px; }
+.settings-scrollarea::-webkit-scrollbar-track { background: var(--surface-sunken); border-left: 1px solid var(--border-light); }
+.settings-scrollarea::-webkit-scrollbar-thumb { background: #c8c0b8; border: 1px solid var(--border-default); border-radius: 4px; }
 
-.settings-v2-section {
+.settings-section {
     padding-bottom: 1rem;
     margin-bottom: 1rem;
     border-bottom: 1px solid var(--border-light);
     scroll-margin-top: 0.5rem;
 }
-.settings-v2-section:last-child { border-bottom: none; }
+.settings-section:last-child { border-bottom: none; }
 
-.settings-v2-h2 {
+.settings-h2 {
     font-size: 0.9rem;
     font-weight: 700;
     color: var(--text-primary);
@@ -158,12 +158,12 @@
 }
 
 /* ===== WIDER SETTINGS SCROLL AREA ===== */
-.settings-v2-scrollarea {
+.settings-scrollarea {
     max-width: none;
 }
 
 /* ===== SAVE BAR ===== */
-.settings-v2-savebar {
+.settings-savebar {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -253,15 +253,15 @@
 /* ===== DIRTY STATE MARKERS ===== */
 
 /* Trailing * on sidebar sublinks and categories with pending edits */
-.settings-v2-sublink.is-dirty::after,
-.settings-v2-group.is-dirty > .settings-v2-group-btn::after {
+.settings-sublink.is-dirty::after,
+.settings-group.is-dirty > .settings-group-btn::after {
     content: " *";
     color: var(--warning-text);
     font-weight: 700;
 }
 
 /* Dirty section left-border marker */
-.settings-v2-section.is-dirty {
+.settings-section.is-dirty {
     box-shadow: inset 3px 0 0 var(--warning-border);
     padding-left: 0.8rem;
     transition: box-shadow var(--motion-hover) var(--ease-out),
@@ -269,7 +269,7 @@
 }
 
 /* Collapse the save bar on non-bulk categories unless something is dirty */
-.settings-v2[data-active-bulk="false"][data-dirty="false"] .settings-v2-savebar {
+.settings[data-active-bulk="false"][data-dirty="false"] .settings-savebar {
     display: none;
 }
 
@@ -282,6 +282,6 @@
 }
 
 @media (max-width: 768px) {
-    .settings-v2-body { flex-direction: column; }
-    .settings-v2-sidebar { width: 100%; max-height: 160px; }
+    .settings-body { flex-direction: column; }
+    .settings-sidebar { width: 100%; max-height: 160px; }
 }

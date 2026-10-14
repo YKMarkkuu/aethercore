@@ -1,5 +1,5 @@
 // Settings bulk-save controller (Apply / OK / Cancel bar).
-// Finds every [data-settings-v2] root, tracks [data-bulk-field] controls
+// Finds every [data-settings] root, tracks [data-bulk-field] controls
 // against their saved ("original") values, and PATCHes only the dirty ones
 // to /settings/preferences. Exposes window.SettingsSave.
 (function () {
@@ -105,25 +105,25 @@
 
         function updateMarkers(dirty) {
             root.querySelectorAll('.is-dirty').forEach(el => {
-                if (el.classList.contains('settings-v2-section')
-                    || el.classList.contains('settings-v2-sublink')
-                    || el.classList.contains('settings-v2-group')) {
+                if (el.classList.contains('settings-section')
+                    || el.classList.contains('settings-sublink')
+                    || el.classList.contains('settings-group')) {
                     el.classList.remove('is-dirty');
                 }
             });
 
             dirty.forEach(f => {
-                const section = f.closest('.settings-v2-section');
+                const section = f.closest('.settings-section');
                 if (!section) return;
                 section.classList.add('is-dirty');
 
-                root.querySelectorAll('.settings-v2-sublink').forEach(link => {
+                root.querySelectorAll('.settings-sublink').forEach(link => {
                     if (link.dataset.scrollTarget === section.id) link.classList.add('is-dirty');
                 });
 
                 const cat = section.closest('[data-category-content]')?.dataset.categoryContent;
                 if (cat) {
-                    root.querySelector('.settings-v2-group[data-group="' + cat + '"]')?.classList.add('is-dirty');
+                    root.querySelector('.settings-group[data-group="' + cat + '"]')?.classList.add('is-dirty');
                 }
             });
         }
@@ -199,7 +199,7 @@
         }
 
         function jumpTo(field) {
-            const section = field.closest('.settings-v2-section');
+            const section = field.closest('.settings-section');
             const cat = section?.closest('[data-category-content]')?.dataset.categoryContent;
 
             // settings-modal.js owns category switching; drive it through its own button.
@@ -357,7 +357,7 @@
 
     // ---------- init ----------
     function init() {
-        document.querySelectorAll('[data-settings-v2]').forEach(root => {
+        document.querySelectorAll('[data-settings]').forEach(root => {
             if (root.dataset.saveInit === 'true') return;
             root.dataset.saveInit = 'true';
             controllers.push(createController(root));

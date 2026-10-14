@@ -76,18 +76,18 @@
     $defaultCategory = array_key_first($categories);
 @endphp
 
-<div class="settings-v2"
-     data-settings-v2
+<div class="settings"
+     data-settings
      data-active-category="{{ $defaultCategory }}"
      data-active-bulk="{{ $categories[$defaultCategory]['bulk'] ? 'true' : 'false' }}"
      data-dirty="false">
 
-    <div class="settings-v2-body">
+    <div class="settings-body">
 
         {{-- ===== LEFT SIDEBAR ===== --}}
-        <aside class="settings-v2-sidebar">
-            <div class="settings-v2-user">
-                <div class="settings-v2-avatar">
+        <aside class="settings-sidebar">
+            <div class="settings-user">
+                <div class="settings-avatar">
                     @if($user->getAvatarUrl())
                         <img src="{{ $user->getAvatarUrl() }}" alt="Avatar">
                     @else
@@ -95,27 +95,27 @@
                     @endif
                 </div>
                 <div>
-                    <div class="settings-v2-username">{{ $user->display_name }}</div>
-                    <a href="{{ route('profile.index') }}" class="settings-v2-edit-link">Edit Profile</a>
+                    <div class="settings-username">{{ $user->display_name }}</div>
+                    <a href="{{ route('profile.index') }}" class="settings-edit-link">Edit Profile</a>
                 </div>
             </div>
 
-            <div class="settings-v2-search">
+            <div class="settings-search">
                 <input type="text" placeholder="Search" disabled>
             </div>
 
-            <nav class="settings-v2-nav">
+            <nav class="settings-nav">
                 @foreach($categories as $catKey => $cat)
-                    <div class="settings-v2-group {{ $catKey === $defaultCategory ? 'active' : '' }}"
+                    <div class="settings-group {{ $catKey === $defaultCategory ? 'active' : '' }}"
                          data-group="{{ $catKey }}"
                          data-bulk="{{ $cat['bulk'] ? 'true' : 'false' }}">
-                        <button type="button" class="settings-v2-group-btn" data-group-toggle="{{ $catKey }}">
-                            <span class="settings-v2-group-icon">@include('partials.icon', ['type' => $cat['icon'], 'size' => 15])</span>
+                        <button type="button" class="settings-group-btn" data-group-toggle="{{ $catKey }}">
+                            <span class="settings-group-icon">@include('partials.icon', ['type' => $cat['icon'], 'size' => 15])</span>
                             <span>{{ $cat['label'] }}</span>
                         </button>
-                        <div class="settings-v2-subs {{ $catKey === $defaultCategory ? '' : 'hidden' }}" data-group-subs="{{ $catKey }}">
+                        <div class="settings-subs {{ $catKey === $defaultCategory ? '' : 'hidden' }}" data-group-subs="{{ $catKey }}">
                             @foreach($cat['subs'] as $subKey => $subLabel)
-                                <button type="button" class="settings-v2-sublink" data-scroll-target="section-{{ $subKey }}" data-parent-group="{{ $catKey }}">
+                                <button type="button" class="settings-sublink" data-scroll-target="section-{{ $subKey }}" data-parent-group="{{ $catKey }}">
                                     {{ $subLabel }}
                                 </button>
                             @endforeach
@@ -126,15 +126,15 @@
         </aside>
 
         {{-- ===== RIGHT: ONE SCROLLABLE PANE PER CATEGORY ===== --}}
-        <div class="settings-v2-content-wrap">
+        <div class="settings-content-wrap">
             @foreach($categories as $catKey => $cat)
-                <div class="settings-v2-scrollarea {{ $catKey === $defaultCategory ? '' : 'hidden' }}"
+                <div class="settings-scrollarea {{ $catKey === $defaultCategory ? '' : 'hidden' }}"
                      data-category-content="{{ $catKey }}"
                      data-bulk="{{ $cat['bulk'] ? 'true' : 'false' }}">
 
                     @foreach($cat['subs'] as $subKey => $subLabel)
-                        <section id="section-{{ $subKey }}" class="settings-v2-section" data-section="{{ $subKey }}">
-                            <h2 class="settings-v2-h2">{{ $subLabel }}</h2>
+                        <section id="section-{{ $subKey }}" class="settings-section" data-section="{{ $subKey }}">
+                            <h2 class="settings-h2">{{ $subLabel }}</h2>
 
                             @includeIf('partials.settings-sections.' . $subKey, ['user' => $user])
                         </section>
@@ -146,7 +146,7 @@
     </div>
 
     {{-- ===== SAVE BAR (inert until Step 4 JS) ===== --}}
-    <div class="settings-v2-savebar" data-savebar>
+    <div class="settings-savebar" data-savebar>
         <div class="settings-savebar-status" data-savebar-status>All changes applied</div>
         <div class="settings-savebar-actions">
             <button type="button" class="settings-btn" data-savebar-apply disabled>Apply</button>

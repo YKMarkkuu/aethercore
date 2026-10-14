@@ -4,5 +4,5 @@
         <label>Last.fm Username</label>
         <input type="text" name="lastfm_username" class="settings-input" value="{{ old('lastfm_username', $user->lastfm_username ?? '') }}">
     </div>
-    <button type="submit" class="settings-v2-btn">Connect Last.fm</button>
+    <button type="submit" class="settings-btn">Connect Last.fm</button>
 </form>

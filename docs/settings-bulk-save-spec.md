@@ -27,7 +27,7 @@ Do not wrap everything in one `<form>`. The Account, Security, Sessions, and Blo
 **Approach:** marked fields collected by JS, scoped to the settings root.
 
 - Bulk fields lose their `<form>` and Save button. Each control gets `data-bulk-field="visibility"` and `autocomplete="off"`.
-- `settings-save.js` registers every `[data-bulk-field]` inside a `[data-settings-v2]` root. It records the original value at init in `dataset.original`, and collects only dirty fields on save.
+- `settings-save.js` registers every `[data-bulk-field]` inside a `[data-settings]` root. It records the original value at init in `dataset.original`, and collects only dirty fields on save.
 - Scoping to the root, not document, keeps two instances from colliding.
 **Regroup categories** in `$categories` in `settings-content.blade.php`, adding a `'bulk' => true` flag:
 
@@ -39,12 +39,12 @@ Renaming "Data & Privacy" to "Your Data" avoids confusion with the new Privacy c
 html
 
 ```
-<div class="settings-v2" data-settings-v2 data-settings-uid="{{ $uid }}">
-  <div class="settings-v2-body">
+<div class="settings" data-settings data-settings-uid="{{ $uid }}">
+  <div class="settings-body">
     <aside>…</aside>
-    <div class="settings-v2-content-wrap">…</div>
+    <div class="settings-content-wrap">…</div>
   </div>
-  <div class="settings-v2-savebar" data-savebar>…</div>
+  <div class="settings-savebar" data-savebar>…</div>
 </div>
 ```
 
@@ -52,7 +52,7 @@ On the `/settings` page: wrap the modal include in `layouts/app.blade.php` with 
 
 **3. The save bar**
 
-- **Location:** a direct child of `.settings-v2`, below `.settings-v2-body`. It is outside every `<form>`, and its buttons are `type="button"`. It spans sidebar and content, like the XP Display Properties button row.
+- **Location:** a direct child of `.settings`, below `.settings-body`. It is outside every `<form>`, and its buttons are `type="button"`. It spans sidebar and content, like the XP Display Properties button row.
 - **Buttons, right-aligned (XP order):** OK (apply and close), Cancel (revert and close), Apply (apply, stay open; disabled when clean). A status text sits on the left.
 - **Visibility:** always rendered. On bulk categories it is shown. On non-bulk categories it is collapsed unless any bulk field is dirty, so a pending change is never hidden by navigating away.
 - **Style (tokens only):**
@@ -62,7 +62,7 @@ On the `/settings` page: wrap the modal include in `layouts/app.blade.php` with 
 - Buttons use the existing `.settings-btn`, with `min-width: 75px`.
 - Disabled state comes from the `button:disabled` rule already in `motion.css`.
 - Press feedback is instant (`motion.css` already sets this).
-- **Layout change in `settings-v2.css`:** `.settings-v2` becomes `flex-direction: column`. `.settings-v2-body` takes `flex: 1; min-height: 0` and the old row layout. The `max-width: 768px` rule must move from `.settings-v2` to `.settings-v2-body`. The bar costs about 40px of the modal's 600px cap, so keep the scrollareas at `height: 100%` of the body, not the modal.
+- **Layout change in `settings.css`:** `.settings` becomes `flex-direction: column`. `.settings-body` takes `flex: 1; min-height: 0` and the old row layout. The `max-width: 768px` rule must move from `.settings` to `.settings-body`. The bar costs about 40px of the modal's 600px cap, so keep the scrollareas at `height: 100%` of the body, not the modal.
 **4. Backend design**
 
 New route, in the existing `throttle:actions` group in `routes/web.php`:
@@ -134,7 +134,7 @@ The bar's collapsed state on these categories keeps them visually uncontaminated
 
 - `layouts/app.blade.php`: load the script after `settings-modal.js`; delegate `closeSettings()`; add `id="themeStylesheet"` to the theme `<link>`.
 - `settings-modal.js`: only if sublink markers aren't handled in the new file (prefer the new file).
-- `settings-v2.css`: bar, dirty markers, layout change.
+- `settings.css`: bar, dirty markers, layout change.
 - `toast.js`: no change needed.
 - **Save sequence details:**
 

@@ -17,7 +17,7 @@
     }
 
     function setActiveSublink(root, groupKey, sectionId) {
-        root.querySelectorAll('.settings-v2-sublink').forEach(link => {
+        root.querySelectorAll('.settings-sublink').forEach(link => {
             link.classList.toggle(
                 'active',
                 link.dataset.parentGroup === groupKey && link.dataset.scrollTarget === sectionId
@@ -29,7 +29,7 @@
         const scrollarea = root.querySelector(`[data-category-content="${groupKey}"]`);
         if (!scrollarea) return;
 
-        const sections = Array.from(scrollarea.querySelectorAll('.settings-v2-section'));
+        const sections = Array.from(scrollarea.querySelectorAll('.settings-section'));
         if (sections.length === 0) return;
 
         const observer = new IntersectionObserver((entries) => {
@@ -59,7 +59,7 @@
                 if (scrollarea && scrollarea.dataset.scrollspyInit !== 'true') {
                     initScrollspy(root, key);
                 }
-                const firstSection = scrollarea?.querySelector('.settings-v2-section');
+                const firstSection = scrollarea?.querySelector('.settings-section');
                 if (firstSection) setActiveSublink(root, key, firstSection.id);
             });
         });
@@ -78,16 +78,16 @@
         });
 
         // Init scrollspy for whichever category starts active.
-        const activeGroup = root.querySelector('.settings-v2-group.active');
+        const activeGroup = root.querySelector('.settings-group.active');
         if (activeGroup) {
             const key = activeGroup.dataset.group;
             initScrollspy(root, key);
-            const firstSub = activeGroup.querySelector('.settings-v2-sublink');
+            const firstSub = activeGroup.querySelector('.settings-sublink');
             if (firstSub) firstSub.classList.add('active');
         }
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('[data-settings-v2]').forEach(init);
+        document.querySelectorAll('[data-settings]').forEach(init);
     });
 })();
