@@ -17,6 +17,8 @@
     --surface-input: #ffffff;
     --surface-post: #f8f5ec;
     --surface-sunken: #e8e4dc;
+    --surface-content: #ffffff; /* .main-content and other full-bleed content areas - distinct from --surface-input */
+    --surface-accent-tint: #d8e6fb; /* "mine" reaction pills, reply composer bar, subtle accent washes */
     --info-note-bg: #4a5a7a;
 
     /* Borders */
@@ -32,12 +34,14 @@
     --text-faint: #9a9488;
     /* White text, borders, and icons on colored accent backgrounds */
     --text-on-accent: #ffffff;
+    --accent-text: #1a4a9e; /* Link, name, number, and focus-ring text on themed surfaces - distinct from --accent-dark (gradient fill) */
 
     /* Accent (blue — links, buttons, active states) */
     --accent-light: #245edb;
     --accent: #3a7bd5;
     --accent-dark: #1a4a9e;
     --accent-hover-strong: #2f68b8;
+    --bevel-hi: #ffffff; /* Bevel highlight color - chrome insets, scrollbar tops, sleeve plate edges. Used as a color stop in gradients. */
 
     /* Status colors */
     --success-bg: #d4e8d4;
@@ -93,7 +97,7 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 0.3rem 1rem;
-    background: linear-gradient(180deg, #245edb 0%, #3a7bd5 50%, #1a4a9e 100%);
+    background: linear-gradient(180deg, var(--accent-light) 0%, var(--accent) 50%, var(--accent-dark) 100%);
     border-bottom: 2px solid #0d2a5e;
     height: 48px;
     flex-shrink: 0;
@@ -205,13 +209,13 @@ body {
     display: flex;
     flex: 1;
     overflow: hidden;
-    background: #d4d0c8;
+    background: var(--surface-secondary);
 }
 
 /* ===== LEFT SIDEBAR ===== */
 .sidebar {
     width: 240px;
-    background: linear-gradient(180deg, #ece9d8 0%, #d4d0c8 100%);
+    background: linear-gradient(180deg, var(--surface-panel-header) 0%, var(--surface-secondary) 100%);
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
@@ -227,7 +231,7 @@ body {
     gap: 0.2rem;
     border-bottom: 1px solid #b0a8a0;
     flex-shrink: 0;
-    background: linear-gradient(180deg, #f0edd8 0%, #d4d0c8 100%);
+    background: linear-gradient(180deg, var(--surface-primary) 0%, var(--surface-secondary) 100%);
 }
 
 .sidebar-tab {
@@ -427,7 +431,7 @@ body {
     gap: 0.5rem;
     padding: 0.5rem;
     border-bottom: 1px solid #b0a8a0;
-    background: linear-gradient(180deg, #ece9d8 0%, #d4d0c8 100%);
+    background: linear-gradient(180deg, var(--surface-panel-header) 0%, var(--surface-secondary) 100%);
 }
 .space-sidebar-title {
     font-size: 0.8rem;
@@ -543,7 +547,7 @@ body {
 /* ===== NOW PLAYING ===== */
 .now-playing {
     padding: 0.3rem 0.6rem;
-    background: linear-gradient(180deg, #f0edd8 0%, #d4d0c8 100%);
+    background: linear-gradient(180deg, var(--surface-primary) 0%, var(--surface-secondary) 100%);
     border-top: 1px solid #b0a8a0;
     border-bottom: 1px solid #b0a8a0;
     flex-shrink: 0;
@@ -579,7 +583,7 @@ body {
     align-items: center;
     gap: 0.5rem;
     padding: 0.3rem 0.6rem;
-    background: linear-gradient(180deg, #f0edd8 0%, #d4d0c8 100%);
+    background: linear-gradient(180deg, var(--surface-primary) 0%, var(--surface-secondary) 100%);
     cursor: pointer;
     transition: 0.2s;
     flex-shrink: 0;
@@ -648,7 +652,7 @@ body {
 /* ===== RIGHT SIDEBAR ===== */
 .right-sidebar {
     width: 220px;
-    background: linear-gradient(180deg, #ece9d8 0%, #d4d0c8 100%);
+    background: linear-gradient(180deg, var(--surface-panel-header) 0%, var(--surface-secondary) 100%);
     border-left: 2px solid #b0a8a0;
     display: flex;
     flex-direction: column;
@@ -745,7 +749,7 @@ body {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    border: 2px solid #ece9d8;
+    border: 2px solid var(--surface-panel-header);
 }
 .status-dot.online { background: #4ade80; }
 .status-dot.idle { background: #fbbf24; }
